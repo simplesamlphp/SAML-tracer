@@ -1,0 +1,24 @@
+.request-list {
+  /* overflow-y: scroll; */
+}
+.request-method {
+  width: 3em;
+}
+.request-url {
+}
+.request-header {
+  font-family: monospace;
+  overflow-x: scroll;
+}
+.request-details {
+  -moz-user-focus: normal;
+  -moz-user-select: text;
+  cursor: text !important;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+.request-list > richlistitem[selected="true"] {
+  background-color: #eeeeee;
+  color: inherit;
+}

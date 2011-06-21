@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
+<?xml-stylesheet type="text/css" href="chrome://samltrace/skin/samltrace.css" ?>
+<!DOCTYPE overlay SYSTEM "chrome://samltrace/locale/samltrace.dtd">
+
+<overlay id="samltrace-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <script type="application/x-javascript" src="chrome://samltrace/content/SAMLTrace.js" />
+
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="samltrace-string-bundle" src="chrome://samltrace/locale/samltrace.properties" />
+  </stringbundleset>
+
+  <menupopup id="menu_ToolsPopup">
+    <menuitem id="samltrace-menu-open" label="&samltrace.open.label;" oncommand="SAMLTrace.TraceWindow.show()" />
+  </menupopup>
+
+</overlay>
