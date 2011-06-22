@@ -398,6 +398,7 @@ SAMLTrace.Request.prototype = {
       msg = this.postParameter('SAMLResponse');
     }
     if (msg != null) {
+      msg = msg.replace(/\s/g, '');
       this.saml = atob(msg);
       return;
     }
