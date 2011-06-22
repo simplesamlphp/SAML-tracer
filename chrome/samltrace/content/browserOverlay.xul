@@ -11,4 +11,8 @@
     <menuitem id="samltrace-menu-open" label="&samltrace.open.label;" oncommand="SAMLTrace.showTraceWindow()" />
   </menupopup>
 
+  <menupopup id="appmenu_webDeveloper_popup">
+    <menuitem id="samltrace-appmenu-open" label="&samltrace.open.label;" oncommand="SAMLTrace.showTraceWindow()" insertafter="appmenu_errorConsole" />
+  </menupopup>
+
 </overlay>
