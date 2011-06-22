@@ -7,10 +7,6 @@
 
   <script type="application/x-javascript" src="chrome://samltrace/content/browserOverlay.js" />
 
-  <stringbundleset id="stringbundleset">
-    <stringbundle id="samltrace-string-bundle" src="chrome://samltrace/locale/samltrace.properties" />
-  </stringbundleset>
-
   <menupopup id="menu_ToolsPopup">
     <menuitem id="samltrace-menu-open" label="&samltrace.open.label;" oncommand="SAMLTrace.showTraceWindow()" />
   </menupopup>
