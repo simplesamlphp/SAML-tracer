@@ -9,6 +9,8 @@
   windowtype="global:samltrace"
   width="600"
   height="400"
+  screenX="10"
+  screenY="10"
   onload="SAMLTrace.TraceWindow.init(window)"
   onunload="SAMLTrace.TraceWindow.close(window)"
 >
