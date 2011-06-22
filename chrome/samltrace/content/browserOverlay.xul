@@ -5,14 +5,14 @@
 
 <overlay id="samltrace-browser-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script type="application/x-javascript" src="chrome://samltrace/content/SAMLTrace.js" />
+  <script type="application/x-javascript" src="chrome://samltrace/content/browserOverlay.js" />
 
   <stringbundleset id="stringbundleset">
     <stringbundle id="samltrace-string-bundle" src="chrome://samltrace/locale/samltrace.properties" />
   </stringbundleset>
 
   <menupopup id="menu_ToolsPopup">
-    <menuitem id="samltrace-menu-open" label="&samltrace.open.label;" oncommand="SAMLTrace.TraceWindow.show()" />
+    <menuitem id="samltrace-menu-open" label="&samltrace.open.label;" oncommand="SAMLTrace.showTraceWindow()" />
   </menupopup>
 
 </overlay>

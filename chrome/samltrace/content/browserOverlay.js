@@ -6,7 +6,8 @@ if ("undefined" == typeof(SAMLTrace)) {
 };
 
 /**
- * Controls the browser overlay for the Hello World extension.
+ * Shows the SAML tracer window.
  */
-SAMLTrace.BrowserOverlay = {
+SAMLTrace.showTraceWindow = function() {
+  toOpenWindowByType('global:samltrace', 'chrome://samltrace/content/TraceWindow.xul');
 };

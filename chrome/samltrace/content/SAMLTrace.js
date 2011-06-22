@@ -757,10 +757,6 @@ SAMLTrace.TraceWindow.close = function() {
   window.tracer.close();
 };
 
-SAMLTrace.TraceWindow.show = function() {
-  toOpenWindowByType('global:samltrace', 'chrome://samltrace/content/TraceWindow.xul');
-};
-
 SAMLTrace.TraceWindow.selectRequest = function() {
   var lb = document.getElementById('request-list');
   var requestElement = lb.getSelectedItem(0);
