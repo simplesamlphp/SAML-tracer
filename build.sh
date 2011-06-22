@@ -1,9 +1,22 @@
 #!/bin/bash
 set -e
 
+if [ -n "$1" ]; then
+    RELEASE="tags/$1"
+    TARGET="$(pwd)/$1.xpi"
+else
+    RELEASE="HEAD"
+    TARGET="$(pwd)/samltracer.xpi"
+fi
+
+if ! git rev-parse --verify "$RELEASE" >/dev/null 2>&1; then
+    echo "Invalid revision: $RELEASE" >&2
+    exit 1
+fi
+
 D=$(mktemp -d)
 
-git archive --format tar HEAD | (cd "$D"; tar xv)
+git archive --format tar "$RELEASE" | (cd "$D"; tar xv)
 
 cd "$D/chrome"
 
@@ -22,7 +35,7 @@ cd "$D"
 rm "build.sh"
 sed -i 's@chrome/samltrace/@jar:chrome/samltrace.jar!/@' "chrome.manifest"
 
-zip -r /tmp/samltrace.xpi *
+zip -r "$TARGET" *
 
 cd /
 rm -r "$D"
