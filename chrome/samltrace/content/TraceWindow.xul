@@ -11,6 +11,8 @@
   height="400"
   screenX="10"
   screenY="10"
+  persist="width height screenX screenY sizemode"
+  id="samltracewindow"
   onload="SAMLTrace.TraceWindow.init(window)"
   onunload="SAMLTrace.TraceWindow.close(window)"
 >
