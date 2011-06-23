@@ -2,40 +2,6 @@ if ("undefined" == typeof(SAMLTrace)) {
   var SAMLTrace = {};
 };
 
-SAMLTrace.splitLongWords = function(element, maxLength) {
-  function split(element, remainingChars, maxLength) {
-    if (element instanceof Text) {
-      for (var i = 0; i < element.length; i++) {
-	var c = element.data.charAt(i);
-	if (c == ' ' || c == "\n" || c == "\r" || c == "\t") {
-	  remainingChars = maxLength;
-	  continue;
-	}
-	remainingChars -= 1;
-	if (remainingChars == 0) {
-	  var newNode = element.splitText(i);
-	  var wbr = element.ownerDocument.createElementNS('http://www.w3.org/1999/xhtml', 'wbr');
-	  element.parentNode.insertBefore(wbr, newNode);
-	  return maxLength;
-	}
-      }
-      return remainingChars;
-    }
-    if (element instanceof Element) {
-      if (element.localName == 'wbr' && element.namespaceURI == 'http://www.w3.org/1999/xhtml') {
-	return maxLength;
-      }
-      for (var child = element.firstChild; child != null; child = child.nextSibling) {
-	remainingChars = split(child, remainingChars, maxLength);
-      }
-      return remainingChars;
-    }
-    return remainingChars;
-  }
-
-  split(element, maxLength, maxLength);
-};
-
 SAMLTrace.b64deflate = function (data) {
 
   if (data.length % 4 != 0) {
