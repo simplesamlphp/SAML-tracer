@@ -22,3 +22,24 @@
   background-color: #eeeeee;
   color: inherit;
 }
+
+.request-info {
+  color: black;
+}
+.request-ok {
+  color: green;
+}
+.request-redirect {
+  color: orange;
+}
+.request-clerror{
+  color: red;
+  font-weight: bold;
+}
+.request-srerror{
+  color: red;
+  font-weight: bold;
+}
+.request-other{
+  color: black;
+}

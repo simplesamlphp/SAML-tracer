@@ -506,6 +506,18 @@ SAMLTrace.RequestItem.prototype = {
     }
 
     var element = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'richlistitem');
+
+    // layout update: apply style to item based on responseStatus
+    var r=this.request.responseStatus;
+    var s;
+    if (r<200) s='info';
+    else if (r<300) s='ok';
+    else if (r<400) s='redirect';
+    else if (r<500) s='clerror';
+    else if (r<600) s='srerror';
+    else s='other';
+    element.setAttribute('class', 'request-'+s);
+
     element.appendChild(hbox);
     element.requestItem = this;
 
