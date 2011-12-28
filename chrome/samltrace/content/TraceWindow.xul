@@ -23,7 +23,7 @@
   <script type="application/javascript" src="chrome://samltrace/content/SAMLTrace.js" />
   <vbox flex="1">
     <toolbar>
-      <toolbarbutton label="Clear" oncommand="window.tracer.clearRequests();" />
+      <toolbarbutton id="button-clear" label="Clear" oncommand="window.tracer.clearRequests();" />
       <toolbarbutton id="button-autoscroll" label="Autoscroll" type="checkbox" oncommand="window.tracer.setAutoscroll(this.hasAttribute('checked'));" />
       <toolbarbutton id="button-filter" label="Filter resources" type="checkbox" oncommand="window.tracer.setFilterResources(this.hasAttribute('checked'));" />
     </toolbar>

@@ -43,3 +43,25 @@
 .request-other{
   color: black;
 }
+
+
+#button-clear {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/x-office-document-icon-24.png");
+}
+toolbar[iconsize="small"] #button-clear {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/x-office-document-icon-16.png");
+}
+
+#button-autoscroll {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/autoscroll-icon-24.png");
+}
+toolbar[iconsize="small"] #button-autoscroll {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/autoscroll-icon-16.png");
+}
+
+#button-filter {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/filter-icon-24.png");
+}
+toolbar[iconsize="small"] #button-filter {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/filter-icon-16.png");
+}
