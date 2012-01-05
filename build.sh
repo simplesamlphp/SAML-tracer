@@ -33,7 +33,8 @@ done
 cd "$D"
 
 rm "build.sh"
-sed -i 's@chrome/samltrace/@jar:chrome/samltrace.jar!/@' "chrome.manifest"
+sed 's@chrome/samltrace/@jar:chrome/samltrace.jar!/@' <"chrome.manifest" >"chrome.manifest.new"
+mv -f "chrome.manifest.new" "chrome.manifest"
 
 zip -r "$TARGET" *
 
