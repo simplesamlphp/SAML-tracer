@@ -166,7 +166,7 @@ SAMLTrace.Request.prototype = {
     for (var i = 0; i < this.requestHeaders.length; i++) {
       var h = this.requestHeaders[i];
       if (h[0].toLowerCase() == name.toLowerCase()) {
-	return h[1];
+        return h[1];
       }
     }
     return null;
@@ -175,7 +175,7 @@ SAMLTrace.Request.prototype = {
     for (var i = 0; i < this.get.length; i++) {
       var p = this.get[i];
       if (p[0] == name) {
-	return p[1];
+        return p[1];
       }
     }
     return null;
@@ -184,7 +184,7 @@ SAMLTrace.Request.prototype = {
     for (var i = 0; i < this.post.length; i++) {
       var p = this.post[i];
       if (p[0] == name) {
-	return p[1];
+        return p[1];
       }
     }
     return null;
@@ -193,7 +193,7 @@ SAMLTrace.Request.prototype = {
     var headers = [];
     var visitor = {
       'visitHeader' : function(header, value) {
-	headers.push([header, value]);
+        headers.push([header, value]);
       },
     };
     httpChannel.visitRequestHeaders(visitor);
@@ -207,7 +207,7 @@ SAMLTrace.Request.prototype = {
     var headers = [];
     var visitor = {
       'visitHeader' : function(header, value) {
-	headers.push([header, value]);
+        headers.push([header, value]);
       },
     };
     httpChannel.visitResponseHeaders(visitor);
@@ -225,11 +225,11 @@ SAMLTrace.Request.prototype = {
       var p = e.indexOf('=');
       var name, value;
       if (p == -1) {
-	name = e;
-	value = '';
+        name = e;
+        value = '';
       } else {
-	name = e.substr(0, p);
-	value = e.substr(p + 1);
+        name = e.substr(0, p);
+        value = e.substr(p + 1);
       }
 
       name = name.replace('+', ' ');
@@ -262,7 +262,7 @@ SAMLTrace.Request.prototype = {
 
     var seekable;
     try {
-	seekable = stream.QueryInterface(Components.interfaces.nsISeekableStream);
+      seekable = stream.QueryInterface(Components.interfaces.nsISeekableStream);
     } catch (e) {
       dump('Upload stream not seekable: ' + e + '\n');
     }
@@ -281,9 +281,9 @@ SAMLTrace.Request.prototype = {
       }
       data += chunk;
       if (data.length > 131072) {
-	dump('Warning: POST data too long. Only saving part of it.');
-	data += '[...]';
-	break;
+        dump('Warning: POST data too long. Only saving part of it.');
+        data += '[...]';
+        break;
       }
     }
 
@@ -335,11 +335,11 @@ SAMLTrace.Request.prototype = {
       var p = e.indexOf('=');
       var name, value;
       if (p == -1) {
-	name = e;
-	value = '';
+        name = e;
+        value = '';
       } else {
-	name = e.substr(0, p);
-	value = e.substr(p + 1);
+        name = e.substr(0, p);
+        value = e.substr(p + 1);
       }
 
       name = name.replace('+', ' ');
@@ -445,17 +445,17 @@ SAMLTrace.RequestItem.prototype = {
 
     function addParameters(name, parameters) {
       if (parameters.length == 0) {
-	return;
+        return;
       }
       var h = doc.createElement('b');
       h.textContent = name + '\n';
       target.appendChild(h);
       for (var i = 0; i < parameters.length; i++) {
-	var p = parameters[i];
-	var nameElement = doc.createElement('b');
-	nameElement.textContent = p[0];
-	target.appendChild(nameElement);
-	target.appendChild(doc.createTextNode(': ' + p[1] + '\n'));
+        var p = parameters[i];
+        var nameElement = doc.createElement('b');
+        nameElement.textContent = p[0];
+        target.appendChild(nameElement);
+        target.appendChild(doc.createTextNode(': ' + p[1] + '\n'));
       }
     }
 
@@ -550,7 +550,7 @@ SAMLTrace.TraceWindow.prototype = {
     for (var i = 0; i < request.responseHeaders.length; i++) {
       var h = request.responseHeaders[i];
       if (h[0].toLowerCase() == 'content-type') {
-	type = h[1];
+        type = h[1];
       }
     }
     if (type == null) {
@@ -611,7 +611,7 @@ SAMLTrace.TraceWindow.prototype = {
     for (var i = 0; i < this.requests.length; i++) {
       var request = this.requests[i];
       if (this.isRequestVisible(request)) {
-	this.addRequestItem(request);
+        this.addRequestItem(request);
       }
     }
 
@@ -698,8 +698,8 @@ SAMLTrace.TraceWindow.prototype = {
     tabpanel.appendChild(iframe);
 
     if (!requestInfoTabs.hasChildNodes()) {
-	/* The first tab. Mark it as selected. */
-	tab.setAttribute('selected', true);
+      /* The first tab. Mark it as selected. */
+      tab.setAttribute('selected', true);
     }
 
     requestInfoTabs.appendChild(tab);

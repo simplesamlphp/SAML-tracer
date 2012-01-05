@@ -22,7 +22,7 @@ cd "$D/chrome"
 
 for F in *; do
     if [ ! -d "$F" ]; then
-	continue
+        continue
     fi
     pushd "$F"
     zip -r "../$F.jar" *
