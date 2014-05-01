@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
+<?xml-stylesheet type="text/css" href="chrome://samltrace/skin/samltrace.css" ?>
+<!DOCTYPE window SYSTEM "chrome://samltrace/locale/exportDialog.dtd" >
+
+<!-- https://developer.mozilla.org/en/XUL/dialog -->
+<dialog id="donothing" title="&exportDialog.exporttitle;"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  buttons="accept,cancel"
+  buttonlabelcancel="&exportDialog.cancel;"
+  buttonlabelaccept="&exportDialog.export;"
+  ondialogaccept="return SAMLTraceIO.exportRequests();"
+  ondialogcancel="window.close();">
+
+  <script type="application/javascript" src="chrome://samltrace/content/SAMLTraceIO.js" />
+
+  <groupbox>
+    <caption label="&exportDialog.title;"/>
+    <grid flex="1">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+      <rows>
+        <row>
+          <label control="rCookieProfile" value="&exportDialog.cookieprofile;" />
+          <radiogroup id="rCookieProfile">
+            <radio value="1" label="&exportDialog.cookieprofile.pub;" />
+            <radio value="2" label="&exportDialog.cookieprofile.obfuscate;"  selected="true" />
+            <radio value="3" label="&exportDialog.cookieprofile.overwrite;" />
+          </radiogroup>
+        </row>
+<!--
+        <row>
+          <label control="cZipResult" value="Create ZIP-file output" />
+          <checkbox id="cZipResult" />
+        </row>
+-->
+      </rows>
+    </grid>
+  </groupbox>
+</dialog>
