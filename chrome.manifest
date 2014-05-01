@@ -1,5 +1,5 @@
-content   samltrace              chrome/samltrace/content/
-skin      samltrace  classic/1.0 chrome/samltrace/skin/
-locale    samltrace  en-US       chrome/samltrace/locale/en-US/
+content   samltrace              jar:chrome/samltrace.jar!/samltrace/content/
+skin      samltrace  classic/1.0 jar:chrome/samltrace.jar!/samltrace/skin/
+locale    samltrace  en-US       jar:chrome/samltrace.jar!/samltrace/locale/en-US/
 
 overlay chrome://browser/content/browser.xul  chrome://samltrace/content/browserOverlay.xul
