@@ -1,3 +1,11 @@
+// export SAMLTrace namespace to make ao. Request definitions available
+var EXPORTED_SYMBOLS = ["SAMLTrace"];
+
+// Import import/export feature
+Components.utils.import("chrome://samltrace/content/SAMLTraceIO.js");
+
+
+
 if ("undefined" == typeof(SAMLTrace)) {
   var SAMLTrace = {};
 };
@@ -372,6 +380,25 @@ SAMLTrace.Request.prototype = {
     this.saml = null;
   }
 };
+
+/** if encoded==true, the variable s is first JSON.parse()'d **/
+SAMLTrace.Request.createFromJSON = function(s, encoded) {
+  var jd;
+  if (encoded) {
+    jd=JSON.parse(s);
+  } else {
+    jd=s;
+  }
+
+  var o = Object.create(SAMLTrace.Request.prototype);
+  for (var n in jd) {
+    o[n] = jd[n];
+  }
+
+  return o;
+}
+
+
 
 SAMLTrace.RequestMonitor = function(traceWindow) {
   this.traceWindow = traceWindow;
@@ -758,3 +785,26 @@ SAMLTrace.TraceWindow.showRequestContent = function() {
 
   window.parent.tracer.showRequestContent(txt, type);
 };
+
+
+SAMLTrace.TraceWindow.exportRequests = function() {
+  var lb = document.getElementById('request-list');
+  if (!lb || lb.itemCount == 0) {
+    var strbundle = document.getElementById('strings');
+    alert(strbundle.getString('samltrace.alert.nothing_to_export'));
+    return;
+  }
+
+  // Establish user context for export
+  var reqs = window.parent.tracer.requests;
+  window.openDialog('chrome://samltrace/content/exportDialog.xul',
+                    'global:samltrace:exportDialog', 'modal', reqs);
+
+}
+
+
+SAMLTrace.TraceWindow.importRequests = function() {
+	SAMLTraceIO.importRequests(window, function(newreq) {
+		window.parent.tracer.addRequest(newreq);
+	});
+} // SAMLTrace.TraceWindow.importRequests()
