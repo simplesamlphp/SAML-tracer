@@ -10,12 +10,6 @@
     <em:version>0.2</em:version>
     <em:type>2</em:type>
 
-    <!--
-        This extension needs to be unpacked since it has an
-        dictionary directory.
-    -->
-    <em:unpack>true</em:unpack>
-
     <!-- Mozilla Firefox -->
     <em:targetApplication>
       <Description>

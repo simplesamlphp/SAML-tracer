@@ -18,23 +18,9 @@ D=$(mktemp -d)
 
 git archive --format tar "$RELEASE" | (cd "$D"; tar xv)
 
-cd "$D/chrome"
-
-for F in *; do
-    if [ ! -d "$F" ]; then
-        continue
-    fi
-    pushd "$F"
-    zip -r "../$F.jar" *
-    popd
-    rm -r "$F"
-done
-
 cd "$D"
 
 rm "build.sh"
-sed 's@chrome/samltrace/@jar:chrome/samltrace.jar!/@' <"chrome.manifest" >"chrome.manifest.new"
-mv -f "chrome.manifest.new" "chrome.manifest"
 
 zip -r "$TARGET" *
 
