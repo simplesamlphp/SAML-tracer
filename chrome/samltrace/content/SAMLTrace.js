@@ -3,6 +3,9 @@ if ("undefined" == typeof(SAMLTrace)) {
 };
 
 SAMLTrace.b64deflate = function (data) {
+  // Remove any whitespace in the base64-encoded data -- Shibboleth may insert
+  // line feeds in the data.
+  data = data.replace(/\s/g, '');
 
   if (data.length % 4 != 0) {
     dump('Warning: base64-encoded data is not a multiple of 4 bytes long.\n');
