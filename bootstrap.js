@@ -1,5 +1,6 @@
 // This bootstrap.js file is based upon the template available here:
 // https://developer.mozilla.org/en-US/Add-ons/Firefox_for_Android/Initialization_and_Cleanup#template_code
+// The onOpenWindow event handler was slightly modified to be compatible with standard Firefox.
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -74,9 +75,9 @@ function unloadFromWindow(window) {
 var windowListener = {
   onOpenWindow: function(aWindow) {
     // Wait for the window to finish loading
-    let domWindow = aWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowInternal || Ci.nsIDOMWindow);
-    domWindow.addEventListener("UIReady", function onLoad() {
-      domWindow.removeEventListener("UIReady", onLoad, false);
+    let domWindow = aWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+    domWindow.addEventListener("load", function onLoad() {
+      domWindow.removeEventListener("load", onLoad, false);
       loadIntoWindow(domWindow);
     }, false);
   },
