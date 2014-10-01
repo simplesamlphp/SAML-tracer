@@ -6,8 +6,10 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
+Cu.import("resource:///modules/CustomizableUI.jsm");
 Cu.import('resource://gre/modules/Services.jsm');
 
+var css_uri = Services.io.newURI("chrome://samltrace/skin/button.css", null, null);
 var strings = Services.strings.createBundle('chrome://samltrace/locale/samltrace.properties');
 
 var tracerWindow = null;
@@ -28,6 +30,9 @@ function showTracerWindow() {
 function loadIntoWindow(window) {
   if (!window)
     return;
+
+  // Add our style sheet
+  window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils).loadSheet(css_uri, 1);
 
   // Add an entry to the tools menu.
   let menuToolsPopup = window.document.getElementById('menu_ToolsPopup');
@@ -70,6 +75,9 @@ function unloadFromWindow(window) {
   if (appMenuOpen) {
     appMenuOpen.parentNode.removeChild(appMenuOpen);
   }
+
+  // Remove our style sheet
+  window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils).removeSheet(css_uri, 1);
 }
 
 var windowListener = {
@@ -96,6 +104,16 @@ function startup(aData, aReason) {
 
   // Load into any new windows
   Services.wm.addListener(windowListener);
+
+  // Add button to panel.
+  CustomizableUI.createWidget({
+    id: "samltrace-showtracer",
+    defaultArea: CustomizableUI.AREA_PANEL,
+    removable: true,
+    label: strings.GetStringFromName('samltrace.open.label'),
+    onCommand: showTracerWindow
+  });
+
 }
 
 function shutdown(aData, aReason) {
@@ -120,6 +138,8 @@ function shutdown(aData, aReason) {
     let domWindow = windows.getNext().QueryInterface(Ci.nsIDOMWindow);
     unloadFromWindow(domWindow);
   }
+
+  CustomizableUI.destroyWidget("samltrace-showtracer");
 }
 
 function install(aData, aReason) {}
