@@ -26,6 +26,9 @@
       <toolbarbutton id="button-clear" label="Clear" oncommand="window.tracer.clearRequests();" />
       <toolbarbutton id="button-autoscroll" label="Autoscroll" type="checkbox" oncommand="window.tracer.setAutoscroll(this.hasAttribute('checked'));" />
       <toolbarbutton id="button-filter" label="Filter resources" type="checkbox" oncommand="window.tracer.setFilterResources(this.hasAttribute('checked'));" />
+      <toolbarspacer flex='1' />
+      <toolbarbutton id="button-export-list" label="Export" oncommand="SAMLTrace.TraceWindow.exportRequests();" />
+      <toolbarbutton id="button-import-list" label="Import" oncommand="SAMLTrace.TraceWindow.importRequests();" />
     </toolbar>
 
     <richlistbox id="request-list" class="request-list" height="120" onselect="SAMLTrace.TraceWindow.selectRequest()" />

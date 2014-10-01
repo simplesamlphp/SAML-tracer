@@ -65,3 +65,16 @@ toolbar[iconsize="small"] #button-autoscroll {
 toolbar[iconsize="small"] #button-filter {
   list-style-image: url("chrome://samltrace/skin/oxygen-icons/filter-icon-16.png");
 }
+
+#button-export-list {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/export-icon-24.png");
+}
+toolbar[iconsize="small"] #button-export-list {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/export-icon-16.png");
+}
+#button-import-list {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/import-icon-24.png");
+}
+toolbar[iconsize="small"] #button-import-list {
+  list-style-image: url("chrome://samltrace/skin/oxygen-icons/import-icon-16.png");
+}
