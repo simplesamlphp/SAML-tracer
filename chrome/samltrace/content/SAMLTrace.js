@@ -102,7 +102,7 @@ SAMLTrace.prettifyXML = function(xmlstring) {
 
   function xmlEntities(string) {
     string = string.replace('&', '&amp;', 'g');
-    string = string.replace('"', '&qout;', 'g');
+    string = string.replace('"', '&quot;', 'g');
     string = string.replace("'", '&apos;', 'g');
     string = string.replace('<', '&lt;', 'g');
     string = string.replace('>', '&gt;', 'g');
