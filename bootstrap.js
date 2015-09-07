@@ -20,7 +20,7 @@ function showTracerWindow() {
     return;
   }
 
-  tracerWindow = Services.ww.openWindow(null, "chrome://samltrace/content/TraceWindow.xul", "global:samltrace", "chrome,centerscreen", null);
+  tracerWindow = Services.ww.openWindow(null, "chrome://samltrace/content/TraceWindow.xul", "global:samltrace", "chrome,centerscreen,resizable", null);
   tracerWindow.addEventListener('close', function() {
     tracerWindow = null;
   });
