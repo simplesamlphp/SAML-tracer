@@ -7,7 +7,7 @@
     <em:id>{d3e01ff2-9a3a-4007-8f6e-7acd9a5de263}</em:id>
     <em:name>SAML tracer</em:name>
     <em:description>A debugger for viewing SAML messages</em:description>
-    <em:version>0.3.1</em:version>
+    <em:version>0.3.2</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
