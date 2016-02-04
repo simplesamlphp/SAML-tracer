@@ -208,7 +208,10 @@ SAMLTraceIO_filters.hashString = function(sval, alg) {
   ch.update(data, data.length);
   var hash = ch.finish(false)
 
-  var s = [SAMLTraceIO_filters.toHashString(hash.charCodeAt(i)) for (i in hash)].join("");
+  var s = "";
+  for (i in hash) {
+    s += SAMLTraceIO_filters.toHashString(hash.charCodeAt(i));
+  }
 
   return s;
 }
