@@ -75,6 +75,15 @@ SAMLTrace.b64deflate = function (data) {
   return listener.buffer;
 };
 
+SAMLTrace.bin2hex = function(s) {
+  var i; var l; var n; var o = '';
+  for (i = 0, l = s.length; i < l; i++) {
+    n = s.charCodeAt(i).toString(16)
+    o += n.length < 2 ? '0' + n : n
+  }
+  return o
+};
+
 SAMLTrace.prettifyXML = function(xmlstring) {
   var parser = new DOMParser();
   var doc = parser.parseFromString(xmlstring, 'text/xml');
@@ -159,6 +168,13 @@ SAMLTrace.prettifyXML = function(xmlstring) {
 
   return prettifyElement(doc.documentElement, '');
 };
+
+SAMLTrace.prettifyArtifact = function(artstring) {
+    var artifact = window.atob(artstring);
+    return 'Endpoint Index: ' + SAMLTrace.bin2hex(artifact.substr(2,2)) + '\n' +
+      'Source ID: ' + SAMLTrace.bin2hex(artifact.substr(4,20));
+};
+
 
 SAMLTrace.Request = function(httpChannel) {
   this.method = httpChannel.requestMethod;
@@ -370,6 +386,14 @@ SAMLTrace.Request.prototype = {
       return;
     }
 
+    if (msg == null) {
+      msg = this.getParameter('SAMLart');
+    }
+    if (msg != null) {
+      this.samlart = msg;
+      return;
+    }
+
     msg = this.postParameter('SAMLRequest');
     if (msg == null) {
       msg = this.postParameter('SAMLResponse');
@@ -377,6 +401,14 @@ SAMLTrace.Request.prototype = {
     if (msg != null) {
       msg = msg.replace(/\s/g, '');
       this.saml = atob(msg);
+      return;
+    }
+
+    if (msg == null) {
+      msg = this.postParameter('SAMLart');
+    }
+    if (msg != null) {
+      this.samlart = msg;
       return;
     }
 
@@ -442,7 +474,7 @@ SAMLTrace.RequestItem = function(request) {
   if (this.request.get.length != 0 || this.request.post.length != 0) {
     this.availableTabs.push('Parameters');
   }
-  if (this.request.saml != null) {
+  if (this.request.saml != null || this.request.samlart != null) {
     this.availableTabs.push('SAML');
   }
 };
@@ -495,7 +527,11 @@ SAMLTrace.RequestItem.prototype = {
 
   'showSAML' : function(target) {
     var doc = target.ownerDocument;
-    var samlFormatted = SAMLTrace.prettifyXML(this.request.saml);
+    if (this.request.saml) {
+      var samlFormatted = SAMLTrace.prettifyXML(this.request.saml);
+    } else {
+      var samlFormatted = SAMLTrace.prettifyArtifact(this.request.samlart);
+    }
     target.appendChild(doc.createTextNode(samlFormatted));
   },
 
@@ -529,7 +565,7 @@ SAMLTrace.RequestItem.prototype = {
     hbox.appendChild(methodLabel);
     hbox.appendChild(urlLabel);
 
-    if (this.request.saml) {
+    if (this.request.saml || this.request.samlart) {
           var samlLogo = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
           samlLogo.setAttribute('src', 'chrome://samltrace/content/saml.png');
           hbox.appendChild(samlLogo);
