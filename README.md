@@ -37,11 +37,13 @@ repository from:
 
 After modifying the source code, you need to commit your changes to
 your local Git repository. You can then run `build.sh` from the
-root of the repository.
+root of the repository. `build.sh` will create `samltracer.xpi` from
+the latest commit in your repository.
 
-`build.sh` will create `samltracer.xpi` from the latest commit in
-your repository. This `xpi`-file can then be loaded into Firefox
-by running `firefox samltracer.xpi` (or opening the file in Firefox).
+You need to set `xpinstall.signatures.required` to false in Firefox
+`about:config` to be able to load this `xpi`-file. You can then run
+`firefox samltracer.xpi` (or open the file in Firefox). Don't forget
+to re-enable `xpinstall.signatures.required` when you're done.
 
 
 License
