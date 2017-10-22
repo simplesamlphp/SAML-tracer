@@ -1,27 +1,59 @@
-.request-list {
-  /* overflow-y: scroll; */
-}
-.request-method {
-  width: 3em;
-}
-.request-url {
-}
-.request-header {
-  font-family: monospace;
-  overflow-x: scroll;
-}
-.request-details {
-  -moz-user-focus: normal;
-  -moz-user-select: text;
-  cursor: text !important;
-  font-family: monospace;
-  white-space: pre-wrap;
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8pt;
 }
 
-.request-list > richlistitem[selected="true"] {
+#header {
+  height: 30px;
+  background-color: #cccccc;
+}
+
+#request-list {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#dragger {
+  background-color: #333333;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+#txt {
+  overflow-y: scroll;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-family: Consolas, "Lucida Console", Courier, monospace;
+}
+
+#statuspanel {
+  bottom: 0;
+  height: 30px;
+  background-color: #cccccc;
+}
+
+.list-row {
+  overflow: hidden;
+  display: flex;
+  white-space: nowrap;
+}
+
+.list-row:nth-child(odd) {
+  background-color: #e0e0e0;
+}
+
+.request-method {
+  flex: 0 0 4em;
+}
+
+/* .request-list > richlistitem[selected="true"] {
   background-color: #eeeeee;
   color: inherit;
-}
+} */
 
 .request-info {
   color: black;
@@ -46,9 +78,11 @@
 
 
 #button-clear {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/x-office-document-icon-24.png");
+  background: url("../skin/oxygen-icons/x-office-document-icon-24.png") no-repeat;
+  height: 24px;
+  width: 24px;
 }
-toolbar[iconsize="small"] #button-clear {
+/* toolbar[iconsize="small"] #button-clear {
   list-style-image: url("chrome://samltrace/skin/oxygen-icons/x-office-document-icon-16.png");
 }
 
@@ -77,4 +111,4 @@ toolbar[iconsize="small"] #button-export-list {
 }
 toolbar[iconsize="small"] #button-import-list {
   list-style-image: url("chrome://samltrace/skin/oxygen-icons/import-icon-16.png");
-}
+} */

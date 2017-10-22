@@ -2,7 +2,7 @@
 var EXPORTED_SYMBOLS = ["SAMLTrace"];
 
 // Import import/export feature
-Components.utils.import("chrome://samltrace/content/SAMLTraceIO.js");
+//Components.utils.import("chrome://samltrace/content/SAMLTraceIO.js");
 
 
 
@@ -176,9 +176,11 @@ SAMLTrace.prettifyArtifact = function(artstring) {
 };
 
 
-SAMLTrace.Request = function(httpChannel) {
-  this.method = httpChannel.requestMethod;
-  this.url = httpChannel.URI.spec;
+SAMLTrace.Request = function(httpChannel, getResponse) {
+  this.method = httpChannel.req.method;
+  this.url = httpChannel.req.url;
+  this.requestId = httpChannel.req.requestId;
+  this.getResponse = getResponse;
 
   this.loadRequestHeaders(httpChannel);
 
@@ -217,29 +219,33 @@ SAMLTrace.Request.prototype = {
     return null;
   },
   'loadRequestHeaders' : function(httpChannel) {
-    var headers = [];
+    /*var headers = [];
     var visitor = {
-      'visitHeader' : function(header, value) {
+      'visitHeader' : function(header, value) {headers
         headers.push([header, value]);
       },
     };
     httpChannel.visitRequestHeaders(visitor);
-
-    this.requestHeaders = headers;
+    this.requestHeaders = headers;*/
+    this.requestHeaders = httpChannel.headers;
   },
   'loadResponse' : function(httpChannel) {
-    this.responseStatus = httpChannel.responseStatus;
-    this.responseStatusText = httpChannel.responseStatusText;
+    // this.responseStatus = httpChannel.responseStatus;
+    // this.responseStatusText = httpChannel.responseStatusText;
 
-    var headers = [];
-    var visitor = {
-      'visitHeader' : function(header, value) {
-        headers.push([header, value]);
-      },
-    };
-    httpChannel.visitResponseHeaders(visitor);
+    this.response = this.getResponse();
+    this.responseStatus = this.response.statusCode;
+    this.responseStatusText = this.response.statusLine;
 
-    this.responseHeaders = headers;
+    // var headers = [];
+    // var visitor = {
+    //   'visitHeader' : function(header, value) {
+    //     headers.push([header, value]);
+    //   },
+    // };
+    // httpChannel.visitResponseHeaders(visitor);
+    // this.responseHeaders = headers;
+    this.responseHeaders = this.response.responseHeaders;
   },
   'loadGET' : function() {
     var r = new RegExp('[&;\?]');
@@ -273,6 +279,7 @@ SAMLTrace.Request.prototype = {
       return;
     }
 
+    return;
     var uploadChannel;
     try {
       uploadChannel = httpChannel.QueryInterface(Components.interfaces.nsIUploadChannel);
@@ -437,9 +444,9 @@ SAMLTrace.Request.createFromJSON = function(s, encoded) {
 
 SAMLTrace.RequestMonitor = function(traceWindow) {
   this.traceWindow = traceWindow;
-  this.obsService = Components.classes['@mozilla.org/observer-service;1'].getService(Components.interfaces.nsIObserverService);
-  this.obsService.addObserver(this, 'http-on-modify-request', false);
-  this.obsService.addObserver(this, 'http-on-examine-response', false);
+  // this.obsService = Components.classes['@mozilla.org/observer-service;1'].getService(Components.interfaces.nsIObserverService);
+  // this.obsService.addObserver(this, 'http-on-modify-request', false);
+  // this.obsService.addObserver(this, 'http-on-examine-response', false);
   this.activeRequests = [];
 };
 SAMLTrace.RequestMonitor.prototype = {
@@ -481,13 +488,21 @@ SAMLTrace.RequestItem = function(request) {
 SAMLTrace.RequestItem.prototype = {
 
   'showHTTP' : function(target) {
+    target.innerText = "";
     var doc = target.ownerDocument;
+
+    // function addHeaderLine(h) {
+    //   var name = doc.createElement('b');
+    //   name.textContent = h[0];
+    //   target.appendChild(name);
+    //   target.appendChild(doc.createTextNode(': ' + h[1] + '\n'));
+    // }
 
     function addHeaderLine(h) {
       var name = doc.createElement('b');
-      name.textContent = h[0];
+      name.textContent = h.name;
       target.appendChild(name);
-      target.appendChild(doc.createTextNode(': ' + h[1] + '\n'));
+      target.appendChild(doc.createTextNode(': ' + h.value + '\n'));
     }
 
     var reqLine = doc.createElement('b');
@@ -496,8 +511,9 @@ SAMLTrace.RequestItem.prototype = {
     this.request.requestHeaders.forEach(addHeaderLine);
     target.appendChild(doc.createTextNode('\n'));
 
+    this.request.loadResponse(null);
     var respLine = doc.createElement('b');
-    respLine.textContent = 'HTTP/?.? ' + this.request.responseStatus + ' ' + this.request.responseStatusText + "\n"
+    respLine.textContent = this.request.responseStatusText + "\n";
     target.appendChild(respLine);
     this.request.responseHeaders.forEach(addHeaderLine);
   },
@@ -549,29 +565,40 @@ SAMLTrace.RequestItem.prototype = {
     }
   },
 
-  'addListItem' : function(target) {
-    var methodLabel = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'label');
+  'addListItem' : function(target, showContentElement) {
+    //var methodLabel = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'label');
+    var methodLabel = document.createElement("label");
     methodLabel.setAttribute('class', 'request-method');
     methodLabel.setAttribute('value', this.request.method);
+    methodLabel.innerText = this.request.method;
 
-    var urlLabel = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'label');
+    //var urlLabel = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'label');
+    var urlLabel = document.createElement("label");
     urlLabel.setAttribute('flex', '1');
     urlLabel.setAttribute('crop', 'end');
     urlLabel.setAttribute('class', 'request-url');
     urlLabel.setAttribute('value', this.request.url);
+    urlLabel.innerText = this.request.url;
+    //urlLabel.onclick = function() { console.log(this.request.url); };
 
-    var hbox = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'hbox');
+    //var hbox = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'hbox');
+    var hbox = document.createElement("div");
     hbox.setAttribute('flex', '1');
+    hbox.setAttribute('id', 'request-' + this.request.requestId);
+    hbox.setAttribute('class', 'list-row');
     hbox.appendChild(methodLabel);
     hbox.appendChild(urlLabel);
 
     if (this.request.saml || this.request.samlart) {
-          var samlLogo = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
-          samlLogo.setAttribute('src', 'chrome://samltrace/content/saml.png');
+          //var samlLogo = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
+          var samlLogo = document.createElement("label");
+          //samlLogo.setAttribute('src', 'chrome://samltrace/content/saml.png');
+          samlLogo.innerText = "SAML";
           hbox.appendChild(samlLogo);
     }
 
-    var element = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'richlistitem');
+    //var element = document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'richlistitem');
+    var element = hbox;
 
     // layout update: apply style to item based on responseStatus
     var r=this.request.responseStatus;
@@ -582,10 +609,19 @@ SAMLTrace.RequestItem.prototype = {
     else if (r<500) s='clerror';
     else if (r<600) s='srerror';
     else s='other';
-    element.setAttribute('class', 'request-'+s);
+    //element.setAttribute('class', 'request-'+s);
 
-    element.appendChild(hbox);
+    //element.appendChild(hbox);
     element.requestItem = this;
+    // element.onclick = function () {
+    //   this.showContent(showContentElement, "http");
+    // };
+
+    var requestItemReference = this;
+    element.addEventListener('click', function(e) {
+      //console.log(this.requestItem.request.url);
+      requestItemReference.showContent(showContentElement, "http");
+    }, false);
 
     target.appendChild(element);
   },
@@ -593,12 +629,13 @@ SAMLTrace.RequestItem.prototype = {
 };
 
 SAMLTrace.TraceWindow = function() {
+  this.httpRequests = [];
   this.requests = [];
   this.autoScroll = true;
   this.filterResources = true;
 
-  document.getElementById('button-autoscroll').setAttribute('checked', this.autoScroll);
-  document.getElementById('button-filter').setAttribute('checked', this.filterResources);
+  // document.getElementById('button-autoscroll').setAttribute('checked', this.autoScroll);
+  // document.getElementById('button-filter').setAttribute('checked', this.filterResources);
 
   window.tracer = this;
   this.requestMonitor = new SAMLTrace.RequestMonitor(this);
@@ -667,37 +704,50 @@ SAMLTrace.TraceWindow.prototype = {
     }
   },
 
-  'addRequestItem' : function(request) {
+  'addRequestItem' : function(request, getResponse) {
 
-    var item = new SAMLTrace.RequestItem(request);
+    var samlTracerRequest = new SAMLTrace.Request(request, getResponse);    
+    var item = new SAMLTrace.RequestItem(samlTracerRequest, showContentElement);
 
     var list = document.getElementById('request-list');
-    item.addListItem(list);
+    var showContentElement = document.getElementById('txt');
+    item.addListItem(list, showContentElement);
+
+    /*var requestItem = document.createElement("div");
+    requestItem.setAttribute("class", "list-row");
+    requestItem.innerText = item.request.url;
+    list.appendChild(requestItem);*/
 
     if (this.autoScroll) {
-      list.ensureElementIsVisible(list.lastChild);
+      //list.ensureElementIsVisible(list.lastChild);
+      //list.scrollTop = list.scrollHeight;
+      list.scrollTop = list.scrollHeight;
     }
   },
 
   'resetList' : function() {
     var listbox = document.getElementById('request-list');
-    var items = listbox.getElementsByTagNameNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'richlistitem');
-    for (var i = items.length - 1; i >= 0; i--) {
-      listbox.removeChild(items[i]);
+    while (listbox.firstChild) {
+      listbox.removeChild(listbox.firstChild);
     }
+    // var items = listbox.getElementsByTagNameNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'richlistitem');
+    // for (var i = items.length - 1; i >= 0; i--) {
+    //   listbox.removeChild(items[i]);
+    // }
 
-    for (var i = 0; i < this.requests.length; i++) {
-      var request = this.requests[i];
-      if (this.isRequestVisible(request)) {
-        this.addRequestItem(request);
-      }
-    }
+    // for (var i = 0; i < this.requests.length; i++) {
+    //   var request = this.requests[i];
+    //   if (this.isRequestVisible(request)) {
+    //     this.addRequestItem(request, null);
+    //   }
+    // }
 
     this.updateStatusBar();
   },
 
   'clearRequests' : function() {
     this.requests = [];
+    this.httpRequests = [];
     this.resetList();
     this.showRequest(null);
   },
@@ -712,28 +762,56 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'updateStatusBar' : function() {
-    var strbundle = document.getElementById('strings');
-    var status = strbundle.getFormattedString('samltrace.status.received_count', [ this.requests.length ]);
+    // var strbundle = document.getElementById('strings');
+    //var status = strbundle.getFormattedString('samltrace.status.received_count', [ this.requests.length ]);
+    var status = "Received " + this.httpRequests.length + " requests.";
 
     var statusItem = document.getElementById('statuspanel');
-    statusItem.setAttribute('label', status);
+    //statusItem.setAttribute('label', status);
+    statusItem.innerText = status;
   },
 
-  'addRequest' : function(request) {
+  'saveHttpRequest' : function(request) { // body
+    var entry = {
+      id: request.requestId,
+      req: request
+    };
+    this.tracer.httpRequests.push(entry);
+  },
 
-    request.id = this.requests.length;
+  'addRequest' : function(request) { //headers
+    var entry = this.tracer.httpRequests.find(req => req.id === request.requestId);
+    entry.headers = request.requestHeaders;
 
-    this.requests.push(request);
-
-    if (this.isRequestVisible(request)) {
-      this.addRequestItem(request);
+    if (this.tracer.isRequestVisible(request)) {
+      this.tracer.addRequestItem(entry, () => entry.res);
     }
-
-    this.updateStatusBar();
+    this.tracer.updateStatusBar();
   },
 
+  'addResponse' : function(response) {
+    var index = this.tracer.httpRequests.findIndex(req => req.id === response.requestId);
+    this.tracer.httpRequests[index].res = response;
+
+    var r = response.statusCode;
+    var s;
+    if (r<200) s='info';
+    else if (r<300) s='ok';
+    else if (r<400) s='redirect';
+    else if (r<500) s='clerror';
+    else if (r<600) s='srerror';
+    else s='other';
+    var requestDiv = document.getElementById("request-" + response.requestId);
+    var existingAttributes = requestDiv.getAttribute("class");
+    requestDiv.setAttribute("class", existingAttributes + " request-" + s);
+  },
 
   'showRequest' : function(requestItem) {
+    if (requestItem === null) {
+      document.getElementById("txt").innerText = "";
+    }
+    return;
+
     this.requestItem = requestItem;
 
     if (this.requestInfoTabbox != null) {
@@ -795,7 +873,25 @@ SAMLTrace.TraceWindow.prototype = {
 };
 
 SAMLTrace.TraceWindow.init = function() {
-  new SAMLTrace.TraceWindow();
+  var traceWindow = new SAMLTrace.TraceWindow();
+  
+  browser.webRequest.onBeforeRequest.addListener(
+    traceWindow.saveHttpRequest,
+    {urls: ["<all_urls>"]},
+    ["requestBody"]
+  );
+
+  browser.webRequest.onBeforeSendHeaders.addListener(
+    traceWindow.addRequest,
+    {urls: ["<all_urls>"]},
+    ["blocking", "requestHeaders"]
+  );
+
+  browser.webRequest.onHeadersReceived.addListener(
+    traceWindow.addResponse,
+    {urls: ["<all_urls>"]},
+    ["blocking", "responseHeaders"]
+  );
 };
 
 SAMLTrace.TraceWindow.close = function() {
@@ -826,24 +922,24 @@ SAMLTrace.TraceWindow.showRequestContent = function() {
 };
 
 
-SAMLTrace.TraceWindow.exportRequests = function() {
-  var lb = document.getElementById('request-list');
-  if (!lb || lb.itemCount == 0) {
-    var strbundle = document.getElementById('strings');
-    alert(strbundle.getString('samltrace.alert.nothing_to_export'));
-    return;
-  }
+// SAMLTrace.TraceWindow.exportRequests = function() {
+//   var lb = document.getElementById('request-list');
+//   if (!lb || lb.itemCount == 0) {
+//     var strbundle = document.getElementById('strings');
+//     //alert(strbundle.getString('samltrace.alert.nothing_to_export'));
+//     return;
+//   }
 
-  // Establish user context for export
-  var reqs = window.parent.tracer.requests;
-  window.openDialog('chrome://samltrace/content/exportDialog.xul',
-                    'global:samltrace:exportDialog', 'modal', reqs);
+//   // Establish user context for export
+//   var reqs = window.parent.tracer.requests;
+//   window.openDialog('chrome://samltrace/content/exportDialog.xul',
+//                     'global:samltrace:exportDialog', 'modal', reqs);
 
-}
+// }
 
 
-SAMLTrace.TraceWindow.importRequests = function() {
-	SAMLTraceIO.importRequests(window, function(newreq) {
-		window.parent.tracer.addRequest(newreq);
-	});
-} // SAMLTrace.TraceWindow.importRequests()
+// SAMLTrace.TraceWindow.importRequests = function() {
+// 	SAMLTraceIO.importRequests(window, function(newreq) {
+// 		window.parent.tracer.addRequest(newreq);
+// 	});
+// } // SAMLTrace.TraceWindow.importRequests()
