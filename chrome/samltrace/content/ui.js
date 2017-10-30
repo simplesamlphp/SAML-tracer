@@ -18,10 +18,11 @@ ui = {
       let reservedHeight = 
           document.getElementById("header").clientHeight +
           document.getElementById("dragger").clientHeight +
+          document.getElementById("request-info-tabbox").clientHeight +
           document.getElementById("statuspanel").clientHeight;
 
       let elementTop = document.getElementById("request-list");
-      let elementBottom = document.getElementById("txt");
+      let elementBottom = document.getElementById("request-info-content");
       let controlHeightSum = elementTop.clientHeight + elementBottom.clientHeight;
       
       let remainingHeight = window.innerHeight - reservedHeight;
@@ -38,7 +39,7 @@ ui = {
   },
   initContentSplitter: function() {
       let controlTop = document.getElementById("request-list");
-      let controlBottom = document.getElementById("txt");
+      let controlBottom = document.getElementById("request-info-content");
       let dragger = document.getElementById("dragger");
       Splitter.setup(controlTop, controlBottom, dragger);
   }

@@ -23,7 +23,35 @@ body {
   cursor: ns-resize;
 }
 
-#txt {
+#request-info-tabbox {
+  overflow: hidden;
+  height: 25px;
+  background-color: #cccccc;
+  display: flex;
+}
+
+a.tab {
+  float: left;
+  background-color: #efefef;
+  padding: 4px;
+  margin: 0 0 0 5px;
+  transition: 0.3s;
+  align-self: flex-end;
+  text-decoration: none;
+  color: #000000;
+  box-shadow: inset 0 -4px 4px -2px #bbbbbb;
+}
+
+a.tab.selected {
+  background-color: #ffffff;
+  box-shadow: unset;
+}
+
+a.tab:hover {
+  background-color: #ffffff;
+}
+
+#request-info-content {
   overflow-y: scroll;
   word-wrap: break-word;
   white-space: pre-wrap;
@@ -74,6 +102,10 @@ body {
 }
 .request-other{
   color: black;
+}
+
+.saml-logo {
+  margin-left: auto;
 }
 
 
