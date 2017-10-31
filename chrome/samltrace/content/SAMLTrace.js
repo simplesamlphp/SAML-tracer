@@ -516,9 +516,6 @@ SAMLTrace.TraceWindow = function() {
   this.autoScroll = true;
   this.filterResources = true;
 
-  // document.getElementById('button-autoscroll').setAttribute('checked', this.autoScroll);
-  // document.getElementById('button-filter').setAttribute('checked', this.filterResources);
-
   window.tracer = this;
   this.requestMonitor = new SAMLTrace.RequestMonitor(this);
 
@@ -535,32 +532,18 @@ SAMLTrace.TraceWindow.prototype = {
     this.requestMonitor.close();
   },
 
-  'isRequestVisible' : function(request) {
-    if (!this.filterResources) {
+  'isRequestVisible' : function(request) {    
+    var contentTypeHeader = request.responseHeaders.filter(header => header.name.toLowerCase() === 'content-type');
+    if (contentTypeHeader === null || contentTypeHeader.length === 0) {
       return true;
     }
-    if (request.responseStatus != 200 && request.responseStatus != 304) {
-      return true; // Always show "special" responses.
-    }
+    var type = contentTypeHeader[0].value;
 
-    var type = null;
-    for (var i = 0; i < request.responseHeaders.length; i++) {
-      var h = request.responseHeaders[i];
-      if (h[0].toLowerCase() == 'content-type') {
-        type = h[1];
-      }
-    }
-    if (type == null) {
-      return true;
-    }
-
-    type = type.toLowerCase();
     var i = type.indexOf(';');
     if (i != -1) {
       type = type.substr(0, i);
     }
-
-    type = type.trim();
+    type = type.toLowerCase().trim();
 
     switch (type) {
     case 'application/ecmascript':
@@ -638,16 +621,18 @@ SAMLTrace.TraceWindow.prototype = {
 
   'setFilterResources' : function(filterResources) {
     this.filterResources = filterResources;
-    this.resetList();
+    this.updateStatusBar();
   },
 
   'updateStatusBar' : function() {
     // var strbundle = document.getElementById('strings');
     //var status = strbundle.getFormattedString('samltrace.status.received_count', [ this.requests.length ]);
-    var status = "Received " + this.httpRequests.length + " requests.";
-
+    var hiddenElementsString = "";
+    if (this.filterResources) {
+      hiddenElementsString = ` (${this.httpRequests.filter(req => !req.isVisible).length} hidden)`;
+    }
+    var status = `${this.httpRequests.length} requests received ${hiddenElementsString}`;
     var statusItem = document.getElementById('statuspanel');
-    //statusItem.setAttribute('label', status);
     statusItem.innerText = status;
   },
 
@@ -663,9 +648,7 @@ SAMLTrace.TraceWindow.prototype = {
     var entry = this.tracer.httpRequests.find(req => req.id === request.requestId);
     entry.headers = request.requestHeaders;
 
-    if (this.tracer.isRequestVisible(request)) {
-      this.tracer.addRequestItem(entry, () => entry.res);
-    }
+    this.tracer.addRequestItem(entry, () => entry.res);
     this.tracer.updateStatusBar();
   },
 
@@ -684,6 +667,13 @@ SAMLTrace.TraceWindow.prototype = {
     else s='other';
     var requestDiv = document.getElementById("request-" + response.requestId);
     requestDiv.classList.add("request-" + s);
+
+    var isVisible = this.tracer.isRequestVisible(response);
+    if (!isVisible) {
+      requestDiv.classList.add("isRessource");
+    }
+    this.tracer.httpRequests[index].isVisible = isVisible;
+    this.tracer.updateStatusBar();
   },
 
   'selectTab' : function(name, containingElement) {

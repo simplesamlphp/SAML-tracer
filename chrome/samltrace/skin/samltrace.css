@@ -8,8 +8,10 @@ body {
 }
 
 #header {
-  height: 30px;
+  height: 32px;
   background-color: #cccccc;
+  display: flex;
+  flex-direction: row;
 }
 
 #request-list {
@@ -68,10 +70,15 @@ a.tab:hover {
   overflow: hidden;
   display: flex;
   white-space: nowrap;
+  border-bottom: 1px dotted #cccccc;
 }
-
-.list-row:nth-child(odd) {
-  background-color: #e0e0e0;
+.list-row.isRessource {
+  height: 0;
+  border-bottom: none;
+}
+.list-row.isRessource.displayAnyway {
+  height: unset;
+  border-bottom: 1px dotted #cccccc;
 }
 
 .request-method {
@@ -108,27 +115,44 @@ a.tab:hover {
   margin-left: auto;
 }
 
+.button {
+  height: 24px;
+  min-width: 24px;
+  margin: 2px;
+  padding: 1px 3px 1px 30px;
+  align-items: center;
+  display: flex;
+  cursor: pointer;
+}
+.button:hover {
+  margin: 1px;
+  border: 1px solid #C0DCF3;
+  background-color: #D8E6F2 !important;
+}
+.button.active {
+  margin: 1px;
+  border: 1px solid #90C8F6;
+  background-color: #C0DCF3 !important;
+}
 
 #button-clear {
-  background: url("../skin/oxygen-icons/x-office-document-icon-24.png") no-repeat;
-  height: 24px;
-  width: 24px;
+  background: url("../skin/oxygen-icons/x-office-document-icon-24.png") no-repeat 0% 50%;
 }
 /* toolbar[iconsize="small"] #button-clear {
   list-style-image: url("chrome://samltrace/skin/oxygen-icons/x-office-document-icon-16.png");
-}
+}*/
 
 #button-autoscroll {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/autoscroll-icon-24.png");
+  background: url("../skin/oxygen-icons/autoscroll-icon-24.png") no-repeat 0% 50%;
 }
-toolbar[iconsize="small"] #button-autoscroll {
+/*toolbar[iconsize="small"] #button-autoscroll {
   list-style-image: url("chrome://samltrace/skin/oxygen-icons/autoscroll-icon-16.png");
-}
+}*/
 
 #button-filter {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/filter-icon-24.png");
+  background: url("../skin/oxygen-icons/filter-icon-24.png") no-repeat 0% 50%;
 }
-toolbar[iconsize="small"] #button-filter {
+/*toolbar[iconsize="small"] #button-filter {
   list-style-image: url("chrome://samltrace/skin/oxygen-icons/filter-icon-16.png");
 }
 
