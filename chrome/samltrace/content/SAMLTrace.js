@@ -175,6 +175,15 @@ SAMLTrace.prettifyArtifact = function(artstring) {
       'Source ID: ' + SAMLTrace.bin2hex(artifact.substr(4,20));
 };
 
+SAMLTrace.UniqueRequestId = function(webRequestId, url) {
+  this.webRequestId = webRequestId;
+  this.url = url;
+};
+SAMLTrace.UniqueRequestId.prototype = {
+  'create' : function(onCreated) {
+    Hash.calculate(this.url).then(digest => onCreated("request-" + this.webRequestId + "-" + digest));
+  }
+};
 
 SAMLTrace.Request = function(httpChannel, getResponse) {
   this.method = httpChannel.req.method;
@@ -335,25 +344,6 @@ SAMLTrace.Request.prototype = {
   }
 };
 
-/** if encoded==true, the variable s is first JSON.parse()'d **/
-SAMLTrace.Request.createFromJSON = function(s, encoded) {
-  var jd;
-  if (encoded) {
-    jd=JSON.parse(s);
-  } else {
-    jd=s;
-  }
-
-  var o = Object.create(SAMLTrace.Request.prototype);
-  for (var n in jd) {
-    o[n] = jd[n];
-  }
-
-  return o;
-}
-
-
-
 SAMLTrace.RequestMonitor = function(traceWindow) {
   this.traceWindow = traceWindow;
   // this.obsService = Components.classes['@mozilla.org/observer-service;1'].getService(Components.interfaces.nsIObserverService);
@@ -492,7 +482,8 @@ SAMLTrace.RequestItem.prototype = {
 
     var hbox = document.createElement("div");
     hbox.setAttribute('flex', '1');
-    hbox.setAttribute('id', 'request-' + this.request.requestId);
+    var uniqueRequestId = new SAMLTrace.UniqueRequestId(this.request.requestId, this.request.url);
+    uniqueRequestId.create(id => hbox.setAttribute('id', id));
     hbox.setAttribute('class', 'list-row');
     hbox.appendChild(methodLabel);
     hbox.appendChild(urlLabel);
@@ -570,8 +561,9 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'addRequestItem' : function(request, getResponse) {
-    var samlTracerRequest = new SAMLTrace.Request(request, getResponse);    
+    var samlTracerRequest = new SAMLTrace.Request(request, getResponse);
     var item = new SAMLTrace.RequestItem(samlTracerRequest, showContentElement);
+    this.requests.push(samlTracerRequest);
 
     var requestList = document.getElementById('request-list');
     var showContentElement = document.getElementById('request-info-content');
@@ -583,7 +575,6 @@ SAMLTrace.TraceWindow.prototype = {
     }, false);
 
     if (this.autoScroll) {
-      //requestList.ensureElementIsVisible(list.lastChild);
       requestList.scrollTop = requestList.scrollHeight;
     }
   },
@@ -637,43 +628,53 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'saveHttpRequest' : function(request) { // body
-    var entry = {
-      id: request.requestId,
-      req: request
-    };
-    this.tracer.httpRequests.push(entry);
+    var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
+    uniqueRequestId.create(id => {
+      var entry = {
+        id: id,
+        req: request
+      };
+      this.tracer.httpRequests.push(entry);
+    });
   },
 
   'addRequest' : function(request) { //headers
-    var entry = this.tracer.httpRequests.find(req => req.id === request.requestId);
-    entry.headers = request.requestHeaders;
+    var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
+    uniqueRequestId.create(id => {
+      var entry = this.tracer.httpRequests.find(req => req.id === id);
+      entry.headers = request.requestHeaders;
 
-    this.tracer.addRequestItem(entry, () => entry.res);
-    this.tracer.updateStatusBar();
+      this.tracer.addRequestItem(entry, () => entry.res);
+      this.tracer.updateStatusBar();
+    });
   },
 
   'addResponse' : function(response) {
-    var index = this.tracer.httpRequests.findIndex(req => req.id === response.requestId);
-    this.tracer.httpRequests[index].res = response;
+    var uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
+    uniqueRequestId.create(id => {
+      var index = this.tracer.httpRequests.findIndex(req => req.id === id);
+      this.tracer.httpRequests[index].res = response;
 
-    // layout update: apply style to item based on responseStatus
-    var r = response.statusCode;
-    var s;
-    if (r<200) s='info';
-    else if (r<300) s='ok';
-    else if (r<400) s='redirect';
-    else if (r<500) s='clerror';
-    else if (r<600) s='srerror';
-    else s='other';
-    var requestDiv = document.getElementById("request-" + response.requestId);
-    requestDiv.classList.add("request-" + s);
+      // layout update: apply style to item based on responseStatus
+      var r = response.statusCode;
+      var s;
+      if (r<200) s='info';
+      else if (r<300) s='ok';
+      else if (r<400) s='redirect';
+      else if (r<500) s='clerror';
+      else if (r<600) s='srerror';
+      else s='other';
 
-    var isVisible = this.tracer.isRequestVisible(response);
-    if (!isVisible) {
-      requestDiv.classList.add("isRessource");
-    }
-    this.tracer.httpRequests[index].isVisible = isVisible;
-    this.tracer.updateStatusBar();
+      var requestDiv = document.getElementById(id);
+      requestDiv.classList.add("request-" + s);
+
+      var isVisible = this.tracer.isRequestVisible(response);
+      if (!isVisible) {
+        requestDiv.classList.add("isRessource");
+      }
+      this.tracer.httpRequests[index].isVisible = isVisible;
+      this.tracer.updateStatusBar();
+    });
   },
 
   'selectTab' : function(name, containingElement) {
