@@ -665,7 +665,14 @@ SAMLTrace.TraceWindow.prototype = {
       else if (r<600) s='srerror';
       else s='other';
 
+      var removeClassByPrefix = function removeClassByPrefix(element, prefix) {
+        var regex = new RegExp('\\b' + prefix + '(.*)?\\b', 'g');
+        element.className = element.className.replace(regex, '');
+        return element;
+      }
+
       var requestDiv = document.getElementById(id);
+      removeClassByPrefix(requestDiv, "request-");
       requestDiv.classList.add("request-" + s);
 
       var isVisible = this.tracer.isRequestVisible(response);
