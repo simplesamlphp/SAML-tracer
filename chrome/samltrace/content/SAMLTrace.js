@@ -10,7 +10,7 @@ if ("undefined" == typeof(SAMLTrace)) {
   var SAMLTrace = {};
 };
 
-SAMLTrace.b64deflate = function (data) {
+SAMLTrace.b64inflate = function (data) {
   // Remove any whitespace in the base64-encoded data -- Shibboleth may insert
   // line feeds in the data.
   data = data.replace(/\s/g, '');
@@ -25,54 +25,9 @@ SAMLTrace.b64deflate = function (data) {
     return null;
   }
 
-  var dataLength = data.length / 4 * 3;
-  if (data[data.length - 1] == '=') {
-    dataLength -= 1;
-  }
-  if (data[data.length - 2] == '=') {
-    dataLength -= 1;
-  }
-
-  var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
-  var channel = ios.newChannel('data:application/octet-stream;base64,' + data, null, null);
-
-  var stream = channel.open();
-
-  /* Sanity check: we want the channel to have the full base64-decoded data available at once. */
-  if (stream.available() < dataLength) {
-    dump('The base64-decoder channel does not have the full decoded data available.\n');
-    return null;
-  }
-
-  var listener = {
-    'reader' : Components.classes["@mozilla.org/binaryinputstream;1"].createInstance(Components.interfaces.nsIBinaryInputStream),
-    'buffer' : [],
-
-    'onStartRequest' : function(aRequest, aContext) { },
-    'onStopRequest' : function(aRequest, aContext, aStatusCode) { },
-    'onDataAvailable' : function(aRequest, aContext, aInputStream, aOffset, aCount) {
-      this.reader.setInputStream(aInputStream);
-      var bytes = this.reader.readBytes(aCount);
-      this.buffer += bytes
-    },
-  };
-
-  var deflate = Components.classes["@mozilla.org/streamconv;1?from=deflate&to=uncompressed"].createInstance(Components.interfaces.nsIStreamConverter);
-  deflate.asyncConvertData("deflate", "uncompressed", listener, null);
-
-  try {
-    deflate.onStartRequest(null, null);
-    deflate.onDataAvailable(null, null, stream, 0, dataLength);
-    deflate.onStopRequest(null, null, 0);
-  } catch (error) {
-    dump('Failed to deflate data: ' + error + '\n');
-    stream.close();
-    return null;
-  }
-
-  stream.close();
-
-  return listener.buffer;
+  var decoded = atob(data);
+  var inflated = pako.inflateRaw(decoded);
+  return String.fromCharCode.apply(String, inflated);
 };
 
 SAMLTrace.bin2hex = function(s) {
@@ -310,7 +265,7 @@ SAMLTrace.Request.prototype = {
       msg = this.getParameter('SAMLResponse');
     }
     if (msg != null) {
-      this.saml = SAMLTrace.b64deflate(msg);
+      this.saml = SAMLTrace.b64inflate(msg);
       return;
     }
 
