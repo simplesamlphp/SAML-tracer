@@ -585,6 +585,23 @@ SAMLTrace.TraceWindow.prototype = {
   'saveHttpRequest' : function(request) { // body
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
+
+      var isRedirected = function(requestId) {
+        var parentRequest = this.tracer.httpRequests.find(r => r.req.requestId === requestId);
+        if (parentRequest != null && parentRequest.res != null && parentRequest.res.statusCode === 302) {
+          return true;
+        }
+        return false;
+      }
+
+      // The webRequest-API seems to keep the HTTP verbs which is correct in resepct to RFC 2616 but
+      // differs from a typical browser behaviour which will usually change the POST to a GET. So do we here...
+      // see: https://github.com/UNINETT/SAML-tracer/pull/23#issuecomment-345540591
+      if (request.method === 'POST' && isRedirected(request.requestId)) {
+        console.log(`Redirected 302-request '${id}' is a POST but is here changed to a GET to conform to browser behaviour...`);
+        request.method = 'GET';
+      }
+
       var entry = {
         id: id,
         req: request
@@ -627,15 +644,26 @@ SAMLTrace.TraceWindow.prototype = {
       }
 
       var requestDiv = document.getElementById(id);
-      removeClassByPrefix(requestDiv, "request-");
-      requestDiv.classList.add("request-" + s);
+      if (requestDiv !== null) {
+        removeClassByPrefix(requestDiv, "request-");
+        requestDiv.classList.add("request-" + s);
 
-      var isVisible = this.tracer.isRequestVisible(response);
-      if (!isVisible) {
-        requestDiv.classList.add("isRessource");
+        var isVisible = this.tracer.isRequestVisible(response);
+        if (!isVisible) {
+          requestDiv.classList.add("isRessource");
+        }
+        
+        this.tracer.httpRequests[index].isVisible = isVisible;
+        this.tracer.updateStatusBar();
       }
-      this.tracer.httpRequests[index].isVisible = isVisible;
-      this.tracer.updateStatusBar();
+      
+      if (response.statusCode === 302) {
+        let location = response.responseHeaders.find(header => header.name === "Location");
+        console.log(`Redirecting request '${id}' to new location '${location.value}'...`);
+        return {
+          redirectUrl: location.value
+        };
+      }
     });
   },
 
@@ -709,7 +737,7 @@ SAMLTrace.TraceWindow.init = function() {
   browser.webRequest.onBeforeRequest.addListener(
     traceWindow.saveHttpRequest,
     {urls: ["<all_urls>"]},
-    ["requestBody"]
+    ["blocking", "requestBody"]
   );
 
   browser.webRequest.onBeforeSendHeaders.addListener(
