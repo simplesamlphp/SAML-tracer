@@ -582,7 +582,7 @@ SAMLTrace.TraceWindow.prototype = {
     statusItem.innerText = status;
   },
 
-  'saveHttpRequest' : function(request) { // body
+  'saveNewRequest' : function(request) { // onBeforeRequest
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
 
@@ -610,7 +610,7 @@ SAMLTrace.TraceWindow.prototype = {
     });
   },
 
-  'addRequest' : function(request) { //headers
+  'attachHeadersToRequest' : function(request) { // onBeforeSendHeaders
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
       var entry = this.tracer.httpRequests.find(req => req.id === id);
@@ -621,7 +621,7 @@ SAMLTrace.TraceWindow.prototype = {
     });
   },
 
-  'addResponse' : function(response) {
+  'attachResponseToRequest' : function(response) { // onHeadersReceived
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
     uniqueRequestId.create(id => {
       var index = this.tracer.httpRequests.findIndex(req => req.id === id);
@@ -735,19 +735,19 @@ SAMLTrace.TraceWindow.init = function() {
   var traceWindow = new SAMLTrace.TraceWindow();
   
   browser.webRequest.onBeforeRequest.addListener(
-    traceWindow.saveHttpRequest,
+    traceWindow.saveNewRequest,
     {urls: ["<all_urls>"]},
     ["blocking", "requestBody"]
   );
 
   browser.webRequest.onBeforeSendHeaders.addListener(
-    traceWindow.addRequest,
+    traceWindow.attachHeadersToRequest,
     {urls: ["<all_urls>"]},
     ["blocking", "requestHeaders"]
   );
 
   browser.webRequest.onHeadersReceived.addListener(
-    traceWindow.addResponse,
+    traceWindow.attachResponseToRequest,
     {urls: ["<all_urls>"]},
     ["blocking", "responseHeaders"]
   );
