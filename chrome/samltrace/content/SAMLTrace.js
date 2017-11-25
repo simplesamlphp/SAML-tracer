@@ -694,7 +694,7 @@ SAMLTrace.TraceWindow.prototype = {
 
     var lastSelectedTab = this.selectedTab;
     if (requestItem.availableTabs.find(tab => tab === this.selectedTab) === undefined) {
-      lastSelectedTab = "http";
+      lastSelectedTab = 'HTTP';
       this.selectedTab = lastSelectedTab;
     }
     this.selectTab(lastSelectedTab, requestInfoTabbox);
