@@ -2,14 +2,28 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  background-color: #ffffff;
   overflow-y: hidden;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8pt;
+  color: #444444;
+}
+
+.not-selectable {
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.is-selectable {
+  user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 #header {
-  height: 32px;
-  background-color: #cccccc;
+  height: 24px;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   flex-direction: row;
 }
@@ -20,7 +34,7 @@ body {
 }
 
 #dragger {
-  background-color: #333333;
+  background-color: #e0e0e0;
   height: 4px;
   cursor: ns-resize;
 }
@@ -28,29 +42,29 @@ body {
 #request-info-tabbox {
   overflow: hidden;
   height: 25px;
-  background-color: #cccccc;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
 }
 
 a.tab {
   float: left;
-  background-color: #efefef;
-  padding: 4px;
-  margin: 0 0 0 5px;
-  transition: 0.3s;
+  padding: 4px 10px;
   align-self: flex-end;
+  color: #444444;
   text-decoration: none;
-  color: #000000;
-  box-shadow: inset 0 -4px 4px -2px #bbbbbb;
 }
 
 a.tab.selected {
+  color: #0074e8;
+  border-top: 2px solid #0074e8;
   background-color: #ffffff;
   box-shadow: unset;
 }
 
 a.tab:hover {
-  background-color: #ffffff;
+  border-top: 2px solid #bebebe;
+  background-color: #ededed;
 }
 
 #request-info-content {
@@ -62,8 +76,9 @@ a.tab:hover {
 
 #statuspanel {
   bottom: 0;
-  height: 30px;
-  background-color: #cccccc;
+  height: 22px;
+  padding: 3px 0 0 3px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .list-row {
@@ -82,17 +97,13 @@ a.tab:hover {
 }
 
 .request-method {
-  flex: 0 0 4em;
+  flex: 0 0 5em;
+  margin-left: 2px;
 }
 
 .request-url {
-  width: calc(100% - 8em);
+  width: calc(100% - 5em - 4em);
 }
-
-/* .request-list > richlistitem[selected="true"] {
-  background-color: #eeeeee;
-  color: inherit;
-} */
 
 .request-info {
   color: black;
@@ -117,59 +128,41 @@ a.tab:hover {
 
 .saml-logo {
   margin-left: auto;
-  width: 4em
+  width: 5em
 }
 
 .button {
-  height: 24px;
-  min-width: 24px;
-  margin: 2px;
-  padding: 1px 3px 1px 30px;
+  margin: 4px 0 4px 2px;
+  padding: 3px 6px;
   align-items: center;
   display: flex;
   cursor: pointer;
+  background-color: #ededed;
+  border-radius: 2px;
 }
 .button:hover {
-  margin: 1px;
-  border: 1px solid #C0DCF3;
-  background-color: #D8E6F2 !important;
+  background-color: #dedede !important;
 }
 .button.active {
-  margin: 1px;
-  border: 1px solid #90C8F6;
-  background-color: #C0DCF3 !important;
+  color: #ffffff;
+  background-color: #0074e8 !important;
 }
 
 #button-clear {
-  background: url("../skin/oxygen-icons/x-office-document-icon-24.png") no-repeat 0% 50%;
+  padding-left: 15px;
+  background: url("../skin/icons/button-clear-default.png") no-repeat 4px 50%;
 }
-/* toolbar[iconsize="small"] #button-clear {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/x-office-document-icon-16.png");
-}*/
-
 #button-autoscroll {
-  background: url("../skin/oxygen-icons/autoscroll-icon-24.png") no-repeat 0% 50%;
+  padding-left: 15px;
+  background: url("../skin/icons/button-autoscroll-default.png") no-repeat 4px 50%;
 }
-/*toolbar[iconsize="small"] #button-autoscroll {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/autoscroll-icon-16.png");
-}*/
-
+#button-autoscroll.button.active {
+  background: url("../skin/icons/button-autoscroll-active.png") no-repeat 4px 50%;
+}
 #button-filter {
-  background: url("../skin/oxygen-icons/filter-icon-24.png") no-repeat 0% 50%;
+  padding-left: 15px;
+  background: url("../skin/icons/button-filter-default.png") no-repeat 4px 50%;
 }
-/*toolbar[iconsize="small"] #button-filter {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/filter-icon-16.png");
+#button-filter.button.active {
+  background: url("../skin/icons/button-filter-active.png") no-repeat 4px 50%;
 }
-
-#button-export-list {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/export-icon-24.png");
-}
-toolbar[iconsize="small"] #button-export-list {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/export-icon-16.png");
-}
-#button-import-list {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/import-icon-24.png");
-}
-toolbar[iconsize="small"] #button-import-list {
-  list-style-image: url("chrome://samltrace/skin/oxygen-icons/import-icon-16.png");
-} */

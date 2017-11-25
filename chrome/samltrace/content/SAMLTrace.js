@@ -334,7 +334,7 @@ SAMLTrace.RequestMonitor.prototype = {
 SAMLTrace.RequestItem = function(request) {
   this.request = request;
 
-  this.availableTabs = ['http'];
+  this.availableTabs = ['HTTP'];
   if (this.request.get.length != 0 || this.request.post.length != 0) {
     this.availableTabs.push('Parameters');
   }
@@ -410,7 +410,7 @@ SAMLTrace.RequestItem.prototype = {
   'showContent' : function(target, type) {
     target.innerText = "";
     switch (type) {
-    case 'http':
+    case 'HTTP':
       this.showHTTP(target);
       break;
     case 'Parameters':

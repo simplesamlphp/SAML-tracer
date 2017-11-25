@@ -18,8 +18,8 @@ function showTracerWindow() {
   var creating = browser.windows.create({
     url: url,
     type: "panel",
-    height: 400,
-    width: 600
+    height: 600,
+    width: 800
   });
   creating.then(onCreated, onError);
 }

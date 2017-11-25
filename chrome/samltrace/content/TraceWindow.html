@@ -5,16 +5,16 @@
         <title>Trace Window</title>
         <link rel="stylesheet" href="../skin/samltrace.css" type="text/css">
     </head>
-    <body>
+    <body class="not-selectable">
         <div id="header">
             <div id="button-clear" class="button">Clear</div>
             <div id="button-autoscroll" class="button active">Autoscroll</div>
             <div id="button-filter" class="button active">Filter ressources</div>
         </div>
-        <div id="request-list"></div>
+        <div id="request-list" class="is-selectable"></div>
         <div id="dragger"></div>
         <div id="request-info-tabbox"></div>
-        <div id="request-info-content"></div>
+        <div id="request-info-content" class="is-selectable"></div>
         <div id="statuspanel"></div>
 
         <script type="text/javascript" src="splitter.js"></script>
