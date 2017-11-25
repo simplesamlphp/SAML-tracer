@@ -248,7 +248,7 @@ SAMLTrace.Request.prototype = {
   'parsePOST' : function() {
     this.post = [];
 
-    if (this.postData == '') {
+    if (this.postData == null || this.postData === '') {
       return;
     }
 
