@@ -299,38 +299,6 @@ SAMLTrace.Request.prototype = {
   }
 };
 
-SAMLTrace.RequestMonitor = function(traceWindow) {
-  this.traceWindow = traceWindow;
-  // this.obsService = Components.classes['@mozilla.org/observer-service;1'].getService(Components.interfaces.nsIObserverService);
-  // this.obsService.addObserver(this, 'http-on-modify-request', false);
-  // this.obsService.addObserver(this, 'http-on-examine-response', false);
-  this.activeRequests = [];
-};
-SAMLTrace.RequestMonitor.prototype = {
-  'close' : function() {
-    this.obsService.removeObserver(this, 'http-on-modify-request');
-    this.obsService.removeObserver(this, 'http-on-examine-response');
-    this.activeRequests = [];
-  },
-  'observe' : function(subject, topic, data) {
-    if (topic == 'http-on-modify-request') {
-      var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-      var request = new SAMLTrace.Request(httpChannel);
-      this.activeRequests.push({'channel' : httpChannel, 'request' : request});
-    } else if (topic == 'http-on-examine-response') {
-      var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-      for (var i = 0; i < this.activeRequests.length; i++) {
-        var r = this.activeRequests[i];
-        if (r.channel == httpChannel) {
-          r.request.loadResponse(httpChannel);
-          this.traceWindow.addRequest(r.request);
-          this.activeRequests.splice(i, 1);
-        }
-      }
-    }
-  },
-};
-
 SAMLTrace.RequestItem = function(request) {
   this.request = request;
 
@@ -463,7 +431,6 @@ SAMLTrace.TraceWindow = function() {
   this.filterResources = true;
 
   window.tracer = this;
-  this.requestMonitor = new SAMLTrace.RequestMonitor(this);
 
   this.updateStatusBar();
 
@@ -474,10 +441,6 @@ SAMLTrace.TraceWindow = function() {
 };
 
 SAMLTrace.TraceWindow.prototype = {
-  'close' : function() {
-    this.requestMonitor.close();
-  },
-
   'isRequestVisible' : function(request) {    
     var contentTypeHeader = request.responseHeaders.filter(header => header.name.toLowerCase() === 'content-type');
     if (contentTypeHeader === null || contentTypeHeader.length === 0) {
@@ -755,10 +718,6 @@ SAMLTrace.TraceWindow.init = function() {
     {urls: ["<all_urls>"]},
     ["blocking", "responseHeaders"]
   );
-};
-
-SAMLTrace.TraceWindow.close = function() {
-  window.tracer.close();
 };
 
 SAMLTrace.TraceWindow.selectRequest = function() {
