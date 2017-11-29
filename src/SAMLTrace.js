@@ -368,9 +368,8 @@ SAMLTrace.RequestItem.prototype = {
     hbox.appendChild(urlLabel);
 
     if (this.request.saml || this.request.samlart) {
-      var samlLogo = document.createElement("img");
-      samlLogo.setAttribute('src', 'saml.png');
-      samlLogo.classList.add('saml-logo');
+      var samlLogo = document.createElement("div");
+      samlLogo.classList.add("saml-logo");
       hbox.appendChild(samlLogo);
     }
 

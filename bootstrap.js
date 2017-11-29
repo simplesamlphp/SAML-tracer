@@ -14,7 +14,7 @@ function showTracerWindow() {
   }
 
   // If it wasn't yet opened or it was already closed -- create a new instance.
-  var url = browser.extension.getURL("/chrome/samltrace/content/TraceWindow.html");
+  var url = browser.extension.getURL("/src/TraceWindow.html");
   var creating = browser.windows.create({
     url: url,
     type: "panel",

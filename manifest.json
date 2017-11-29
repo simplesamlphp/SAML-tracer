@@ -10,7 +10,7 @@
     },
     "homepage_url": "https://github.com/UNINETT/SAML-tracer",
     "icons": {
-        "48": "chrome/samltrace/content/saml.png"
+        "48": "src/resources/images/saml.png"
     },
     "permissions": [
         "webRequest",
@@ -21,6 +21,6 @@
         "scripts": ["bootstrap.js"]
     },
     "browser_action": {
-        "default_icon": "chrome/samltrace/content/saml.png"
+        "default_icon": "src/resources/images/saml.png"
     }
 }
