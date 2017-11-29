@@ -87,6 +87,17 @@ a.tab:hover {
   white-space: nowrap;
   border-bottom: 1px dotted #cccccc;
 }
+.list-row:hover {
+  background-color: #E6F0FA;
+}
+.list-row.selected {
+  color: #96C8F5;
+  background-color: #0074e8;
+}
+.list-row.selected:hover {
+  color: #96C8F5;
+  background-color: #0074e8;
+}
 .list-row.isRessource {
   height: 0;
   border-bottom: none;

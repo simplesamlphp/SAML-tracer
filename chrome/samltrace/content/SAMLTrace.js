@@ -524,9 +524,9 @@ SAMLTrace.TraceWindow.prototype = {
     var showContentElement = document.getElementById('request-info-content');
     var requestItemListElement = item.addListItem(requestList, showContentElement);
 
-    var traceWindowReference = this;
     requestItemListElement.addEventListener('click', e => {
-      traceWindowReference.showRequest(requestItemListElement.requestItem);
+      this.selectItemInList(requestItemListElement, requestList);
+      this.showRequest(requestItemListElement.requestItem);
     }, false);
 
     if (this.autoScroll) {
@@ -666,15 +666,19 @@ SAMLTrace.TraceWindow.prototype = {
       }
     });
   },
-
+  
   'selectTab' : function(name, containingElement) {
-    // un-select previously selected tabs
-    var previouslySelectedTabs = containingElement.querySelectorAll(".selected");
-    previouslySelectedTabs.forEach(previouslySelectedTab => previouslySelectedTab.classList.remove("selected"));
-
-    // select the currently clicked tab
     var tab = containingElement.querySelector(`[href*=\\#${name}]`)
-    tab.classList.add("selected");
+    this.selectItemInList(tab, containingElement);
+  },
+
+  'selectItemInList' : function(itemToBeSelected, containingElement) {
+    // un-select previously selected items
+    var previouslySelectedItems = containingElement.querySelectorAll(".selected");
+    previouslySelectedItems.forEach(item => item.classList.remove("selected"));
+
+    // select new item
+    itemToBeSelected.classList.add("selected");
   },
 
   'showRequest' : function(requestItem) {
