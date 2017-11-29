@@ -21,6 +21,6 @@
         "scripts": ["bootstrap.js"]
     },
     "browser_action": {
-        "default_icon": "src/resources/images/saml.png"
+        "default_icon": "src/resources/images/saml-as-square.png"
     }
 }
