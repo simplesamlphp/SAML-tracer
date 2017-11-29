@@ -1,8 +1,0 @@
-<!ENTITY exportDialog.exporttitle  "Export SAML trace">
-<!ENTITY exportDialog.title "Export SAML-trace preferences">
-<!ENTITY exportDialog.cookieprofile "Select cookie-filter profile">
-<!ENTITY exportDialog.cookieprofile.pub "None">
-<!ENTITY exportDialog.cookieprofile.obfuscate "Mask values">
-<!ENTITY exportDialog.cookieprofile.overwrite "Remove values">
-<!ENTITY exportDialog.cancel "Cancel">
-<!ENTITY exportDialog.export "Export">
