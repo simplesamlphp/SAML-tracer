@@ -147,15 +147,6 @@ SAMLTrace.Request = function(request, getResponse) {
   this.loadSAML();
 };
 SAMLTrace.Request.prototype = {
-  'getRequestHeader' : function(name) {
-    for (var i = 0; i < this.requestHeaders.length; i++) {
-      var h = this.requestHeaders[i];
-      if (h[0].toLowerCase() == name.toLowerCase()) {
-        return h[1];
-      }
-    }
-    return null;
-  },
   'getParameter' : function(name) {
     for (var i = 0; i < this.get.length; i++) {
       var p = this.get[i];
@@ -390,23 +381,15 @@ SAMLTrace.RequestItem.prototype = {
 };
 
 SAMLTrace.TraceWindow = function() {
+  window.tracer = this;
   this.httpRequests = [];
   this.requests = [];
   this.autoScroll = true;
   this.filterResources = true;
-
-  window.tracer = this;
-
-  this.updateStatusBar();
-
-  this.requestInfoEmpty = document.getElementById('request-info-norequest');
-  this.requestInfoTabbox = null;
-
-  this.showRequest(null);
 };
 
 SAMLTrace.TraceWindow.prototype = {
-  'isRequestVisible' : function(request) {    
+  'isRequestVisible' : function(request) {
     var contentTypeHeader = request.responseHeaders.filter(header => header.name.toLowerCase() === 'content-type');
     if (contentTypeHeader === null || contentTypeHeader.length === 0) {
       return true;
@@ -604,7 +587,7 @@ SAMLTrace.TraceWindow.prototype = {
     }
     this.requestItem = requestItem;
 
-    var requestInfoTabbox = document.getElementById('request-info-tabbox');    
+    var requestInfoTabbox = document.getElementById('request-info-tabbox');
     requestInfoTabbox.innerText = "";
     for (var i = 0; i < requestItem.availableTabs.length; i++) {
       var name = requestItem.availableTabs[i];
@@ -669,27 +652,4 @@ SAMLTrace.TraceWindow.init = function() {
     {urls: ["<all_urls>"]},
     ["blocking", "responseHeaders"]
   );
-};
-
-SAMLTrace.TraceWindow.selectRequest = function() {
-  var lb = document.getElementById('request-list');
-  var requestElement = lb.getSelectedItem(0);
-
-  if (requestElement == null) {
-    window.tracer.showRequest(null);
-  } else {
-    window.tracer.showRequest(requestElement.requestItem);
-  }
-};
-
-SAMLTrace.TraceWindow.showRequestContent = function() {
-  var type = window.location.hash.substr(1);
-  var requestInfoContent = document.getElementById('request-info-content');
-
-  if (!window.parent.tracer) {
-    /* Not loaded yet. */
-    return;
-  }
-
-  window.parent.tracer.showRequestContent(requestInfoContent, type);
 };
