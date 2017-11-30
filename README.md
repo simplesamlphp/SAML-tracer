@@ -10,9 +10,7 @@ SAML messages that are transmitted.
 Using SAML Tracer
 -----------------
 
-SAML Tracer is activated by selecting SAML Tracer in the Tools menu.
-(If the menu bar is deativated, it must be activated to access SAML
-Tracer.)
+SAML Tracer is activated by clicking its icon in the browser toolbar.
 
 Once it is activated, you will get a window that shows all requests,
 and the data included in them. It also shows response headers.
@@ -21,7 +19,7 @@ right side of the request list.
 
 Selecting a request gives you up to three tabs:
 
-* http: A quick overview over the request, with request and response
+* HTTP: A quick overview over the request, with request and response
   headers.
 * Parameters: GET and POST parameters included in the request.
 * SAML: Decoded SAML message found in the request.
@@ -35,15 +33,13 @@ repository from:
 
   https://github.com/UNINETT/SAML-tracer/
 
-After modifying the source code, you need to commit your changes to
-your local Git repository. You can then run `build.sh` from the
-root of the repository. `build.sh` will create `samltracer.xpi` from
-the latest commit in your repository.
+You can now modify and extend SAML Tracer. To test your changes, you 
+can debug the extension as described here:
 
-You need to set `xpinstall.signatures.required` to false in Firefox
-`about:config` to be able to load this `xpi`-file. You can then run
-`firefox samltracer.xpi` (or open the file in Firefox). Don't forget
-to re-enable `xpinstall.signatures.required` when you're done.
+  https://developer.mozilla.org/Add-ons/WebExtensions/Debugging
+
+After modifying the source code, you need to commit your changes to
+your local Git repository.
 
 
 License
@@ -51,3 +47,10 @@ License
 
 SAML Tracer is released under the 2-clause BSD license. See the
 `LICENSE`-file for more information.
+
+
+Attribution
+-----------
+
+SAML Tracer makes use of open source libraries.
+See [here](attribution.md) for more details.

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Trace Window</title>
+        <link rel="stylesheet" href="resources/css/samltrace.css" type="text/css">
+    </head>
+    <body class="not-selectable">
+        <div id="header">
+            <div id="button-clear" class="button">Clear</div>
+            <div id="button-autoscroll" class="button active">Autoscroll</div>
+            <div id="button-filter" class="button active">Filter resources</div>
+        </div>
+        <div id="request-list" class="is-selectable"></div>
+        <div id="dragger"></div>
+        <div id="request-info-tabbox"></div>
+        <div id="request-info-content" class="is-selectable"></div>
+        <div id="statuspanel"></div>
+
+        <script type="text/javascript" src="splitter.js"></script>
+        <script type="text/javascript" src="hash.js"></script>
+        <script type="text/javascript" src="SAMLTrace.js"></script>
+        <script type="text/javascript" src="ui.js"></script>
+        <script type="text/javascript" src="../lib/pako_inflate.js"></script>
+    </body>
+</html>

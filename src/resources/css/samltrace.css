@@ -1,0 +1,182 @@
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  overflow-y: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8pt;
+  color: #444444;
+}
+
+.not-selectable {
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.is-selectable {
+  user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+#header {
+  height: 24px;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: row;
+}
+
+#request-list {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#dragger {
+  background-color: #e0e0e0;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+#request-info-tabbox {
+  overflow: hidden;
+  height: 25px;
+  background-color: #f9f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+}
+
+a.tab {
+  float: left;
+  padding: 4px 10px;
+  align-self: flex-end;
+  color: #444444;
+  text-decoration: none;
+}
+
+a.tab.selected {
+  color: #0074e8;
+  border-top: 2px solid #0074e8;
+  background-color: #ffffff;
+  box-shadow: unset;
+}
+
+a.tab:hover {
+  border-top: 2px solid #bebebe;
+  background-color: #ededed;
+}
+
+#request-info-content {
+  overflow-y: scroll;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-family: Consolas, "Lucida Console", Courier, monospace;
+}
+
+#statuspanel {
+  bottom: 0;
+  height: 22px;
+  padding: 3px 0 0 3px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.list-row {
+  overflow: hidden;
+  display: flex;
+  white-space: nowrap;
+  border-bottom: 1px dotted #cccccc;
+}
+.list-row:hover {
+  background-color: #E6F0FA;
+}
+.list-row.selected {
+  color: #96C8F5;
+  background-color: #0074e8;
+}
+.list-row.selected:hover {
+  color: #96C8F5;
+  background-color: #0074e8;
+}
+.list-row.isRessource {
+  height: 0;
+  border-bottom: none;
+}
+.list-row.isRessource.displayAnyway {
+  height: unset;
+  border-bottom: 1px dotted #cccccc;
+}
+
+.request-method {
+  flex: 0 0 5em;
+  margin-left: 2px;
+}
+
+.request-url {
+  width: calc(100% - 5em - 4em);
+}
+
+.request-info {
+  color: black;
+}
+.request-ok {
+  color: green;
+}
+.request-redirect {
+  color: orange;
+}
+.request-clerror{
+  color: red;
+  font-weight: bold;
+}
+.request-srerror{
+  color: red;
+  font-weight: bold;
+}
+.request-other{
+  color: black;
+}
+
+.saml-logo {
+  margin-left: auto;
+  display: block;
+  width: 40px;
+  height: 14px;
+  background: url("../images/saml.png") no-repeat center/cover;
+}
+
+.button {
+  margin: 4px 0 4px 2px;
+  padding: 3px 6px;
+  align-items: center;
+  display: flex;
+  cursor: pointer;
+  background-color: #ededed;
+  border-radius: 2px;
+}
+.button:hover {
+  background-color: #dedede !important;
+}
+.button.active {
+  color: #ffffff;
+  background-color: #0074e8 !important;
+}
+
+#button-clear {
+  padding-left: 15px;
+  background: url("../images/icons/button-clear-default.png") no-repeat 4px 50%;
+}
+#button-autoscroll {
+  padding-left: 15px;
+  background: url("../images/icons/button-autoscroll-default.png") no-repeat 4px 50%;
+}
+#button-autoscroll.button.active {
+  background: url("../images/icons/button-autoscroll-active.png") no-repeat 4px 50%;
+}
+#button-filter {
+  padding-left: 15px;
+  background: url("../images/icons/button-filter-default.png") no-repeat 4px 50%;
+}
+#button-filter.button.active {
+  background: url("../images/icons/button-filter-active.png") no-repeat 4px 50%;
+}

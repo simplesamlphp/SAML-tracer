@@ -1,146 +1,42 @@
-// This bootstrap.js file is based upon the template available here:
-// https://developer.mozilla.org/en-US/Add-ons/Firefox_for_Android/Initialization_and_Cleanup#template_code
+// This bootstrap.js file now acts as a background.js file in terms of a Web Extension. See here:
+// https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Anatomy_of_a_WebExtension#Specifying_background_scripts
 // The onOpenWindow event handler was slightly modified to be compatible with standard Firefox.
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-Cu.import("resource:///modules/CustomizableUI.jsm");
-Cu.import('resource://gre/modules/Services.jsm');
-
-var css_uri = Services.io.newURI("chrome://samltrace/skin/button.css", null, null);
-var strings = Services.strings.createBundle('chrome://samltrace/locale/samltrace.properties');
+browser.browserAction.onClicked.addListener((tab) => showTracerWindow());
 
 var tracerWindow = null;
+
 function showTracerWindow() {
   if (tracerWindow != null) {
     // Window already opened -- just give it focus.
-    tracerWindow.focus();
+    browser.windows.update(tracerWindow.id, { focused: true }, null);
     return;
   }
 
-  tracerWindow = Services.ww.openWindow(null, "chrome://samltrace/content/TraceWindow.xul", "global:samltrace", "chrome,centerscreen,resizable", null);
-  tracerWindow.addEventListener('close', function() {
-    tracerWindow = null;
+  // If it wasn't yet opened or it was already closed -- create a new instance.
+  var url = browser.extension.getURL("/src/TraceWindow.html");
+  var creating = browser.windows.create({
+    url: url,
+    type: "panel",
+    height: 600,
+    width: 800
   });
+  creating.then(onCreated, onError);
 }
 
+function onCreated(windowInfo) {
+  console.log(`Created window: ${windowInfo.id}`);
 
-function loadIntoWindow(window) {
-  if (!window)
-    return;
-
-  // Add our style sheet
-  window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils).loadSheet(css_uri, 1);
-
-  // Add an entry to the tools menu.
-  let menuToolsPopup = window.document.getElementById('menu_ToolsPopup');
-  if (menuToolsPopup) {
-    let mi = window.document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'menuitem');
-    mi.setAttribute('label', strings.GetStringFromName('samltrace.open.label'));
-    mi.setAttribute('id', 'samltrace-menu-open');
-    mi.addEventListener('command', showTracerWindow);
-    menuToolsPopup.appendChild(mi);
-  }
-
-  // Add it to the web developer menu.
-  let menuWebDevPopup = window.document.getElementById('appmenu_webDeveloper_popup');
-  if (menuWebDevPopup) {
-    let mi = window.document.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'menuitem');
-    mi.setAttribute('label', strings.GetStringFromName('samltrace.open.label'));
-    mi.setAttribute('id', 'samltrace-appmenu-open');
-    mi.addEventListener('command', showTracerWindow);
-    let errConsole = window.document.getElementById("appmenu_errorConsole");
-    if (errConsole && errConsole.parentNode == menuWebDevPopup) {
-      /* Insert it before the error console, if it is in the menu. */
-      menuWebDevPopup.insertBefore(mi, errConsole);
-    } else {
-      /* No error console -- just append it to the end. */
-      menuWebDevPopup.appendChild(mi);
-    }
-  }
+  // memorize the extension window, so that we can give it focus, if it's already opened.
+  tracerWindow = windowInfo;
+  browser.windows.onRemoved.addListener(onCloseExtensionWindow);
 }
 
-function unloadFromWindow(window) {
-  if (!window)
-    return;
-
-  // Clean up menu entries.
-  let toolsOpen = window.document.getElementById('samltrace-menu-open');
-  if (toolsOpen) {
-    toolsOpen.parentNode.removeChild(toolsOpen);
-  }
-  let appMenuOpen = window.document.getElementById('samltrace-appmenu-open');
-  if (appMenuOpen) {
-    appMenuOpen.parentNode.removeChild(appMenuOpen);
-  }
-
-  // Remove our style sheet
-  window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils).removeSheet(css_uri, 1);
+function onError(error) {
+  console.log(`Error: ${error}`);
 }
 
-var windowListener = {
-  onOpenWindow: function(aWindow) {
-    // Wait for the window to finish loading
-    let domWindow = aWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-    domWindow.addEventListener("load", function onLoad() {
-      domWindow.removeEventListener("load", onLoad, false);
-      loadIntoWindow(domWindow);
-    }, false);
-  },
-
-  onCloseWindow: function(aWindow) {},
-  onWindowTitleChange: function(aWindow, aTitle) {}
-};
-
-function startup(aData, aReason) {
-  // Load into any existing windows
-  let windows = Services.wm.getEnumerator("navigator:browser");
-  while (windows.hasMoreElements()) {
-    let domWindow = windows.getNext().QueryInterface(Ci.nsIDOMWindow);
-    loadIntoWindow(domWindow);
-  }
-
-  // Load into any new windows
-  Services.wm.addListener(windowListener);
-
-  // Add button to panel.
-  CustomizableUI.createWidget({
-    id: "samltrace-showtracer",
-    defaultArea: CustomizableUI.AREA_PANEL,
-    removable: true,
-    label: strings.GetStringFromName('samltrace.open.label'),
-    onCommand: showTracerWindow
-  });
-
+function onCloseExtensionWindow(windowId) {
+  console.log(`Window ${windowId} is closed. Setting "traceWindow" to null.`)
+  tracerWindow = null
 }
-
-function shutdown(aData, aReason) {
-  // When the application is shutting down we normally don't have to clean
-  // up any UI changes made
-  if (aReason == APP_SHUTDOWN) {
-    return;
-  }
-
-  // Close the SAML tracer window if it is open.
-  if (tracerWindow != null) {
-    tracerWindow.close();
-    tracerWindow = null;
-  }
-
-  // Stop listening for new windows
-  Services.wm.removeListener(windowListener);
-
-  // Unload from any existing windows
-  let windows = Services.wm.getEnumerator("navigator:browser");
-  while (windows.hasMoreElements()) {
-    let domWindow = windows.getNext().QueryInterface(Ci.nsIDOMWindow);
-    unloadFromWindow(domWindow);
-  }
-
-  CustomizableUI.destroyWidget("samltrace-showtracer");
-}
-
-function install(aData, aReason) {}
-function uninstall(aData, aReason) {}
