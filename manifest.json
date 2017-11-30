@@ -2,7 +2,7 @@
     "name": "SAML tracer",
     "description": "A debugger for viewing SAML messages",
     "manifest_version": 2,
-    "version": "0.4.0",
+    "version": "1.0",
     "applications": {
         "gecko": {
           "id": "{d3e01ff2-9a3a-4007-8f6e-7acd9a5de263}"
@@ -10,7 +10,7 @@
     },
     "homepage_url": "https://github.com/UNINETT/SAML-tracer",
     "icons": {
-        "48": "src/resources/images/saml.png"
+        "48": "src/resources/images/saml-as-square.png"
     },
     "permissions": [
         "webRequest",
