@@ -36,7 +36,7 @@ repository from:
 You can now modify and extend SAML Tracer. To test your changes, you 
 can debug the extension as described here:
 
-  https://developer.mozilla.org/de/Add-ons/WebExtensions/Debugging
+  https://developer.mozilla.org/Add-ons/WebExtensions/Debugging
 
 After modifying the source code, you need to commit your changes to
 your local Git repository.
