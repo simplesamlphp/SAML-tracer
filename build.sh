@@ -3,10 +3,10 @@ set -e
 
 if [ -n "$1" ]; then
     RELEASE="tags/$1"
-    TARGET="$(pwd)/$1.xpi"
+    TARGET="$(pwd)/$1.zip"
 else
     RELEASE="HEAD"
-    TARGET="$(pwd)/samltracer.xpi"
+    TARGET="$(pwd)/samltracer.zip"
 fi
 
 if ! git rev-parse --verify "$RELEASE" >/dev/null 2>&1; then
@@ -16,7 +16,7 @@ fi
 
 D=$(mktemp -d)
 
-git archive --format tar "$RELEASE" | (cd "$D"; tar xv)
+git archive --format zip "$RELEASE" | (cd "$D"; tar xv)
 
 cd "$D"
 
