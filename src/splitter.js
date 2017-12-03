@@ -26,10 +26,15 @@ Splitter = {
             bottomManipulated = true;
         }
 
-        Splitter.controlTop.style.height = controlTopNewHeight + "px";
-        Splitter.controlBottom.style.height = controlBottomNewHeight + "px";
+        const getPaddingHeight = element => {
+            let style = window.getComputedStyle(element);
+            return parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+        };
+
+        Splitter.controlTop.style.height = (controlTopNewHeight - getPaddingHeight(Splitter.controlTop)) + "px";
+        Splitter.controlBottom.style.height = (controlBottomNewHeight - getPaddingHeight(Splitter.controlBottom)) + "px";
         Splitter.lastPosition = e.clientY;
-    },    
+    },
     stop: function() {
         document.onmousemove = null;
         document.onmouseup = null;
