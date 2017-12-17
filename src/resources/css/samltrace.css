@@ -144,39 +144,3 @@ a.tab:hover {
   height: 14px;
   background: url("../images/saml.png") no-repeat center/cover;
 }
-
-.button {
-  margin: 4px 0 4px 2px;
-  padding: 3px 6px;
-  align-items: center;
-  display: flex;
-  cursor: pointer;
-  background-color: #ededed;
-  border-radius: 2px;
-}
-.button:hover {
-  background-color: #dedede !important;
-}
-.button.active {
-  color: #ffffff;
-  background-color: #0074e8 !important;
-}
-
-#button-clear {
-  padding-left: 15px;
-  background: url("../images/icons/button-clear-default.png") no-repeat 4px 50%;
-}
-#button-autoscroll {
-  padding-left: 15px;
-  background: url("../images/icons/button-autoscroll-default.png") no-repeat 4px 50%;
-}
-#button-autoscroll.button.active {
-  background: url("../images/icons/button-autoscroll-active.png") no-repeat 4px 50%;
-}
-#button-filter {
-  padding-left: 15px;
-  background: url("../images/icons/button-filter-default.png") no-repeat 4px 50%;
-}
-#button-filter.button.active {
-  background: url("../images/icons/button-filter-active.png") no-repeat 4px 50%;
-}
