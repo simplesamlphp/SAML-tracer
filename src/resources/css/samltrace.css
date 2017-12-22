@@ -9,6 +9,10 @@ body {
   color: #444444;
 }
 
+iframe {
+  border: none;
+}
+
 .not-selectable {
   user-select: none;
   -moz-user-select: none;

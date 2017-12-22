@@ -5,18 +5,27 @@
         <title>Trace Window</title>
         <link rel="stylesheet" href="resources/css/samltrace.css" type="text/css">
         <link rel="stylesheet" href="resources/css/buttons.css" type="text/css">
+        <link rel="stylesheet" href="resources/css/modal.css" type="text/css">
     </head>
     <body class="not-selectable">
         <div id="header">
             <div id="button-clear" class="button">Clear</div>
             <div id="button-autoscroll" class="button active">Autoscroll</div>
             <div id="button-filter" class="button active">Filter resources</div>
+            <div id="button-export-list" class="button">Export</div>
         </div>
         <div id="request-list" class="is-selectable"></div>
         <div id="dragger"></div>
         <div id="request-info-tabbox"></div>
         <div id="request-info-content" class="is-selectable"></div>
         <div id="statuspanel"></div>
+
+        <div id="exportDialog" class="modal">
+            <div class="modal-inner">
+                <div class="modal-close"></div>
+                <iframe src="exportDialog.html" class="modal-content"></iframe>
+            </div>
+        </div>
 
         <script type="text/javascript" src="splitter.js"></script>
         <script type="text/javascript" src="hash.js"></script>

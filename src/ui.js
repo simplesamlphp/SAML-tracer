@@ -1,6 +1,7 @@
 window.addEventListener("load", function(e) {
   // initially setup the ui
   ui.resizeElements();
+  ui.resizeDialogs();
   ui.bindButtons();
   ui.initContentSplitter();
 
@@ -56,11 +57,28 @@ ui = {
         Array.from(hidableRows).forEach(row => row.classList.add("displayAnyway"));
       }
     }, true);
+    document.getElementById("button-export-list").addEventListener("click", function() {
+      let exportDialog = document.getElementById("exportDialog");
+      exportDialog.style.visibility = "visible";
+    }, true);
+
+    let modalCloseButtons = document.querySelectorAll(".modal-close");
+    modalCloseButtons.forEach(button => {
+      button.addEventListener("click", function() {
+        document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
+    }, true)});
   },
   initContentSplitter: function() {
     let controlTop = document.getElementById("request-list");
     let controlBottom = document.getElementById("request-info-content");
     let dragger = document.getElementById("dragger");
     Splitter.setup(controlTop, controlBottom, dragger);
+  },
+  resizeDialogs: function() {
+    let iframes = document.querySelectorAll("iframe");
+    iframes.forEach(iframe => {
+      iframe.width  = iframe.contentWindow.document.body.scrollWidth;
+      iframe.height = iframe.contentWindow.document.body.scrollHeight;
+    });
   }
 }
