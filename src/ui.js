@@ -60,6 +60,8 @@ ui = {
     document.getElementById("button-export-list").addEventListener("click", function() {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";
+      let exportDialogContent = document.getElementById("exportDialogContent");
+      exportDialogContent.contentWindow.ui.maybeDisableExportButton();
     }, true);
 
     let modalCloseButtons = document.querySelectorAll(".modal-close");

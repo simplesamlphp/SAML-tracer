@@ -16,6 +16,10 @@
   color: #ffffff;
   background-color: #0074e8 !important;
 }
+.button.inactive {
+  color: #cccccc;
+  pointer-events: none;
+}
 
 #button-clear {
   padding-left: 15px;
