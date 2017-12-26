@@ -206,7 +206,9 @@ SAMLTrace.Request.prototype = {
       return;
     }
 
-    this.postData = request.req.requestBody.formData;
+    if (request.req.requestBody !== null && request.req.requestBody.formData !== null) {
+      this.postData = request.req.requestBody.formData;
+    }
   },
   'parsePOST' : function() {
     this.post = [];
