@@ -557,7 +557,7 @@ SAMLTrace.TraceWindow.prototype = {
       }
       
       if (response.statusCode === 302) {
-        let location = response.responseHeaders.find(header => header.name === "Location");
+        let location = response.responseHeaders.find(header => header.name.toLowerCase() === "location");
         console.log(`Redirecting request '${id}' to new location '${location.value}'...`);
         return {
           redirectUrl: location.value
@@ -567,7 +567,7 @@ SAMLTrace.TraceWindow.prototype = {
   },
   
   'selectTab' : function(name, containingElement) {
-    var tab = containingElement.querySelector(`[href*=\\#${name}]`)
+    var tab = containingElement.querySelector(`[href*=\\#${name}]`);
     this.selectItemInList(tab, containingElement);
   },
 
