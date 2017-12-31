@@ -169,10 +169,10 @@ SAMLTrace.Request.prototype = {
     this.requestHeaders = request.headers;
   },
   'loadResponse' : function() {
-    this.response = this.getResponse();
-    this.responseStatus = this.response.statusCode;
-    this.responseStatusText = this.response.statusLine;
-    this.responseHeaders = this.response.responseHeaders;
+    let response = this.getResponse();
+    this.responseStatus = response.statusCode;
+    this.responseStatusText = response.statusLine;
+    this.responseHeaders = response.responseHeaders;
   },
   'loadGET' : function() {
     var r = new RegExp('[&;\?]');
