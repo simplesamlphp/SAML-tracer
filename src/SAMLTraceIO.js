@@ -8,156 +8,93 @@
 // export SAMLTrace namespace to make ao. Request definitions available
 var EXPORTED_SYMBOLS = ["SAMLTraceIO"];
 
-// file i/o related libraries to use
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
-Components.utils.import("resource://gre/modules/FileUtils.jsm");
-
-// Import SAMLTrace.Request definitions
-Components.utils.import("chrome://samltrace/content/SAMLTrace.js");
-
-// Import ExportFilters functionality
-// Components.utils.import("chrome://samltrace/content/SAMLTraceExportFilter.js");
-
-// Import SAMLTrace.Request definitions
-Components.utils.import("chrome://samltrace/content/filters.js");
-
-
 // Put functionality in out own namespace
 if ("undefined" == typeof(SAMLTraceIO)) {
   var SAMLTraceIO = {};
 };
 
-
-
-SAMLTraceIO.getOutputFile = function() {
-  var nsIFilePicker = Components.interfaces.nsIFilePicker;
-  var fp = Components.classes["@mozilla.org/filepicker;1"].
-    createInstance(nsIFilePicker);
-  fp.init(window, "Please enter filename to save trace to",
-          nsIFilePicker.modeSave);
-
-  var res = fp.show();
-  if (res == nsIFilePicker.returnCancel) {
-    return null;
-  }
-  var f = fp.file;
-
-  // delete the file if it already exists
-  try {
-    if (f.exists()) f.remove(false); // false=non-recursive...
-  } catch (ex) {
-    // ignore errors here
-  }
-
-  return f;
+SAMLTraceIO = function() {
 };
 
+SAMLTraceIO.prototype = {
+  'getInputFile': function(w) {
+    var nsIFilePicker = Components.interfaces.nsIFilePicker;
+    var fp = Components.classes["@mozilla.org/filepicker;1"].
+      createInstance(nsIFilePicker);
 
-SAMLTraceIO.getInputFile = function(w) {
-  var nsIFilePicker = Components.interfaces.nsIFilePicker;
-  var fp = Components.classes["@mozilla.org/filepicker;1"].
-    createInstance(nsIFilePicker);
+    fp.init(w, "Select RequestDump file - exported requests",
+            nsIFilePicker.modeOpen);
 
-  fp.init(w, "Select RequestDump file - exported requests",
-          nsIFilePicker.modeOpen);
+    var res = fp.show();
+    if (res != nsIFilePicker.returnOK) return null;
 
-  var res = fp.show();
-  if (res != nsIFilePicker.returnOK) return null;
-
-  return fp.file;
-};
-
-
-
+    return fp.file;
+  },
 
 // Main feature
-SAMLTraceIO.exportRequests = function() {
-  var reqs = window.arguments[0];
+  'exportRequests': function(reqs, cookieProfile) {
+    // Perform request filtering based on user input from dialog:
+    var ef = new SAMLTraceIO.ExportFilter(cookieProfile);
+    var filteredreqs = ef.perform(reqs);
 
-  // Establish context from dialog:
-  var cookieProfile=document.getElementById('rCookieProfile');
+    // Package results
+    var result = {};
+    result['requests'] = filteredreqs;
+    result['timestamp'] = new Date().toISOString();
+    return result;
+  },
 
-	// Perform request filtering based on user input from dialog:
-  var ef = new SAMLTraceIO.ExportFilter(cookieProfile.value);
-  var filteredreqs = ef.perform(reqs);
+  'serialize': function(exportResult) {
+    let indentSpaces = 2;
+    return JSON.stringify(exportResult, null, indentSpaces);
+  },
 
-  // Package results
-  var r, s;
-  r={};
-  r['requests'] = filteredreqs;
-  r['timestamp'] = Date.now();
-  s = JSON.stringify(r);
+  'getOutputFile': function(exportResult) {
+    let timeStamp = exportResult && exportResult["timestamp"] ? exportResult["timestamp"] : "no-timestamp";
+    return `SAML-Tracer-export-${timeStamp}.json`;
+  },
 
-  // Let user choose filename:
-  var f = SAMLTraceIO.getOutputFile();
+  /**
+   * Import requests, and execute given function 'nrf' on every
+   *   imported request, with SAMLTrace.Request instance as argument
+   * @param w is the parent window of the UI-dialog; must be non-null
+   *   for getInputFile to work
+   **/
+  'importRequests': function(w, nrf) {
+    var f = SAMLTraceIO.getInputFile(w);
+    if (f == null) return; // No input file selected
 
-  if (f==null) {
-    return null;
+    // Bulk read contents; provide content-type to facilitate reading;
+    // Perform a-sync reading to not lockup UI
+    var channel = NetUtil.newChannel(f);
+    channel.contentType = "application/json";
+
+    NetUtil.asyncFetch(channel, function(inputStream, status) {
+        if (!Components.isSuccessCode(status)) {
+          SAMLTraceIO.log('Error occurred when reading file: '+status);
+          return;
+        }
+
+        var data = NetUtil.readInputStreamToString(inputStream,
+                                                  inputStream.available());
+        var j = JSON.parse(data);
+
+        // Append the requests to the list
+        for (var i in j['requests']) {
+          var o = j['requests'][i];
+          var ni = SAMLTrace.Request.createFromJSON(o, false);
+          nrf(ni);
+        }
+      }); // NetUtil.asyncFetch()
+  }, // SAMLTrace.TraceWindow.importRequests()
+
+  'log': function(msg) {
+    var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
+      getService(Components.interfaces.nsIConsoleService);
+
+    aConsoleService.logStringMessage('SAMLTraceIO.log: '+msg);
   }
-
-  // Write contents of 's' to the file
-  var ostream = FileUtils.openSafeFileOutputStream(f);
-  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-    createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-  converter.charset = "UTF-8";
-  var istream = converter.convertToInputStream(s);
-
-  NetUtil.asyncCopy(istream, ostream, function(status) {
-      if (!Components.isSuccessCode(status)) {
-        // Only log the error:
-        SAMLTraceIO.log('Error writing to file '+f.path);
-        return;
-      }
-    });
-
-  // Data has been written to the file.
-  return null;
 }
-
-/**
- * Import requests, and execute given function 'nrf' on every
- *   imported request, with SAMLTrace.Request instance as argument
- * @param w is the parent window of the UI-dialog; must be non-null
- *   for getInputFile to work
- **/
-SAMLTraceIO.importRequests = function(w, nrf) {
-  var f = SAMLTraceIO.getInputFile(w);
-  if (f == null) return; // No input file selected
-
-  // Bulk read contents; provide content-type to facilitate reading;
-  // Perform a-sync reading to not lockup UI
-  var channel = NetUtil.newChannel(f);
-  channel.contentType = "application/json";
-
-  NetUtil.asyncFetch(channel, function(inputStream, status) {
-      if (!Components.isSuccessCode(status)) {
-        SAMLTraceIO.log('Error occurred when reading file: '+status);
-        return;
-      }
-
-      var data = NetUtil.readInputStreamToString(inputStream,
-                                                 inputStream.available());
-      var j = JSON.parse(data);
-
-      // Append the requests to the list
-      for (var i in j['requests']) {
-        var o = j['requests'][i];
-        var ni = SAMLTrace.Request.createFromJSON(o, false);
-				nrf(ni);
-      }
-    }); // NetUtil.asyncFetch()
-} // SAMLTrace.TraceWindow.importRequests()
-
-
-SAMLTraceIO.log = function(msg) {
-  var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-    getService(Components.interfaces.nsIConsoleService);
-
-  aConsoleService.logStringMessage('SAMLTraceIO.log: '+msg);
-}
-
-
-
 
 /**
  * ExportFilter applies filtering of SAMLTrace.Request instances
@@ -204,16 +141,24 @@ SAMLTraceIO.ExportFilter.prototype = {
 				break;
 		} // switch
 	},
-	'perform' : function(reqs) {
-		var the_filters = this.exportFilters;	// move from instance to local scope
+  'perform' : function(reqs) {
+    var the_filters = this.exportFilters;	// move from instance to local scope
+    
+    var createFromJSON = function(s, encoded) {
+      if (encoded) {
+        return JSON.parse(s);
+      } else {
+        return s;
+      }
+    };
 
-		var reqscopy = reqs.map(function(r) {
-				var newRequest = SAMLTrace.Request.createFromJSON(JSON.stringify(r), true);
-        the_filters.forEach(function(filter) {
-					filter(newRequest);
-        });
-				return newRequest;	// add filtered request to result
+    var reqscopy = reqs.map(function(req) {
+      var newRequest = createFromJSON(JSON.stringify(req), true);
+      the_filters.forEach(function(filter) {
+        filter(newRequest);
+      });
+      return newRequest; // add filtered request to result
     });
-		return reqscopy;
-	}
+    return reqscopy;
+  }
 }

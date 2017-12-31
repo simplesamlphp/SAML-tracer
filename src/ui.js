@@ -61,7 +61,7 @@ ui = {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";
       let exportDialogContent = document.getElementById("exportDialogContent");
-      exportDialogContent.contentWindow.ui.maybeDisableExportButton();
+      exportDialogContent.contentWindow.ui.setupContent();
     }, true);
 
     let modalCloseButtons = document.querySelectorAll(".modal-close");

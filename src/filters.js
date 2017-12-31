@@ -24,21 +24,23 @@ if ("undefined" == typeof(SAMLTraceIO_filters)) {
 *   be filtered using the provided spec
 */
 SAMLTraceIO_filters.genValueFilter = function(collection, key, new_val_func) {
-	return function(req) {
-		if (req==null || req[collection]==null) return;
-		for (var i in req[collection]) {
-			if (key == req[collection][i][0] || key == '*') {
+  return function(req) {
+    if (req == null || req[collection] == null) return;
+    for (var i in req[collection]) {
+      if (key == req[collection][i][0] || key == '*') {
         var s = req[collection][i][1];
         if (s) {
-          var h = new_val_func(req[collection][i][1]);
-				req[collection][i][1] = h;
+          new_val_func(i, req[collection][i][1], (index, newval) => {
+            req[collection][index][1] = newval;
+          });
         } else {  // only key was set without data (can happen with 'post'..)
-          var h = new_val_func(req[collection][i][0]);
-				req[collection][i][0] = h;
+          new_val_func(i, req[collection][i][0], (index, newval) => {
+            req[collection][index][0] = newval;
+          });
         }
-			}
-		}
-	};
+      }
+    }
+  };
 }
 
 /**
@@ -46,7 +48,7 @@ SAMLTraceIO_filters.genValueFilter = function(collection, key, new_val_func) {
  * fixed value, provided in newvalue
  */
 SAMLTraceIO_filters.overwriteValueFilter = function(collection, key, newvalue) {
-	newvalue = newvalue || '{overwritten}';
+  newvalue = newvalue || '{overwritten}';
   return SAMLTraceIO_filters.genValueFilter(collection, key, function(oldval) {
     return newvalue;
   });
@@ -54,24 +56,26 @@ SAMLTraceIO_filters.overwriteValueFilter = function(collection, key, newvalue) {
 
 /**
  * genValueFilter-wrapper that delivers a function that replaces a key with the
- * sha1-hash of a key-value
+ * hash of a key-value
  */
 SAMLTraceIO_filters.hashValueFilter = function(collection, key) {
-  return SAMLTraceIO_filters.genValueFilter(collection, key, function(oldval) {
+  return SAMLTraceIO_filters.genValueFilter(collection, key, function(index, oldval, onHashCalculated) {
     var h = SAMLTraceIO_filters.hashString(oldval);
-    return '{hash:'+h+'}';
+    h.then(newval => {
+      onHashCalculated(index, '{hash:'+newval+'}');
+    });
   });
 };
-
 
 /**
  * genValueFilter-wrapper that delivers a function that replaces a key with a
  * obfuscated value for a key-value
  */
 SAMLTraceIO_filters.obfuscateValueFilter = function(collection, key) {
-  return SAMLTraceIO_filters.genValueFilter(collection, key, function(oldval) {
+  return SAMLTraceIO_filters.genValueFilter(collection, key, function(index, oldval, onObfuscated) {
     var h = SAMLTraceIO_filters.getObfValueFor(oldval);
-    return '{obf:'+h+'}';
+    var newval = '{obf:'+h+'}';
+    onObfuscated(index, newval);
   });
 }
 
@@ -98,49 +102,52 @@ SAMLTraceIO_filters.obfuscateValueFilter = function(collection, key) {
 * returns a function that expects a SAMLTrace.Request instance, which will
 *   be filtered using the provided spec
 */
-SAMLTraceIO_filters.genMultiValueFilter = function(collection,
-    key, separator, new_val_func)
+SAMLTraceIO_filters.genMultiValueFilter = function(collection, key, separator, new_val_func)
 {
-	return function(req) {
-		if (req==null || req[collection]==null) return;
+  return function(req) {
+    if (req == null || req[collection] == null) {
+      return;
+    }
 
-		for (var i in req[collection]) {
-			if (key == req[collection][i][0]) {
-				// perform split, and overwrite the values
-				var v=req[collection][i][1];
-				var ac=v.split(separator);
-				var fc=[];
+    let elem = req[collection].find(item => item.name === key);
+    if (elem == null) {
+      return;
+    }
+    
+    var ac = elem.value.split(separator);
+    var fc = [];
 
-				for (var c in ac) {
-					var kk,kv;
-					if (ac[c].indexOf('=')>=0) {
-						kk=ac[c].split('=')[0];
-						kv=ac[c].split('=')[1];
-					} else {
-						kk='';// no key
-						kv=ac[c];
-					}
-					var h = new_val_func(kv);
+    for (let i = 0; i < ac.length; i++) {
+      var kk,kv;
+      if (ac[i].indexOf('=')>=0) {
+        kk=ac[i].split('=')[0];
+        kv=ac[i].split('=')[1];
+      } else {
+        kk='';// no key
+        kv=ac[i];
+      }
 
-					// create syntactically correct entry:
-					fc.push( [kk,h].join('=') );
-				}
+      new_val_func(kk, kv, (kkk, newval) => {
+        // create syntactically correct entry:
+        fc.push([kkk, newval].join('='));
 
-				req[collection][i][1] = fc.join(separator);
-			}
-		}
-	};
+        // update element's value on the last iteration
+        if (i === ac.length - 1) {
+          elem.value = fc.join(separator);
+        }
+      });
+    }
+  };
 }
-
 
 /**
  * genMultiValueFilter-wrapper that delivers a function that replaces the
  * sub_values of a key with a fixed value
  */
 SAMLTraceIO_filters.overwriteCookieValueFilter = function(collection, key, newvalue) {
-	newvalue = newvalue || '{overwritten}';
-  return SAMLTraceIO_filters.genMultiValueFilter(collection, key, ';', function(oldval) {
-      return newvalue;
+  newvalue = newvalue || '{overwritten}';
+  return SAMLTraceIO_filters.genMultiValueFilter(collection, key, ';', function(key, oldval, onOverwritten) {
+    onOverwritten(key, newvalue);
   });
 }
 
@@ -149,9 +156,11 @@ SAMLTraceIO_filters.overwriteCookieValueFilter = function(collection, key, newva
  * sub_values of a key with the sha1-hash value
  */
 SAMLTraceIO_filters.hashCookieValueFilter = function(collection, key) {
-  return SAMLTraceIO_filters.genMultiValueFilter(collection, key, ';', function(oldval) {
+  return SAMLTraceIO_filters.genMultiValueFilter(collection, key, ';', function(key, oldval, onHashCalculated) {
     var h = SAMLTraceIO_filters.hashString(oldval);
-    return '{hash:'+h+'}';
+    h.then(newval => {
+      onHashCalculated(key, '{hash:'+newval+'}');
+    });
   });
 }
 
@@ -160,9 +169,10 @@ SAMLTraceIO_filters.hashCookieValueFilter = function(collection, key) {
  * sub_values of a key with a obfuscated sub_value for a sub_key=sub_value
  */
 SAMLTraceIO_filters.obfuscateCookieValueFilter = function(collection, key) {
-  return SAMLTraceIO_filters.genMultiValueFilter(collection, key, ';', function(oldval) {
+  return SAMLTraceIO_filters.genMultiValueFilter(collection, key, ';', function(key, oldval, onObfuscated) {
     var h = SAMLTraceIO_filters.getObfValueFor(oldval);
-    return '{obf:'+h+'}';
+    var newval = '{obf:'+h+'}';
+    onObfuscated(key, newval);
   });
 }
 
@@ -171,59 +181,34 @@ SAMLTraceIO_filters.obfuscateCookieValueFilter = function(collection, key) {
  * Deliver a function that overwrites a main key with a fixed value
  */
 SAMLTraceIO_filters.overwriteKeyValue = function(key, newvalue) {
-	newvalue = newvalue || '{overwritten}';
-
-	return function(req) {
-		if (req==null || req[key]==null || req[key]==='') return;
-		req[key] = newvalue;;
-	};
+  newvalue = newvalue || '{overwritten}';
+  return function(req) {
+    if (req == null || req[key] == null || req[key] === '') return;
+    req[key] = newvalue;
+  };
 }
 
 
 
-// == helper functions for hash calculation ==
-SAMLTraceIO_filters.toHashString = function(charCode) {
-  return ("0" + charCode.toString(16)).slice(-2);
-}
 
 /**
- * calculate hash over provided string value (sval);
- * hash is calculated over utf8-encoded byte-stream of the string
- * alg = number, see: https://developer.mozilla.org/en/nsICryptoHash#Hash_algorithms
+ * Calculate hash over provided string value (str).
  */
-SAMLTraceIO_filters.hashString = function(sval, alg) {
-  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-      createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-  converter.charset = "UTF-8";
-  var result = {};
-  // data is an array of bytes
-  var data = converter.convertToByteArray(sval, result);
-
-  // now do the hash thing
-  var ch = Components.classes["@mozilla.org/security/hash;1"]
-                   .createInstance(Components.interfaces.nsICryptoHash);
-
-  alg = alg || ch.SHA1;  // default: sha1
-  ch.init(alg);
-  ch.update(data, data.length);
-  var hash = ch.finish(false)
-
-  var s = [SAMLTraceIO_filters.toHashString(hash.charCodeAt(i)) for (i in hash)].join("");
-
-  return s;
+SAMLTraceIO_filters.hashString = function(str) {
+  return Hash.calculate(str);
 }
 
 
 // == helper functions for static replacement calculation ==
 SAMLTraceIO_filters.obfs = [];
 SAMLTraceIO_filters.getObfValueFor = function(oldvalue) {
-  var i=-1;
+  var i =- 1;
   if (SAMLTraceIO_filters.obfs) {
     i = SAMLTraceIO_filters.obfs.indexOf(oldvalue);
-    if (i===-1) {
-      i=SAMLTraceIO_filters.obfs.length;
+    if (i === -1) {
+      i = SAMLTraceIO_filters.obfs.length;
       SAMLTraceIO_filters.obfs.push(oldvalue);
     }
   }
-  return 'alternative_'+i;
+  return 'alternative_' + i;
 }
