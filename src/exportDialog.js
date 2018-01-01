@@ -3,6 +3,7 @@ window.top.addEventListener("load", e => {
 }, true);
 
 ui = {
+  requests: null,
   exportResult: null,
 
   bindButtons: () => {
@@ -21,10 +22,20 @@ ui = {
     }, true);
   },
 
-  setupContent: () => {
+  setupContent: requests => {
+    // remember the currently captured requests
+    if (requests) {
+      ui.requests = requests.slice();
+    }
+
+    let displayExportableRequestCount = () => {
+      let requestCount = document.getElementById("request-count");
+      requestCount.innerText = ui.requests.length;
+    };
+
     let maybeDisableExportButton = () => {
       let button = document.getElementById("button-export");
-      if (window.parent.tracer.requests.length === 0) {
+      if (ui.requests.length === 0) {
         button.classList.add("inactive");
       } else {
         button.classList.remove("inactive");
@@ -34,9 +45,10 @@ ui = {
     let createExportResult = () => {
       let io = new SAMLTraceIO();
       let cookieProfile = document.querySelector('input[type="radio"]:checked').value;
-      ui.exportResult = io.exportRequests(window.parent.tracer.requests, cookieProfile);
+      ui.exportResult = io.exportRequests(ui.requests, cookieProfile);
     };
 
+    displayExportableRequestCount();
     maybeDisableExportButton();
     createExportResult();
   }
