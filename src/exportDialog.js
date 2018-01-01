@@ -25,7 +25,7 @@ ui = {
   setupContent: requests => {
     // remember the currently captured requests
     if (requests) {
-      ui.requests = requests.slice();
+      ui.requests = requests;
     }
 
     let displayExportableRequestCount = () => {
