@@ -147,24 +147,6 @@ SAMLTrace.Request = function(request, getResponse) {
   this.loadSAML();
 };
 SAMLTrace.Request.prototype = {
-  'getParameter' : function(name) {
-    for (var i = 0; i < this.get.length; i++) {
-      var p = this.get[i];
-      if (p[0] == name) {
-        return p[1];
-      }
-    }
-    return null;
-  },
-  'postParameter' : function(name) {
-    for (var i = 0; i < this.post.length; i++) {
-      var p = this.post[i];
-      if (p[0] == name) {
-        return p[1];
-      }
-    }
-    return null;
-  },
   'loadRequestHeaders' : function(request) {
     this.requestHeaders = request.headers;
   },
@@ -175,6 +157,10 @@ SAMLTrace.Request.prototype = {
     this.responseHeaders = response.responseHeaders;
   },
   'loadGET' : function() {
+    if (this.method !== 'GET') {
+      return;
+    }
+
     var r = new RegExp('[&;\?]');
     var elements = this.url.split(r);
 
@@ -202,7 +188,7 @@ SAMLTrace.Request.prototype = {
   'loadPOSTData' : function(request) {
     this.postData = '';
 
-    if (this.method != 'POST') {
+    if (this.method !== 'POST') {
       return;
     }
 
@@ -225,9 +211,18 @@ SAMLTrace.Request.prototype = {
     }
   },
   'loadSAML' : function() {
-    var msg = this.getParameter('SAMLRequest');
+    const findParameter = function(name, collection) {
+      if (!collection) {
+        return null;
+      }
+      
+      let parameter = collection.find(item => item[0] === name);
+      return parameter ? parameter[1] : null;
+    };
+
+    var msg = findParameter('SAMLRequest', this.get);
     if (msg == null) {
-      msg = this.getParameter('SAMLResponse');
+      msg = findParameter('SAMLResponse', this.get);
     }
     if (msg != null) {
       this.saml = SAMLTrace.b64inflate(msg);
@@ -235,16 +230,16 @@ SAMLTrace.Request.prototype = {
     }
 
     if (msg == null) {
-      msg = this.getParameter('SAMLart');
+      msg = findParameter('SAMLart', this.get);
     }
     if (msg != null) {
       this.samlart = msg;
       return;
     }
 
-    msg = this.postParameter('SAMLRequest');
+    msg = findParameter('SAMLRequest', this.post);
     if (msg == null) {
-      msg = this.postParameter('SAMLResponse');
+      msg = findParameter('SAMLResponse', this.post);
     }
     if (msg != null) {
       msg = msg.replace(/\s/g, '');
@@ -253,7 +248,7 @@ SAMLTrace.Request.prototype = {
     }
 
     if (msg == null) {
-      msg = this.postParameter('SAMLart');
+      msg = findParameter('SAMLart', this.post);
     }
     if (msg != null) {
       this.samlart = msg;
@@ -268,7 +263,7 @@ SAMLTrace.RequestItem = function(request) {
   this.request = request;
 
   this.availableTabs = ['HTTP'];
-  if (this.request.get.length != 0 || this.request.post.length != 0) {
+  if ((this.request.get && this.request.get.length !== 0) || (this.request.post && this.request.post.length !== 0)) {
     this.availableTabs.push('Parameters');
   }
   if (this.request.saml != null || this.request.samlart != null) {
@@ -304,7 +299,7 @@ SAMLTrace.RequestItem.prototype = {
     var doc = target.ownerDocument;
 
     function addParameters(name, parameters) {
-      if (parameters.length == 0) {
+      if (!parameters || parameters.length === 0) {
         return;
       }
       var h = doc.createElement('b');
