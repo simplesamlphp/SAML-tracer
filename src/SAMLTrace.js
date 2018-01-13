@@ -479,9 +479,10 @@ SAMLTrace.TraceWindow.prototype = {
   'saveNewRequest' : function(request) { // onBeforeRequest
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
+      let tracer = SAMLTrace.TraceWindow.instance();
 
       var isRedirected = function(requestId) {
-        var parentRequest = this.tracer.httpRequests.find(r => r.req.requestId === requestId);
+        var parentRequest = tracer.httpRequests.find(r => r.req.requestId === requestId);
         if (parentRequest != null && parentRequest.res != null && parentRequest.res.statusCode === 302) {
           return true;
         }
@@ -500,26 +501,28 @@ SAMLTrace.TraceWindow.prototype = {
         id: id,
         req: request
       };
-      this.tracer.httpRequests.push(entry);
+      tracer.httpRequests.push(entry);
     });
   },
 
   'attachHeadersToRequest' : function(request) { // onBeforeSendHeaders
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
-      var entry = this.tracer.httpRequests.find(req => req.id === id);
+      let tracer = SAMLTrace.TraceWindow.instance();
+      var entry = tracer.httpRequests.find(req => req.id === id);
       entry.headers = request.requestHeaders;
 
-      this.tracer.addRequestItem(entry, () => entry.res);
-      this.tracer.updateStatusBar();
+      tracer.addRequestItem(entry, () => entry.res);
+      tracer.updateStatusBar();
     });
   },
 
   'attachResponseToRequest' : function(response) { // onHeadersReceived
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
     uniqueRequestId.create(id => {
-      var index = this.tracer.httpRequests.findIndex(req => req.id === id);
-      this.tracer.httpRequests[index].res = response;
+      let tracer = SAMLTrace.TraceWindow.instance();
+      var index = tracer.httpRequests.findIndex(req => req.id === id);
+      tracer.httpRequests[index].res = response;
 
       // layout update: apply style to item based on responseStatus
       var r = response.statusCode;
@@ -542,13 +545,13 @@ SAMLTrace.TraceWindow.prototype = {
         removeClassByPrefix(requestDiv, "request-");
         requestDiv.classList.add("request-" + s);
 
-        var isVisible = this.tracer.isRequestVisible(response);
+        var isVisible = tracer.isRequestVisible(response);
         if (!isVisible) {
           requestDiv.classList.add("isRessource");
         }
         
-        this.tracer.httpRequests[index].isVisible = isVisible;
-        this.tracer.updateStatusBar();
+        tracer.httpRequests[index].isVisible = isVisible;
+        tracer.updateStatusBar();
       }
       
       if (response.statusCode === 302) {
@@ -629,7 +632,7 @@ SAMLTrace.TraceWindow.prototype = {
 };
 
 SAMLTrace.TraceWindow.init = function() {
-  var traceWindow = new SAMLTrace.TraceWindow();
+  let traceWindow = new SAMLTrace.TraceWindow();
   
   browser.webRequest.onBeforeRequest.addListener(
     traceWindow.saveNewRequest,
@@ -649,3 +652,7 @@ SAMLTrace.TraceWindow.init = function() {
     ["blocking", "responseHeaders"]
   );
 };
+
+SAMLTrace.TraceWindow.instance = function() {
+  return (this instanceof SAMLTrace.TraceWindow) ? this : window.tracer;
+}
