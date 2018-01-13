@@ -72,8 +72,8 @@ SAMLTraceIO.prototype = {
     NetUtil.asyncFetch(channel, function(inputStream, status) {
         if (!Components.isSuccessCode(status)) {
           SAMLTraceIO.log('Error occurred when reading file: '+status);
-          return;
-        }
+      return;
+    }
 
         var data = NetUtil.readInputStreamToString(inputStream,
                                                   inputStream.available());
@@ -84,7 +84,7 @@ SAMLTraceIO.prototype = {
           var o = j['requests'][i];
           var ni = SAMLTrace.Request.createFromJSON(o, false);
           nrf(ni);
-        }
+      }
       }); // NetUtil.asyncFetch()
   }, // SAMLTrace.TraceWindow.importRequests()
 
@@ -96,6 +96,7 @@ SAMLTraceIO.prototype = {
   }
 }
 
+
 /**
  * ExportFilter applies filtering of SAMLTrace.Request instances
  * based on provided profile
@@ -105,60 +106,57 @@ SAMLTraceIO.ExportFilter = function(cookieProfile) {
   this.loadPreferences(cookieProfile);
 };
 
-
 SAMLTraceIO.ExportFilter.prototype = {
-	'loadPreferences' : function(cookieProfile) {
-		this.exportFilters = [];
+  'loadPreferences' : function(cookieProfile) {
+    this.exportFilters = [];
 
-		switch (cookieProfile) {
-			case '1' :	// No cookiefiltering or filtering whatsoever
-				break;
+    switch (cookieProfile) {
+      case '1' :	// No cookiefiltering or filtering whatsoever
+        break;
 
-			case '2' :	// Apply hash filters
-				this.exportFilters.push(
-					SAMLTraceIO_filters.hashValueFilter(
-							'post', '*'),		// hash *all* the post elements
-					SAMLTraceIO_filters.overwriteKeyValue(
-							'postData'),	// overwrite the postData-variable
-					SAMLTraceIO_filters.hashCookieValueFilter(
-							'requestHeaders', 'Cookie'),	// hash cookie values in request
-					SAMLTraceIO_filters.hashCookieValueFilter(
-							'responseHeaders', 'Set-Cookie')	// ..as well as in response
-				);
-				break;
+      case '2' :	// Apply hash filters
+        this.exportFilters.push(
+          SAMLTraceIO_filters.hashValueFilter('post', '*'),                          // hash *all* the post elements
+          SAMLTraceIO_filters.overwriteKeyValue('postData'),                         // overwrite the postData-variable
+          SAMLTraceIO_filters.hashCookieValueFilter('requestHeaders', 'Cookie'),     // hash cookie values in request
+          SAMLTraceIO_filters.hashCookieValueFilter('responseHeaders', 'Set-Cookie') // ..as well as in response
+        );
+        break;
 
-			case '3' :	// Apply obfuscate/overwrite filters
-				this.exportFilters.push(
-					SAMLTraceIO_filters.obfuscateValueFilter(
-							'post', '*'),		// obfuscate *all* the post elements
-					SAMLTraceIO_filters.overwriteKeyValue(
-							'postData'),	// overwrite the postData-variable
-					SAMLTraceIO_filters.obfuscateCookieValueFilter(
-							'requestHeaders', 'Cookie'),	// obfuscate cookie values in request
-					SAMLTraceIO_filters.obfuscateCookieValueFilter(
-							'responseHeaders', 'Set-Cookie')	// ..as well as in response
-				);
-				break;
-		} // switch
-	},
+      case '3' :	// Apply obfuscate/overwrite filters
+        this.exportFilters.push(
+          SAMLTraceIO_filters.obfuscateValueFilter('post', '*'),                          // obfuscate *all* the post elements
+          SAMLTraceIO_filters.overwriteKeyValue('postData'),                              // overwrite the postData-variable
+          SAMLTraceIO_filters.obfuscateCookieValueFilter('requestHeaders', 'Cookie'),     // obfuscate cookie values in request
+          SAMLTraceIO_filters.obfuscateCookieValueFilter('responseHeaders', 'Set-Cookie') // ..as well as in response
+        );
+        break;
+    }
+  },
+  
   'perform' : function(reqs) {
-    var the_filters = this.exportFilters;	// move from instance to local scope
+    let the_filters = this.exportFilters; // move from instance to local scope
     
-    var createFromJSON = function(s, encoded) {
-      if (encoded) {
-        return JSON.parse(s);
-      } else {
-        return s;
-      }
+    const createFromJSON = function(obj) {
+      let stringified = JSON.stringify(obj);
+      return JSON.parse(stringified);
     };
 
-    var reqscopy = reqs.map(function(req) {
-      var newRequest = createFromJSON(JSON.stringify(req), true);
-      the_filters.forEach(function(filter) {
-        filter(newRequest);
-      });
-      return newRequest; // add filtered request to result
+    const enrichWithResponse = (req, res) => {
+      let responseCopy = createFromJSON(res);
+      req.responseStatus = responseCopy.statusCode;
+      req.responseStatusText = responseCopy.statusLine;
+      req.responseHeaders = responseCopy.responseHeaders;
+    };
+
+    let reqscopy = reqs.map(req => {
+      let newRequest = createFromJSON(req);
+      enrichWithResponse(newRequest, req.getResponse());
+
+      the_filters.forEach(filter => filter(newRequest));
+      return newRequest;
     });
+    
     return reqscopy;
   }
 }
