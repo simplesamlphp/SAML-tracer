@@ -186,23 +186,27 @@ SAMLTrace.Request.prototype = {
     }
   },
   'loadPOSTData' : function(request) {
-    this.postData = '';
-
     if (this.method !== 'POST') {
       return;
     }
 
-    if (request.req.requestBody !== null && request.req.requestBody.formData !== null) {
+    const isTracedRequest = req => req.requestBody && req.requestBody.formData;
+    const isImportedRequest = req => req.requestBody && req.requestBody.post && request.req.requestBody.post.length;
+
+    if (isTracedRequest(request.req)) {
+      // if it's an actively traced request, we have to look up its formData and parse it later on.
       this.postData = request.req.requestBody.formData;
+    } else if (isImportedRequest(request.req)) {
+      // if the request comes from an import, the parsed post-array is already present.
+      this.post = request.req.requestBody.post;
     }
   },
   'parsePOST' : function() {
-    this.post = [];
-
     if (this.postData == null || this.postData === '') {
       return;
     }
 
+    this.post = [];
     var keys = Object.keys(this.postData);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];

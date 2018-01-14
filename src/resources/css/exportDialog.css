@@ -1,13 +1,3 @@
-.title {
-  font-weight: bold;
-  border-bottom: 1px dotted #cccccc;
-  line-height: 20px;
-}
-
-.row-space {
-  margin-bottom: 15px;
-}
-
 #splitBox {
   display: flex;
   flex-direction: row;
@@ -18,9 +8,4 @@
   margin-left: 15px;
   display: flex;
   flex-direction: column;
-}
-
-.bottomRow {
-  float: right;
-  margin-top: 15px;
 }

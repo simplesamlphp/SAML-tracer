@@ -55,38 +55,75 @@ SAMLTraceIO.prototype = {
   },
 
   /**
-   * Import requests, and execute given function 'nrf' on every
-   *   imported request, with SAMLTrace.Request instance as argument
-   * @param w is the parent window of the UI-dialog; must be non-null
-   *   for getInputFile to work
+   * Imports requests and restores them in the TraceWindow.
    **/
-  'importRequests': function(w, nrf) {
-    var f = SAMLTraceIO.getInputFile(w);
-    if (f == null) return; // No input file selected
+  'importRequests': function(selectedFile, tracer) {
+    const parseRequests = rawResult => {
+      let exportedSession = JSON.parse(rawResult);
+      this.restoreFromImport(exportedSession.requests, tracer);
+    };
 
-    // Bulk read contents; provide content-type to facilitate reading;
-    // Perform a-sync reading to not lockup UI
-    var channel = NetUtil.newChannel(f);
-    channel.contentType = "application/json";
+    let reader = new FileReader();
+    reader.onload = e => parseRequests(e.target.result);
+    reader.readAsText(selectedFile);
+  },
 
-    NetUtil.asyncFetch(channel, function(inputStream, status) {
-        if (!Components.isSuccessCode(status)) {
-          SAMLTraceIO.log('Error occurred when reading file: '+status);
+  'restoreFromImport' : function(importedRequests, tracer) {
+    if (!importedRequests || importedRequests.length === 0) {
+      console.log("There aren't any requests to import...");
       return;
     }
 
-        var data = NetUtil.readInputStreamToString(inputStream,
-                                                  inputStream.available());
-        var j = JSON.parse(data);
+    // Since the relase of v1.0.0 every request's got a "requestId". If it ain't present, it's a legacy import.
+    let isLegacyImport = !importedRequests[0].hasOwnProperty("requestId");
+    console.log(`The imported requests are in ${isLegacyImport ? "legacy" : "current"}-style.`);
 
-        // Append the requests to the list
-        for (var i in j['requests']) {
-          var o = j['requests'][i];
-          var ni = SAMLTrace.Request.createFromJSON(o, false);
-          nrf(ni);
+    const getHeaders = importedHeaders => {
+      if (isLegacyImport) {
+        return importedHeaders.map(h => { return { name: h[0], value: h[1] } });
+      } else {
+        return importedHeaders;
       }
-      }); // NetUtil.asyncFetch()
-  }, // SAMLTrace.TraceWindow.importRequests()
+    };
+    
+    const getRequestId = importedRequest => {
+      return isLegacyImport ? importedRequest.id : importedRequest.requestId;
+    };
+
+    const createRestoreableModel = importedRequest => {
+      let pseudoRequest = {
+        req: {
+          method: importedRequest.method,
+          url: importedRequest.url,
+          requestId: getRequestId(importedRequest),
+          requestBody: {
+            post: importedRequest.post
+          }
+        },
+        requestId: getRequestId(importedRequest),
+        url: importedRequest.url,
+        headers: getHeaders(importedRequest.requestHeaders),
+        getResponse: () => {
+          let pseudoResponse = {
+            requestId: getRequestId(importedRequest),
+            url: importedRequest.url,
+            statusCode: importedRequest.responseStatus,
+            statusLine: importedRequest.responseStatusText,
+            responseHeaders: getHeaders(importedRequest.responseHeaders)
+          };
+          return pseudoResponse;
+        }
+      };
+      return pseudoRequest;
+    }
+
+    let restoreableRequests = importedRequests.map(ir => createRestoreableModel(ir));
+    restoreableRequests.forEach(rr => {
+      tracer.saveNewRequest(rr);
+      tracer.addRequestItem(rr, rr.getResponse);
+      tracer.attachResponseToRequest(rr.getResponse());
+    });
+  },
 
   'log': function(msg) {
     var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].

@@ -1,0 +1,14 @@
+.title {
+  font-weight: bold;
+  border-bottom: 1px dotted #cccccc;
+  line-height: 20px;
+}
+
+.row-space {
+  margin-bottom: 15px;
+}
+
+.bottomRow {
+  float: right;
+  margin-top: 15px;
+}

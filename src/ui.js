@@ -70,6 +70,10 @@ ui = {
       let exportDialogContent = document.getElementById("exportDialogContent");
       exportDialogContent.contentWindow.ui.setupContent(filteredRequests);
     }, true);
+    document.getElementById("button-import-list").addEventListener("click", function() {
+      let importDialog = document.getElementById("importDialog");
+      importDialog.style.visibility = "visible";
+    }, true);
 
     let modalCloseButtons = document.querySelectorAll(".modal-close");
     modalCloseButtons.forEach(button => {
