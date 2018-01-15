@@ -9,6 +9,15 @@
 }
 
 .bottomRow {
-  float: right;
   margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.errorBox {
+  display: none;
+  color: #e66465;
+  background-color: #ffe7e8;
+  margin-top: 15px;
+  padding: 5px;
 }

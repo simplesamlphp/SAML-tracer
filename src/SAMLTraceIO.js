@@ -57,10 +57,21 @@ SAMLTraceIO.prototype = {
   /**
    * Imports requests and restores them in the TraceWindow.
    **/
-  'importRequests': function(selectedFile, tracer) {
+  'importRequests': function(selectedFile, tracer, onError) {
     const parseRequests = rawResult => {
+      try {
       let exportedSession = JSON.parse(rawResult);
-      this.restoreFromImport(exportedSession.requests, tracer);
+        this.restoreFromImport(exportedSession.requests, tracer, onError);
+      } catch (error) {
+        console.log("An error occured while trying to parse and import requests: " + error);
+        if (error instanceof SyntaxError) {
+          onError("The selected file doesn't seem to contain importable traces!");
+        } else if (error instanceof TypeError) {
+          onError("The selected file seems to be invalid or corrupted!");
+        } else {
+          onError("Error while importing: " + error);
+        }
+      }
     };
 
     let reader = new FileReader();
@@ -68,9 +79,9 @@ SAMLTraceIO.prototype = {
     reader.readAsText(selectedFile);
   },
 
-  'restoreFromImport' : function(importedRequests, tracer) {
+  'restoreFromImport' : function(importedRequests, tracer, onError) {
     if (!importedRequests || importedRequests.length === 0) {
-      console.log("There aren't any requests to import...");
+      onError("There aren't any requests to import...");
       return;
     }
 
