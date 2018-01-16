@@ -17,30 +17,19 @@ SAMLTraceIO = function() {
 };
 
 SAMLTraceIO.prototype = {
-  'getInputFile': function(w) {
-    var nsIFilePicker = Components.interfaces.nsIFilePicker;
-    var fp = Components.classes["@mozilla.org/filepicker;1"].
-      createInstance(nsIFilePicker);
-
-    fp.init(w, "Select RequestDump file - exported requests",
-            nsIFilePicker.modeOpen);
-
-    var res = fp.show();
-    if (res != nsIFilePicker.returnOK) return null;
-
-    return fp.file;
-  },
-
-// Main feature
+  /**
+   * Main feature: Exports and optionally filters traced requests.
+   **/
   'exportRequests': function(reqs, cookieProfile) {
     // Perform request filtering based on user input from dialog:
     var ef = new SAMLTraceIO.ExportFilter(cookieProfile);
     var filteredreqs = ef.perform(reqs);
 
     // Package results
-    var result = {};
-    result['requests'] = filteredreqs;
-    result['timestamp'] = new Date().toISOString();
+    var result = {
+      requests: filteredreqs,
+      timestamp: new Date().toISOString()
+    };
     return result;
   },
 
@@ -50,18 +39,19 @@ SAMLTraceIO.prototype = {
   },
 
   'getOutputFile': function(exportResult) {
-    let timeStamp = exportResult && exportResult["timestamp"] ? exportResult["timestamp"] : "no-timestamp";
+    let timeStamp = exportResult && exportResult.timestamp ? exportResult.timestamp : "no-timestamp";
     return `SAML-Tracer-export-${timeStamp}.json`;
   },
 
   /**
    * Imports requests and restores them in the TraceWindow.
    **/
-  'importRequests': function(selectedFile, tracer, onError) {
+  'importRequests': function(selectedFile, tracer, onSuccess, onError) {
     const parseRequests = rawResult => {
       try {
-      let exportedSession = JSON.parse(rawResult);
+        let exportedSession = JSON.parse(rawResult);
         this.restoreFromImport(exportedSession.requests, tracer, onError);
+        onSuccess();
       } catch (error) {
         console.log("An error occured while trying to parse and import requests: " + error);
         if (error instanceof SyntaxError) {
@@ -126,7 +116,7 @@ SAMLTraceIO.prototype = {
         }
       };
       return pseudoRequest;
-    }
+    };
 
     let restoreableRequests = importedRequests.map(ir => createRestoreableModel(ir));
     restoreableRequests.forEach(rr => {
@@ -134,15 +124,8 @@ SAMLTraceIO.prototype = {
       tracer.addRequestItem(rr, rr.getResponse);
       tracer.attachResponseToRequest(rr.getResponse());
     });
-  },
-
-  'log': function(msg) {
-    var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-      getService(Components.interfaces.nsIConsoleService);
-
-    aConsoleService.logStringMessage('SAMLTraceIO.log: '+msg);
   }
-}
+};
 
 
 /**
@@ -207,4 +190,4 @@ SAMLTraceIO.ExportFilter.prototype = {
     
     return reqscopy;
   }
-}
+};

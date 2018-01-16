@@ -17,6 +17,9 @@ ui = {
       let encodedExportResult = encodeURIComponent(io.serialize(ui.exportResult));
       e.target.href = "data:application/json;charset=utf-8," + encodedExportResult;
       e.target.download = io.getOutputFile(ui.exportResult);
+
+      // hide dialog after export
+      window.parent.ui.hideDialogs();
     }, true);
   },
 
@@ -32,12 +35,17 @@ ui = {
       ui.requests = filteredRequests;
     }
 
-    let displayExportableRequestCount = () => {
+    const displayExportableRequestCount = () => {
       let requestCount = document.getElementById("request-count");
       requestCount.innerText = ui.requests.length;
     };
 
-    let maybeDisableExportButton = () => {
+    const resetFilterOptions = () => {
+      let defaultFilterOption = document.querySelector('input[type="radio"][value="2"]');
+      defaultFilterOption.checked = true;
+    };
+
+    const maybeDisableExportButton = () => {
       let button = document.getElementById("button-export");
       if (ui.requests.length === 0) {
         button.classList.add("inactive");
@@ -47,13 +55,14 @@ ui = {
     };
 
     displayExportableRequestCount();
+    resetFilterOptions();
     maybeDisableExportButton();
     ui.createExportResult();
   },
 
   createExportResult: () => {
-      let io = new SAMLTraceIO();
-      let cookieProfile = document.querySelector('input[type="radio"]:checked').value;
-      ui.exportResult = io.exportRequests(ui.requests, cookieProfile);
+    let io = new SAMLTraceIO();
+    let cookieProfile = document.querySelector('input[type="radio"]:checked').value;
+    ui.exportResult = io.exportRequests(ui.requests, cookieProfile);
   }
 };

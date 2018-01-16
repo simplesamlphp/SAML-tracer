@@ -491,7 +491,7 @@ SAMLTrace.TraceWindow.prototype = {
           return true;
         }
         return false;
-      }
+      };
 
       // The webRequest-API seems to keep the HTTP verbs which is correct in resepct to RFC 2616 but
       // differs from a typical browser behaviour which will usually change the POST to a GET. So do we here...
@@ -542,7 +542,7 @@ SAMLTrace.TraceWindow.prototype = {
         var regex = new RegExp('\\b' + prefix + '(.*)?\\b', 'g');
         element.className = element.className.replace(regex, '');
         return element;
-      }
+      };
 
       var requestDiv = document.getElementById(id);
       if (requestDiv !== null) {
@@ -659,4 +659,4 @@ SAMLTrace.TraceWindow.init = function() {
 
 SAMLTrace.TraceWindow.instance = function() {
   return (this instanceof SAMLTrace.TraceWindow) ? this : window.tracer;
-}
+};
