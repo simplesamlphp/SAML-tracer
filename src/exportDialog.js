@@ -9,9 +9,7 @@ ui = {
   bindButtons: () => {
     // bind radio huttons
     let radioButtons = document.querySelectorAll('input[type="radio"]');
-    Array.from(radioButtons).map(rb => rb.onchange = e => {
-      ui.setupContent();
-    });
+    Array.from(radioButtons).map(rb => rb.onchange = e => ui.createExportResult());
 
     // bind export button
     document.getElementById("button-export").addEventListener("click", e => {
@@ -22,10 +20,16 @@ ui = {
     }, true);
   },
 
-  setupContent: requests => {
-    // remember the currently captured requests
+  setupContent: (requests, httpRequests, isFlteringActive) => {
+    // remember the currently captured (and filtered) requests
     if (requests) {
-      ui.requests = requests;
+      let filteredRequests = requests.filter(req => {
+        let match = httpRequests.find(hr => hr.req.requestId === req.requestId);
+        if (match && (match.isVisible || !isFlteringActive)) {
+          return req;
+        }
+      });
+      ui.requests = filteredRequests;
     }
 
     let displayExportableRequestCount = () => {
@@ -42,14 +46,14 @@ ui = {
       }
     };
 
-    let createExportResult = () => {
+    displayExportableRequestCount();
+    maybeDisableExportButton();
+    ui.createExportResult();
+  },
+
+  createExportResult: () => {
       let io = new SAMLTraceIO();
       let cookieProfile = document.querySelector('input[type="radio"]:checked').value;
       ui.exportResult = io.exportRequests(ui.requests, cookieProfile);
-    };
-
-    displayExportableRequestCount();
-    maybeDisableExportButton();
-    createExportResult();
   }
 };

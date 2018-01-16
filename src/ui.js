@@ -61,14 +61,8 @@ ui = {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";
       let isFlteringActive = document.getElementById("button-filter").classList.contains("active");
-      let filteredRequests = window.tracer.requests.filter(req => {
-        let match = window.tracer.httpRequests.find(hr => hr.req.requestId === req.requestId);
-        if (match && (match.isVisible || !isFlteringActive)) {
-          return req;
-        }
-      });
       let exportDialogContent = document.getElementById("exportDialogContent");
-      exportDialogContent.contentWindow.ui.setupContent(filteredRequests);
+      exportDialogContent.contentWindow.ui.setupContent(window.tracer.requests, window.tracer.httpRequests, isFlteringActive);
     }, true);
     document.getElementById("button-import-list").addEventListener("click", function() {
       let importDialog = document.getElementById("importDialog");
