@@ -50,8 +50,10 @@ SAMLTraceIO.prototype = {
     const parseRequests = rawResult => {
       try {
         let exportedSession = JSON.parse(rawResult);
-        this.restoreFromImport(exportedSession.requests, tracer, onError);
-        onSuccess();
+        let successfullyRestored = this.restoreFromImport(exportedSession.requests, tracer, onError);
+        if (successfullyRestored) {
+          onSuccess();
+        }
       } catch (error) {
         console.log("An error occured while trying to parse and import requests: " + error);
         if (error instanceof SyntaxError) {
@@ -65,14 +67,16 @@ SAMLTraceIO.prototype = {
     };
 
     let reader = new FileReader();
-    reader.onload = e => parseRequests(e.target.result);
+    reader.onload = e => {
+      parseRequests(e.target.result);
+    }
     reader.readAsText(selectedFile);
   },
 
   'restoreFromImport' : function(importedRequests, tracer, onError) {
     if (!importedRequests || importedRequests.length === 0) {
       onError("There aren't any requests to import...");
-      return;
+      return false;
     }
 
     // Since the relase of v1.0.0 every request's got a "requestId". If it ain't present, it's a legacy import.
@@ -124,6 +128,8 @@ SAMLTraceIO.prototype = {
       tracer.addRequestItem(rr, rr.getResponse);
       tracer.attachResponseToRequest(rr.getResponse());
     });
+
+    return true;
   }
 };
 
