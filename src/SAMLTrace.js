@@ -409,12 +409,18 @@ SAMLTrace.TraceWindow.prototype = {
     case 'application/vnd.google.safebrowsing-update':
     case 'application/x-javascript':
     case 'application/x-shockwave-flash':
+    case 'application/font-sfnt':
+    case 'application/font-woff':
+    case 'application/font-woff2':
+    case 'application/x-font-ttf':
+    case 'application/x-font-woff':
     case 'image/gif':
     case 'image/jpg':
     case 'image/jpeg':
     case 'image/png':
     case 'image/vnd.microsoft.icon':
     case 'image/x-icon':
+    case 'image/svg+xml':
     case 'text/css':
     case 'text/ecmascript':
     case 'text/javascript':
