@@ -142,9 +142,9 @@ SAMLTrace.Request = function(request, getResponse) {
 
   this.loadRequestHeaders(request);
   this.loadGET();
-  this.loadPOSTData(request);
+  this.loadPOST(request);
   this.parsePOST();
-  this.loadSAML();
+  this.parseSAML();
 };
 SAMLTrace.Request.prototype = {
   'loadRequestHeaders' : function(request) {
@@ -185,7 +185,7 @@ SAMLTrace.Request.prototype = {
       this.get.push([name, value]);
     }
   },
-  'loadPOSTData' : function(request) {
+  'loadPOST' : function(request) {
     if (this.method !== 'POST') {
       return;
     }
@@ -197,8 +197,9 @@ SAMLTrace.Request.prototype = {
       // if it's an actively traced request, we have to look up its formData and parse it later on.
       this.postData = request.req.requestBody.formData;
     } else if (isImportedRequest(request.req)) {
-      // if the request comes from an import, the parsed post-array is already present.
+      // if the request comes from an import, the parsed post-array and probably a token are already present.
       this.post = request.req.requestBody.post;
+      this.saml = request.saml;
     }
   },
   'parsePOST' : function() {
@@ -214,7 +215,7 @@ SAMLTrace.Request.prototype = {
       this.post.push([key, propertyValues[0]])
     }
   },
-  'loadSAML' : function() {
+  'parseSAML' : function() {
     const findParameter = function(name, collection) {
       if (!collection) {
         return null;
@@ -223,6 +224,11 @@ SAMLTrace.Request.prototype = {
       let parameter = collection.find(item => item[0] === name);
       return parameter ? parameter[1] : null;
     };
+
+    if (this.saml && this.saml !== "") {
+      // do nothing if the token of an imported request is already present
+      return;
+    }
 
     var msg = findParameter('SAMLRequest', this.get);
     if (msg == null) {

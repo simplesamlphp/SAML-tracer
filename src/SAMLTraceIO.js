@@ -108,6 +108,7 @@ SAMLTraceIO.prototype = {
         requestId: getRequestId(importedRequest),
         url: importedRequest.url,
         headers: getHeaders(importedRequest.requestHeaders),
+        saml: importedRequest.saml,
         getResponse: () => {
           let pseudoResponse = {
             requestId: getRequestId(importedRequest),
