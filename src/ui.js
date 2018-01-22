@@ -3,13 +3,11 @@ window.addEventListener("load", function(e) {
   ui.resizeElements();
   ui.resizeDialogs();
   ui.bindButtons();
-  ui.bindKey();
+  ui.bindKeys();
   ui.initContentSplitter();
 
   // attach resize event
-  this.addEventListener("resize", function() {
-      ui.resizeElements();
-  }, true);
+  this.addEventListener("resize", ui.resizeElements);
 
   // initialize trace listener
   SAMLTrace.TraceWindow.init();
@@ -34,6 +32,7 @@ ui = {
     elementTop.style.height = ratioTop + "px";
     elementBottom.style.height = ratioBottom + "px";
   },
+
   bindButtons: function() {
     const toggleButtonState = button => {
       let isActive = button.classList.contains("active");
@@ -75,27 +74,43 @@ ui = {
     let modalCloseButtons = document.querySelectorAll(".modal-close");
     modalCloseButtons.forEach(button => button.addEventListener("click", ui.hideDialogs, true));
   },
-  bindKey: function() {
+  
+  bindKeys: function() {
     const closeDialogs = e => {
+      // close dialogs when ESC is pressed
       if (e.keyCode === 27) {
         ui.hideDialogs();
       }
     };
+    
+    const selectRequestInfoContent = e => {
+      // override CTRL+A to just select the request info content
+      if ((e.ctrlKey || e.metaKey) && e.keyCode == 65 ) {
+        let element = document.getElementById("request-info-content");
+        let range = document.createRange();
+        range.selectNode(element);
+        window.getSelection().addRange(range);
+        e.preventDefault();
+      }
+    };
 
-    // close dialogs when ESC is pressed
-    document.addEventListener("keydown", closeDialogs, true);
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
+    document.addEventListener("keydown", closeDialogs);
+    document.addEventListener("keydown", selectRequestInfoContent);
   },
+
   initContentSplitter: function() {
     let controlTop = document.getElementById("request-list");
     let controlBottom = document.getElementById("request-info-content");
     let dragger = document.getElementById("dragger");
     Splitter.setup(controlTop, controlBottom, dragger);
   },
+
   hideDialogs: () => {
     document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
   },
+  
   resizeDialogs: function() {
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => {
