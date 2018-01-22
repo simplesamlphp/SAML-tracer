@@ -1,14 +1,14 @@
 window.addEventListener("load", function(e) {
   // initially setup the ui
   ui.resizeElements();
+  ui.resizeDialogs();
   ui.bindButtons();
+  ui.bindKey();
   ui.initContentSplitter();
   ui.enableSyntaxHighlighting();
 
   // attach resize event
-  this.addEventListener("resize", function() {
-      ui.resizeElements();
-  }, true);
+  this.addEventListener("resize", ui.resizeElements);
 
   // initialize trace listener
   SAMLTrace.TraceWindow.init();
@@ -29,7 +29,7 @@ ui = {
     let remainingHeight = window.innerHeight - reservedHeight;
     let ratioTop = (elementTop.clientHeight / controlHeightSum) * remainingHeight;
     let ratioBottom = (elementBottom.clientHeight / controlHeightSum) * remainingHeight;
-
+    
     const getPaddingHeight = element => {
       let style = window.getComputedStyle(element);
       return parseInt(style.paddingTop) + parseInt(style.paddingBottom);
@@ -37,8 +37,8 @@ ui = {
     
     elementTop.style.height = (ratioTop - getPaddingHeight(elementTop)) + "px";
     elementBottom.style.height = (ratioBottom - getPaddingHeight(elementBottom)) + "px";
-    var foo = 1;
   },
+
   bindButtons: function() {
     const toggleButtonState = button => {
       let isActive = button.classList.contains("active");
@@ -63,13 +63,56 @@ ui = {
         Array.from(hidableRows).forEach(row => row.classList.add("displayAnyway"));
       }
     }, true);
+    document.getElementById("button-export-list").addEventListener("click", function() {
+      let exportDialog = document.getElementById("exportDialog");
+      exportDialog.style.visibility = "visible";
+      let isFlteringActive = document.getElementById("button-filter").classList.contains("active");
+      let exportDialogContent = document.getElementById("exportDialogContent");
+      exportDialogContent.contentWindow.ui.setupContent(window.tracer.requests, window.tracer.httpRequests, isFlteringActive);
+    }, true);
+    document.getElementById("button-import-list").addEventListener("click", function() {
+      let importDialog = document.getElementById("importDialog");
+      importDialog.style.visibility = "visible";
+      let importDialogContent = document.getElementById("importDialogContent");
+      importDialogContent.contentWindow.ui.setupContent();
+    }, true);
+
+    let modalCloseButtons = document.querySelectorAll(".modal-close");
+    modalCloseButtons.forEach(button => button.addEventListener("click", ui.hideDialogs, true));
   },
+
+  bindKey: function() {
+    const closeDialogs = e => {
+      if (e.keyCode === 27) {
+        ui.hideDialogs();
+      }
+    };
+
+    // close dialogs when ESC is pressed
+    document.addEventListener("keydown", closeDialogs, true);
+    let iframes = document.querySelectorAll("iframe");
+    iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
+  },
+
+  hideDialogs: () => {
+    document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
+  },
+
   initContentSplitter: function() {
     let controlTop = document.getElementById("request-list");
     let controlBottom = document.getElementById("request-info-content");
     let dragger = document.getElementById("dragger");
     Splitter.setup(controlTop, controlBottom, dragger);
   },
+
+  resizeDialogs: function() {
+    let iframes = document.querySelectorAll("iframe");
+    iframes.forEach(iframe => {
+      iframe.width  = iframe.contentWindow.document.body.scrollWidth;
+      iframe.height = iframe.contentWindow.document.body.scrollHeight;
+    });
+  },
+  
   enableSyntaxHighlighting: function() {
     const getSyntaxHighlightingClass = tab => {
       let tabName = tab.href.split('#')[1];
@@ -94,11 +137,11 @@ ui = {
       content.classList.add(syntaxHighlightingClass);
       hljs.highlightBlock(content);
     }
-    
+
     let tabBox = document.querySelector("#request-info-tabbox");
-    tabBox.addEventListener("click", highlightContent, false);
-        
+    tabBox.addEventListener("click", highlightContent);
+
     let requestList = document.querySelector("#request-list");
-    requestList.addEventListener("click", highlightContent, false);
+    requestList.addEventListener("click", highlightContent);
   }
 }
