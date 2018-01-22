@@ -212,7 +212,10 @@ SAMLTrace.Request.prototype = {
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
       var propertyValues = this.postData[key];
-      this.post.push([key, propertyValues[0]])
+
+      for (var j = 0; j < propertyValues.length; j++) {
+        this.post.push([key, propertyValues[j]]);
+      }
     }
   },
   'parseSAML' : function() {
