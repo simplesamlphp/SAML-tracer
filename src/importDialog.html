@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Import SAML trace</title>
+  <link rel="stylesheet" href="resources/css/samltrace.css" type="text/css">
+  <link rel="stylesheet" href="resources/css/buttons.css" type="text/css">
+  <link rel="stylesheet" href="resources/css/dialog.css" type="text/css">
+</head>
+
+<body class="not-selectable">
+  <div class="title row-space">Import SAML-trace preferences</div>
+  <input id="fileInput" type="file" accept=".json, .txt" />
+  <div class="errorBox is-selectable"></div>
+
+  <div class="bottomRow">
+    <a id="button-import" class="button">Import</a>
+  </div>
+
+  <script type="text/javascript" src="importDialog.js"></script>
+  <script type="text/javascript" src="SAMLTraceIO.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Export SAML trace</title>
+  <link rel="stylesheet" href="resources/css/samltrace.css" type="text/css">
+  <link rel="stylesheet" href="resources/css/buttons.css" type="text/css">
+  <link rel="stylesheet" href="resources/css/dialog.css" type="text/css">
+  <link rel="stylesheet" href="resources/css/exportDialog.css" type="text/css">
+</head>
+
+<body class="not-selectable">
+  <div class="title row-space">Export SAML-trace preferences</div>
+
+  <div class="row-space"><span id="request-count">0</span> requests can be exported.</div>
+  <form id="exportForm">
+    <div id=splitBox>
+      <div>
+        <span>Select cookie-filter profile:</span>
+      </div>
+      <div id="selectionBox">
+        <div>
+          <input type="radio" name="cookie-filter-profile" id="cookie-filter-profile-none" value="1">
+          <label for="cookie-filter-profile-none">None</label>
+        </div>
+        <div>
+          <input type="radio" name="cookie-filter-profile" id="cookie-filter-profile-mask" value="2">
+          <label for="cookie-filter-profile-mask">Mask values</label>
+        </div>
+        <div>
+          <input type="radio" name="cookie-filter-profile" id="cookie-filter-profile-remove" value="3">
+          <label for="cookie-filter-profile-remove">Remove values</label>
+        </div>
+      </div>
+    </div>
+  </form>
+  
+  <div class="bottomRow">
+    <a id="button-export" class="button" href="" download="requests.json">Export</a>
+  </div>
+
+  <script type="text/javascript" src="exportDialog.js"></script>
+  <script type="text/javascript" src="SAMLTraceIO.js"></script>
+  <script type="text/javascript" src="filters.js"></script>
+  <script type="text/javascript" src="hash.js"></script>
+</body>
+
+</html>

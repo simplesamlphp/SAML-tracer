@@ -1,0 +1,11 @@
+#splitBox {
+  display: flex;
+  flex-direction: row;
+  /* margin: 15px 15px; */
+}
+
+#selectionBox {
+  margin-left: 15px;
+  display: flex;
+  flex-direction: column;
+}

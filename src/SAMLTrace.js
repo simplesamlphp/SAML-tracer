@@ -142,39 +142,25 @@ SAMLTrace.Request = function(request, getResponse) {
 
   this.loadRequestHeaders(request);
   this.loadGET();
-  this.loadPOSTData(request);
+  this.loadPOST(request);
   this.parsePOST();
-  this.loadSAML();
+  this.parseSAML();
 };
 SAMLTrace.Request.prototype = {
-  'getParameter' : function(name) {
-    for (var i = 0; i < this.get.length; i++) {
-      var p = this.get[i];
-      if (p[0] == name) {
-        return p[1];
-      }
-    }
-    return null;
-  },
-  'postParameter' : function(name) {
-    for (var i = 0; i < this.post.length; i++) {
-      var p = this.post[i];
-      if (p[0] == name) {
-        return p[1];
-      }
-    }
-    return null;
-  },
   'loadRequestHeaders' : function(request) {
     this.requestHeaders = request.headers;
   },
   'loadResponse' : function() {
-    this.response = this.getResponse();
-    this.responseStatus = this.response.statusCode;
-    this.responseStatusText = this.response.statusLine;
-    this.responseHeaders = this.response.responseHeaders;
+    let response = this.getResponse();
+    this.responseStatus = response.statusCode;
+    this.responseStatusText = response.statusLine;
+    this.responseHeaders = response.responseHeaders;
   },
   'loadGET' : function() {
+    if (this.method !== 'GET') {
+      return;
+    }
+
     var r = new RegExp('[&;\?]');
     var elements = this.url.split(r);
 
@@ -199,22 +185,29 @@ SAMLTrace.Request.prototype = {
       this.get.push([name, value]);
     }
   },
-  'loadPOSTData' : function(request) {
-    this.postData = '';
-
-    if (this.method != 'POST') {
+  'loadPOST' : function(request) {
+    if (this.method !== 'POST') {
       return;
     }
 
-    this.postData = request.req.requestBody.formData;
+    const isTracedRequest = req => req.requestBody && req.requestBody.formData;
+    const isImportedRequest = req => req.requestBody && req.requestBody.post && request.req.requestBody.post.length;
+
+    if (isTracedRequest(request.req)) {
+      // if it's an actively traced request, we have to look up its formData and parse it later on.
+      this.postData = request.req.requestBody.formData;
+    } else if (isImportedRequest(request.req)) {
+      // if the request comes from an import, the parsed post-array and probably a token are already present.
+      this.post = request.req.requestBody.post;
+      this.saml = request.saml;
+    }
   },
   'parsePOST' : function() {
-    this.post = [];
-
     if (this.postData == null || this.postData === '') {
       return;
     }
 
+    this.post = [];
     var keys = Object.keys(this.postData);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
@@ -222,10 +215,24 @@ SAMLTrace.Request.prototype = {
       this.post.push([key, propertyValues[0]])
     }
   },
-  'loadSAML' : function() {
-    var msg = this.getParameter('SAMLRequest');
+  'parseSAML' : function() {
+    const findParameter = function(name, collection) {
+      if (!collection) {
+        return null;
+      }
+      
+      let parameter = collection.find(item => item[0] === name);
+      return parameter ? parameter[1] : null;
+    };
+
+    if (this.saml && this.saml !== "") {
+      // do nothing if the token of an imported request is already present
+      return;
+    }
+
+    var msg = findParameter('SAMLRequest', this.get);
     if (msg == null) {
-      msg = this.getParameter('SAMLResponse');
+      msg = findParameter('SAMLResponse', this.get);
     }
     if (msg != null) {
       this.saml = SAMLTrace.b64inflate(msg);
@@ -233,16 +240,16 @@ SAMLTrace.Request.prototype = {
     }
 
     if (msg == null) {
-      msg = this.getParameter('SAMLart');
+      msg = findParameter('SAMLart', this.get);
     }
     if (msg != null) {
       this.samlart = msg;
       return;
     }
 
-    msg = this.postParameter('SAMLRequest');
+    msg = findParameter('SAMLRequest', this.post);
     if (msg == null) {
-      msg = this.postParameter('SAMLResponse');
+      msg = findParameter('SAMLResponse', this.post);
     }
     if (msg != null) {
       msg = msg.replace(/\s/g, '');
@@ -251,7 +258,7 @@ SAMLTrace.Request.prototype = {
     }
 
     if (msg == null) {
-      msg = this.postParameter('SAMLart');
+      msg = findParameter('SAMLart', this.post);
     }
     if (msg != null) {
       this.samlart = msg;
@@ -266,7 +273,7 @@ SAMLTrace.RequestItem = function(request) {
   this.request = request;
 
   this.availableTabs = ['HTTP'];
-  if (this.request.get.length != 0 || this.request.post.length != 0) {
+  if ((this.request.get && this.request.get.length !== 0) || (this.request.post && this.request.post.length !== 0)) {
     this.availableTabs.push('Parameters');
   }
   if (this.request.saml != null || this.request.samlart != null) {
@@ -302,7 +309,7 @@ SAMLTrace.RequestItem.prototype = {
     var doc = target.ownerDocument;
 
     function addParameters(name, parameters) {
-      if (parameters.length == 0) {
+      if (!parameters || parameters.length === 0) {
         return;
       }
       var h = doc.createElement('b');
@@ -482,14 +489,15 @@ SAMLTrace.TraceWindow.prototype = {
   'saveNewRequest' : function(request) { // onBeforeRequest
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
+      let tracer = SAMLTrace.TraceWindow.instance();
 
       var isRedirected = function(requestId) {
-        var parentRequest = this.tracer.httpRequests.find(r => r.req.requestId === requestId);
+        var parentRequest = tracer.httpRequests.find(r => r.req.requestId === requestId);
         if (parentRequest != null && parentRequest.res != null && parentRequest.res.statusCode === 302) {
           return true;
         }
         return false;
-      }
+      };
 
       // The webRequest-API seems to keep the HTTP verbs which is correct in resepct to RFC 2616 but
       // differs from a typical browser behaviour which will usually change the POST to a GET. So do we here...
@@ -503,26 +511,28 @@ SAMLTrace.TraceWindow.prototype = {
         id: id,
         req: request
       };
-      this.tracer.httpRequests.push(entry);
+      tracer.httpRequests.push(entry);
     });
   },
 
   'attachHeadersToRequest' : function(request) { // onBeforeSendHeaders
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
-      var entry = this.tracer.httpRequests.find(req => req.id === id);
+      let tracer = SAMLTrace.TraceWindow.instance();
+      var entry = tracer.httpRequests.find(req => req.id === id);
       entry.headers = request.requestHeaders;
 
-      this.tracer.addRequestItem(entry, () => entry.res);
-      this.tracer.updateStatusBar();
+      tracer.addRequestItem(entry, () => entry.res);
+      tracer.updateStatusBar();
     });
   },
 
   'attachResponseToRequest' : function(response) { // onHeadersReceived
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
     uniqueRequestId.create(id => {
-      var index = this.tracer.httpRequests.findIndex(req => req.id === id);
-      this.tracer.httpRequests[index].res = response;
+      let tracer = SAMLTrace.TraceWindow.instance();
+      var index = tracer.httpRequests.findIndex(req => req.id === id);
+      tracer.httpRequests[index].res = response;
 
       // layout update: apply style to item based on responseStatus
       var r = response.statusCode;
@@ -538,24 +548,24 @@ SAMLTrace.TraceWindow.prototype = {
         var regex = new RegExp('\\b' + prefix + '(.*)?\\b', 'g');
         element.className = element.className.replace(regex, '');
         return element;
-      }
+      };
 
       var requestDiv = document.getElementById(id);
       if (requestDiv !== null) {
         removeClassByPrefix(requestDiv, "request-");
         requestDiv.classList.add("request-" + s);
 
-        var isVisible = this.tracer.isRequestVisible(response);
+        var isVisible = tracer.isRequestVisible(response);
         if (!isVisible) {
           requestDiv.classList.add("isRessource");
         }
         
-        this.tracer.httpRequests[index].isVisible = isVisible;
-        this.tracer.updateStatusBar();
+        tracer.httpRequests[index].isVisible = isVisible;
+        tracer.updateStatusBar();
       }
       
       if (response.statusCode === 302) {
-        let location = response.responseHeaders.find(header => header.name === "Location");
+        let location = response.responseHeaders.find(header => header.name.toLowerCase() === "location");
         console.log(`Redirecting request '${id}' to new location '${location.value}'...`);
         return {
           redirectUrl: location.value
@@ -565,7 +575,7 @@ SAMLTrace.TraceWindow.prototype = {
   },
   
   'selectTab' : function(name, containingElement) {
-    var tab = containingElement.querySelector(`[href*=\\#${name}]`)
+    var tab = containingElement.querySelector(`[href*=\\#${name}]`);
     this.selectItemInList(tab, containingElement);
   },
 
@@ -632,7 +642,7 @@ SAMLTrace.TraceWindow.prototype = {
 };
 
 SAMLTrace.TraceWindow.init = function() {
-  var traceWindow = new SAMLTrace.TraceWindow();
+  let traceWindow = new SAMLTrace.TraceWindow();
   
   browser.webRequest.onBeforeRequest.addListener(
     traceWindow.saveNewRequest,
@@ -651,4 +661,8 @@ SAMLTrace.TraceWindow.init = function() {
     {urls: ["<all_urls>"]},
     ["blocking", "responseHeaders"]
   );
+};
+
+SAMLTrace.TraceWindow.instance = function() {
+  return (this instanceof SAMLTrace.TraceWindow) ? this : window.tracer;
 };
