@@ -72,6 +72,7 @@ a.tab:hover {
 }
 
 #request-info-content {
+  padding: 2px;
   overflow-y: scroll;
   word-wrap: break-word;
   white-space: pre-wrap;

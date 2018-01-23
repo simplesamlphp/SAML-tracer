@@ -5,11 +5,10 @@ window.addEventListener("load", function(e) {
   ui.bindButtons();
   ui.bindKey();
   ui.initContentSplitter();
+  ui.enableSyntaxHighlighting();
 
   // attach resize event
-  this.addEventListener("resize", function() {
-      ui.resizeElements();
-  }, true);
+  this.addEventListener("resize", ui.resizeElements);
 
   // initialize trace listener
   SAMLTrace.TraceWindow.init();
@@ -31,9 +30,15 @@ ui = {
     let ratioTop = (elementTop.clientHeight / controlHeightSum) * remainingHeight;
     let ratioBottom = (elementBottom.clientHeight / controlHeightSum) * remainingHeight;
     
-    elementTop.style.height = ratioTop + "px";
-    elementBottom.style.height = ratioBottom + "px";
+    const getPaddingHeight = element => {
+      let style = window.getComputedStyle(element);
+      return parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+    };
+    
+    elementTop.style.height = (ratioTop - getPaddingHeight(elementTop)) + "px";
+    elementBottom.style.height = (ratioBottom - getPaddingHeight(elementBottom)) + "px";
   },
+
   bindButtons: function() {
     const toggleButtonState = button => {
       let isActive = button.classList.contains("active");
@@ -75,6 +80,7 @@ ui = {
     let modalCloseButtons = document.querySelectorAll(".modal-close");
     modalCloseButtons.forEach(button => button.addEventListener("click", ui.hideDialogs, true));
   },
+
   bindKey: function() {
     const closeDialogs = e => {
       if (e.keyCode === 27) {
@@ -87,20 +93,55 @@ ui = {
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
   },
+
+  hideDialogs: () => {
+    document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
+  },
+
   initContentSplitter: function() {
     let controlTop = document.getElementById("request-list");
     let controlBottom = document.getElementById("request-info-content");
     let dragger = document.getElementById("dragger");
     Splitter.setup(controlTop, controlBottom, dragger);
   },
-  hideDialogs: () => {
-    document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
-  },
+
   resizeDialogs: function() {
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => {
       iframe.width  = iframe.contentWindow.document.body.scrollWidth;
       iframe.height = iframe.contentWindow.document.body.scrollHeight;
     });
+  },
+  
+  enableSyntaxHighlighting: function() {
+    const getSyntaxHighlightingClass = tab => {
+      let tabName = tab.href.split('#')[1];
+      if (tabName === "HTTP" || tabName === "Parameters") {
+        return "HTTP";
+      } else {
+        return "XML";
+      }
+    };
+
+    const removeSyntaxHighlightingClasses = block => {
+      const syntaxHighlightingClasses = [ "HTTP", "XML" ];
+      syntaxHighlightingClasses.forEach(c => block.classList.remove(c));
+    };
+
+    const highlightContent = () => {
+      let content = document.querySelector("#request-info-content");
+      removeSyntaxHighlightingClasses(content);
+
+      let selectedTab = document.querySelector(".tab.selected");
+      let syntaxHighlightingClass = getSyntaxHighlightingClass(selectedTab);
+      content.classList.add(syntaxHighlightingClass);
+      hljs.highlightBlock(content);
+    }
+
+    let tabBox = document.querySelector("#request-info-tabbox");
+    tabBox.addEventListener("click", highlightContent);
+
+    let requestList = document.querySelector("#request-list");
+    requestList.addEventListener("click", highlightContent);
   }
 }
