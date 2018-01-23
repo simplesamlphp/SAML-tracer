@@ -5,6 +5,7 @@ window.addEventListener("load", function(e) {
   ui.bindButtons();
   ui.bindKeys();
   ui.initContentSplitter();
+  ui.enableSyntaxHighlighting();
 
   // attach resize event
   this.addEventListener("resize", ui.resizeElements);
@@ -29,8 +30,13 @@ ui = {
     let ratioTop = (elementTop.clientHeight / controlHeightSum) * remainingHeight;
     let ratioBottom = (elementBottom.clientHeight / controlHeightSum) * remainingHeight;
     
-    elementTop.style.height = ratioTop + "px";
-    elementBottom.style.height = ratioBottom + "px";
+    const getPaddingHeight = element => {
+      let style = window.getComputedStyle(element);
+      return parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+    };
+    
+    elementTop.style.height = (ratioTop - getPaddingHeight(elementTop)) + "px";
+    elementBottom.style.height = (ratioBottom - getPaddingHeight(elementBottom)) + "px";
   },
 
   bindButtons: function() {
@@ -117,5 +123,37 @@ ui = {
       iframe.width  = iframe.contentWindow.document.body.scrollWidth;
       iframe.height = iframe.contentWindow.document.body.scrollHeight;
     });
+  },
+  
+  enableSyntaxHighlighting: function() {
+    const getSyntaxHighlightingClass = tab => {
+      let tabName = tab.href.split('#')[1];
+      if (tabName === "HTTP" || tabName === "Parameters") {
+        return "HTTP";
+      } else {
+        return "XML";
+      }
+    };
+
+    const removeSyntaxHighlightingClasses = block => {
+      const syntaxHighlightingClasses = [ "HTTP", "XML" ];
+      syntaxHighlightingClasses.forEach(c => block.classList.remove(c));
+    };
+
+    const highlightContent = () => {
+      let content = document.querySelector("#request-info-content");
+      removeSyntaxHighlightingClasses(content);
+
+      let selectedTab = document.querySelector(".tab.selected");
+      let syntaxHighlightingClass = getSyntaxHighlightingClass(selectedTab);
+      content.classList.add(syntaxHighlightingClass);
+      hljs.highlightBlock(content);
+    }
+
+    let tabBox = document.querySelector("#request-info-tabbox");
+    tabBox.addEventListener("click", highlightContent);
+
+    let requestList = document.querySelector("#request-list");
+    requestList.addEventListener("click", highlightContent);
   }
 }
