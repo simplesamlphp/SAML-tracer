@@ -3,7 +3,7 @@ window.addEventListener("load", function(e) {
   ui.resizeElements();
   ui.resizeDialogs();
   ui.bindButtons();
-  ui.bindKey();
+  ui.bindKeys();
   ui.initContentSplitter();
   ui.enableSyntaxHighlighting();
 
@@ -80,22 +80,30 @@ ui = {
     let modalCloseButtons = document.querySelectorAll(".modal-close");
     modalCloseButtons.forEach(button => button.addEventListener("click", ui.hideDialogs, true));
   },
-
-  bindKey: function() {
+  
+  bindKeys: function() {
     const closeDialogs = e => {
+      // close dialogs when ESC is pressed
       if (e.keyCode === 27) {
         ui.hideDialogs();
       }
     };
+    
+    const selectRequestInfoContent = e => {
+      // override CTRL+A to just select the request info content
+      if ((e.ctrlKey || e.metaKey) && e.keyCode == 65 ) {
+        let element = document.getElementById("request-info-content");
+        let range = document.createRange();
+        range.selectNode(element);
+        window.getSelection().addRange(range);
+        e.preventDefault();
+      }
+    };
 
-    // close dialogs when ESC is pressed
-    document.addEventListener("keydown", closeDialogs, true);
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
-  },
-
-  hideDialogs: () => {
-    document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
+    document.addEventListener("keydown", closeDialogs);
+    document.addEventListener("keydown", selectRequestInfoContent);
   },
 
   initContentSplitter: function() {
@@ -105,6 +113,10 @@ ui = {
     Splitter.setup(controlTop, controlBottom, dragger);
   },
 
+  hideDialogs: () => {
+    document.querySelectorAll(".modal").forEach(dialog => dialog.style.visibility = "hidden");
+  },
+  
   resizeDialogs: function() {
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => {
