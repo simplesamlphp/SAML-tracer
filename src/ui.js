@@ -100,10 +100,21 @@ ui = {
       }
     };
 
+    const selectRowOnKeybeardEvent = e => {
+      // select another request, when ArrowUp, ArrowDown, PageUp, PageDown, Home or End are pressed
+      let requestList = document.getElementById("request-list");
+      ScrollableList.selectRowOnKeybeardEvent(e, requestList, newElement => {
+        window.tracer.selectItemInList(newElement, requestList);
+        window.tracer.showRequest(newElement.requestItem);
+        ui.highlightContent();
+      });
+    };
+
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
     document.addEventListener("keydown", closeDialogs);
     document.addEventListener("keydown", selectRequestInfoContent);
+    document.addEventListener("keydown", selectRowOnKeybeardEvent);
   },
 
   initContentSplitter: function() {
@@ -125,9 +136,9 @@ ui = {
     });
   },
   
-  enableSyntaxHighlighting: function() {
+  highlightContent: () => {
     const getSyntaxHighlightingClass = tab => {
-      let tabName = tab.href.split('#')[1];
+      let tabName = tab ? tab.href.split('#')[1] : "n/a";
       if (tabName === "HTTP" || tabName === "Parameters") {
         return "HTTP";
       } else {
@@ -140,20 +151,20 @@ ui = {
       syntaxHighlightingClasses.forEach(c => block.classList.remove(c));
     };
 
-    const highlightContent = () => {
-      let content = document.querySelector("#request-info-content");
-      removeSyntaxHighlightingClasses(content);
+    let content = document.querySelector("#request-info-content");
+    removeSyntaxHighlightingClasses(content);
 
-      let selectedTab = document.querySelector(".tab.selected");
-      let syntaxHighlightingClass = getSyntaxHighlightingClass(selectedTab);
-      content.classList.add(syntaxHighlightingClass);
-      hljs.highlightBlock(content);
-    }
-
+    let selectedTab = document.querySelector(".tab.selected");
+    let syntaxHighlightingClass = getSyntaxHighlightingClass(selectedTab);
+    content.classList.add(syntaxHighlightingClass);
+    hljs.highlightBlock(content);
+  },
+  
+  enableSyntaxHighlighting: function() {
     let tabBox = document.querySelector("#request-info-tabbox");
-    tabBox.addEventListener("click", highlightContent);
+    tabBox.addEventListener("click", ui.highlightContent);
 
     let requestList = document.querySelector("#request-list");
-    requestList.addEventListener("click", highlightContent);
+    requestList.addEventListener("click", ui.highlightContent);
   }
 }
