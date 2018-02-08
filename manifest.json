@@ -2,7 +2,7 @@
     "name": "SAML tracer",
     "description": "A debugger for viewing SAML messages",
     "manifest_version": 2,
-    "version": "1.1",
+    "version": "1.2",
     "applications": {
         "gecko": {
           "id": "{d3e01ff2-9a3a-4007-8f6e-7acd9a5de263}"
