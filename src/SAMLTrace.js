@@ -152,9 +152,9 @@ SAMLTrace.Request.prototype = {
   },
   'loadResponse' : function() {
     let response = this.getResponse();
-    this.responseStatus = response.statusCode;
-    this.responseStatusText = response.statusLine;
-    this.responseHeaders = response.responseHeaders;
+    this.responseStatus = response ? response.statusCode : "";
+    this.responseStatusText = response ? response.statusLine : "";
+    this.responseHeaders = response ? response.responseHeaders: [];
   },
   'loadGET' : function() {
     if (this.method !== 'GET') {
