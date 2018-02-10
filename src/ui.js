@@ -46,14 +46,18 @@ ui = {
       return !isActive;
     };
 
-    document.getElementById("button-clear").addEventListener("click", function() {
+    document.getElementById("button-clear").addEventListener("click", () => {
       window.tracer.clearRequests();
     }, true);
-    document.getElementById("button-autoscroll").addEventListener("click", function(e) {
+    document.getElementById("button-pause").addEventListener("click", e => {
+      let newState = toggleButtonState(e.target);
+      window.tracer.setPauseTracing(newState);
+    }, true);
+    document.getElementById("button-autoscroll").addEventListener("click", e => {
       let newState = toggleButtonState(e.target);
       window.tracer.setAutoscroll(newState);
     }, true);
-    document.getElementById("button-filter").addEventListener("click", function(e) {
+    document.getElementById("button-filter").addEventListener("click", e => {
       let newState = toggleButtonState(e.target);
       window.tracer.setFilterResources(newState);
       let hidableRows = document.getElementsByClassName("list-row isRessource");
@@ -63,14 +67,14 @@ ui = {
         Array.from(hidableRows).forEach(row => row.classList.add("displayAnyway"));
       }
     }, true);
-    document.getElementById("button-export-list").addEventListener("click", function() {
+    document.getElementById("button-export-list").addEventListener("click", () => {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";
       let isFlteringActive = document.getElementById("button-filter").classList.contains("active");
       let exportDialogContent = document.getElementById("exportDialogContent");
       exportDialogContent.contentWindow.ui.setupContent(window.tracer.requests, window.tracer.httpRequests, isFlteringActive);
     }, true);
-    document.getElementById("button-import-list").addEventListener("click", function() {
+    document.getElementById("button-import-list").addEventListener("click", () => {
       let importDialog = document.getElementById("importDialog");
       importDialog.style.visibility = "visible";
       let importDialogContent = document.getElementById("importDialogContent");

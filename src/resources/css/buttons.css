@@ -27,6 +27,12 @@
 #button-clear {
   background: url("../images/icons/button-clear-default.png") no-repeat 4px 50%;
 }
+#button-pause {
+  background: url("../images/icons/button-pause-default.png") no-repeat 4px 50%;
+}
+#button-pause.button.active {
+  background: url("../images/icons/button-pause-active.png") no-repeat 4px 50%;
+}
 #button-autoscroll {
   background: url("../images/icons/button-autoscroll-default.png") no-repeat 4px 50%;
 }
