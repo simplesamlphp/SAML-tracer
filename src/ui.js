@@ -39,26 +39,26 @@ ui = {
     elementBottom.style.height = (ratioBottom - getPaddingHeight(elementBottom)) + "px";
   },
 
-  bindButtons: function() {
-    const toggleButtonState = button => {
-      let isActive = button.classList.contains("active");
-      isActive ? button.classList.remove("active") : button.classList.add("active");
-      return !isActive;
-    };
+  toggleButtonState: function(button) {
+    let isActive = button.classList.contains("active");
+    isActive ? button.classList.remove("active") : button.classList.add("active");
+    return !isActive;
+  },
 
+  bindButtons: function() {
     document.getElementById("button-clear").addEventListener("click", () => {
       window.tracer.clearRequests();
     }, true);
     document.getElementById("button-pause").addEventListener("click", e => {
-      let newState = toggleButtonState(e.target);
+      let newState = ui.toggleButtonState(e.target);
       window.tracer.setPauseTracing(newState);
     }, true);
     document.getElementById("button-autoscroll").addEventListener("click", e => {
-      let newState = toggleButtonState(e.target);
+      let newState = ui.toggleButtonState(e.target);
       window.tracer.setAutoscroll(newState);
     }, true);
     document.getElementById("button-filter").addEventListener("click", e => {
-      let newState = toggleButtonState(e.target);
+      let newState = ui.toggleButtonState(e.target);
       window.tracer.setFilterResources(newState);
       let hidableRows = document.getElementsByClassName("list-row isRessource");
       if (newState) {
@@ -88,14 +88,14 @@ ui = {
   bindKeys: function() {
     const closeDialogs = e => {
       // close dialogs when ESC is pressed
-      if (e.keyCode === 27) {
+      if (e.key === "Escape") {
         ui.hideDialogs();
       }
     };
     
     const selectRequestInfoContent = e => {
       // override CTRL+A to just select the request info content
-      if ((e.ctrlKey || e.metaKey) && e.keyCode == 65 ) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "a") {
         let element = document.getElementById("request-info-content");
         let range = document.createRange();
         range.selectNode(element);
@@ -113,12 +113,22 @@ ui = {
         ui.highlightContent();
       });
     };
+    
+    const togglePauseTracing = e => {
+      // pauses or resumes request tracing when the pause key is pressed
+      if (e.key === "Pause") {
+        let button = document.getElementById("button-pause");
+        let newState = ui.toggleButtonState(button);
+        window.tracer.setPauseTracing(newState);
+      }
+    };
 
     let iframes = document.querySelectorAll("iframe");
     iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
     document.addEventListener("keydown", closeDialogs);
     document.addEventListener("keydown", selectRequestInfoContent);
     document.addEventListener("keydown", selectRowOnKeybeardEvent);
+    document.addEventListener("keydown", togglePauseTracing);
   },
 
   initContentSplitter: function() {
