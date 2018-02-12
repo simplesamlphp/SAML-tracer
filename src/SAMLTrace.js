@@ -393,6 +393,7 @@ SAMLTrace.TraceWindow = function() {
   window.tracer = this;
   this.httpRequests = [];
   this.requests = [];
+  this.pauseTracing = false;
   this.autoScroll = true;
   this.filterResources = true;
 };
@@ -476,6 +477,10 @@ SAMLTrace.TraceWindow.prototype = {
     this.showRequest(null);
   },
 
+  'setPauseTracing' : function(pauseTracing) {
+    this.pauseTracing = pauseTracing;
+  },
+
   'setAutoscroll' : function(autoScroll) {
     this.autoScroll = autoScroll;
   },
@@ -496,10 +501,14 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'saveNewRequest' : function(request) { // onBeforeRequest
+    let tracer = SAMLTrace.TraceWindow.instance();
+    if (tracer.pauseTracing) {
+      // Skip tracing new requests
+      return;
+    }
+
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
-      let tracer = SAMLTrace.TraceWindow.instance();
-
       var isRedirected = function(requestId) {
         var parentRequest = tracer.httpRequests.find(r => r.req.requestId === requestId);
         if (parentRequest != null && parentRequest.res != null && parentRequest.res.statusCode === 302) {
@@ -525,33 +534,42 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'attachHeadersToRequest' : function(request) { // onBeforeSendHeaders
-    var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
+    let uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
     uniqueRequestId.create(id => {
       let tracer = SAMLTrace.TraceWindow.instance();
-      var entry = tracer.httpRequests.find(req => req.id === id);
-      entry.headers = request.requestHeaders;
+      let entry = tracer.httpRequests.find(req => req.id === id);
+      if (!entry) {
+        // Skip further execution if no precedingly issued request can be found. This may occur, if tracing
+        // new requests is paused. Requests that were issued before pausing will be found and handled.
+        return;
+      }
 
+      entry.headers = request.requestHeaders;
       tracer.addRequestItem(entry, () => entry.res);
       tracer.updateStatusBar();
     });
   },
 
   'attachResponseToRequest' : function(response) { // onHeadersReceived
-    var uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
+    let uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
     uniqueRequestId.create(id => {
       let tracer = SAMLTrace.TraceWindow.instance();
-      var index = tracer.httpRequests.findIndex(req => req.id === id);
-      tracer.httpRequests[index].res = response;
+      let entry = tracer.httpRequests.find(req => req.id === id);
+      if (!entry) {
+        // Skip further execution if no precedingly issued request can be found. This may occur, if tracing
+        // new requests is paused. Requests that were issued before pausing will be found and handled.
+        return;
+      }
+
+      entry.res = response;
 
       // layout update: apply style to item based on responseStatus
-      var r = response.statusCode;
-      var s;
-      if (r<200) s='info';
-      else if (r<300) s='ok';
-      else if (r<400) s='redirect';
-      else if (r<500) s='clerror';
-      else if (r<600) s='srerror';
-      else s='other';
+      let status = 'other';
+      if (response.statusCode < 200) status = 'info';
+      else if (response.statusCode < 300) status = 'ok';
+      else if (response.statusCode < 400) status = 'redirect';
+      else if (response.statusCode < 500) status = 'clerror';
+      else if (response.statusCode < 600) status = 'srerror';
 
       var removeClassByPrefix = function removeClassByPrefix(element, prefix) {
         var regex = new RegExp('\\b' + prefix + '(.*)?\\b', 'g');
@@ -562,14 +580,14 @@ SAMLTrace.TraceWindow.prototype = {
       var requestDiv = document.getElementById(id);
       if (requestDiv !== null) {
         removeClassByPrefix(requestDiv, "request-");
-        requestDiv.classList.add("request-" + s);
+        requestDiv.classList.add("request-" + status);
 
         var isVisible = tracer.isRequestVisible(response);
         if (!isVisible) {
           requestDiv.classList.add("isRessource");
         }
         
-        tracer.httpRequests[index].isVisible = isVisible;
+        entry.isVisible = isVisible;
         tracer.updateStatusBar();
       }
       
