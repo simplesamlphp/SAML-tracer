@@ -62,6 +62,10 @@ ui = {
     document.getElementById("button-autoscroll").addEventListener("click", e => {
       let newState = ui.toggleButtonState(e.target);
       window.tracer.setAutoscroll(newState);
+      if (newState === true) {
+        let requestList = document.getElementById("request-list");
+        requestList.scrollTop = requestList.scrollTopMax;
+      }
     }, true);
     document.getElementById("button-filter").addEventListener("click", e => {
       let newState = ui.toggleButtonState(e.target);
