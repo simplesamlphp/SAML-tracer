@@ -4,6 +4,7 @@ window.addEventListener("load", function(e) {
   ui.resizeDialogs();
   ui.bindButtons();
   ui.bindKeys();
+  ui.bindScrollRequestList();
   ui.initContentSplitter();
   ui.enableSyntaxHighlighting();
 
@@ -41,8 +42,13 @@ ui = {
 
   toggleButtonState: function(button) {
     let isActive = button.classList.contains("active");
-    isActive ? button.classList.remove("active") : button.classList.add("active");
-    return !isActive;
+    let newState = !isActive;
+    ui.setButtonState(button, newState)
+    return newState;
+  },
+
+  setButtonState: function(button, newState) {
+    newState ? button.classList.add("active") : button.classList.remove("active");
   },
 
   bindButtons: function() {
@@ -56,6 +62,10 @@ ui = {
     document.getElementById("button-autoscroll").addEventListener("click", e => {
       let newState = ui.toggleButtonState(e.target);
       window.tracer.setAutoscroll(newState);
+      if (newState === true) {
+        let requestList = document.getElementById("request-list");
+        requestList.scrollTop = requestList.scrollTopMax;
+      }
     }, true);
     document.getElementById("button-filter").addEventListener("click", e => {
       let newState = ui.toggleButtonState(e.target);
@@ -129,6 +139,19 @@ ui = {
     document.addEventListener("keydown", selectRequestInfoContent);
     document.addEventListener("keydown", selectRowOnKeybeardEvent);
     document.addEventListener("keydown", togglePauseTracing);
+  },
+
+  bindScrollRequestList: function() {
+    let requestList = document.getElementById("request-list");
+    let autoScrollButton = document.getElementById("button-autoscroll");
+
+    requestList.addEventListener("scroll", e => {
+      let wasScrolledUp = requestList.scrollTop < requestList.scrollTopMax;
+      let activateAutoscroll = !wasScrolledUp;
+
+      ui.setButtonState(autoScrollButton, activateAutoscroll);
+      window.tracer.setAutoscroll(activateAutoscroll);
+    });
   },
 
   initContentSplitter: function() {
