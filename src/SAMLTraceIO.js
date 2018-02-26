@@ -1,7 +1,7 @@
 /**
  * Some functionality to support the import/export
- * for SAMLTracer
- * Added to SAMLTracer by M. Dobrinic
+ * for SAML-tracer
+ * Added to SAML-tracer by M. Dobrinic
  * 2011-dec
  **/
 
@@ -40,7 +40,7 @@ SAMLTraceIO.prototype = {
 
   'getOutputFile': function(exportResult) {
     let timeStamp = exportResult && exportResult.timestamp ? exportResult.timestamp : "no-timestamp";
-    return `SAML-Tracer-export-${timeStamp}.json`;
+    return `SAML-tracer-export-${timeStamp}.json`;
   },
 
   /**

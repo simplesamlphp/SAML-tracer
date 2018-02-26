@@ -1,5 +1,5 @@
 {
-    "name": "SAML tracer",
+    "name": "SAML-tracer",
     "description": "A debugger for viewing SAML messages",
     "manifest_version": 2,
     "version": "1.4",
