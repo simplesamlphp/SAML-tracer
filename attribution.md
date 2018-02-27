@@ -1,7 +1,7 @@
 Attribution
 ===========
 
-SAML Tracer makes use of open source libraries licensed by third parties 
+SAML-tracer makes use of open source libraries licensed by third parties 
 (hereinafter "Third Party Materials").
 These third party materials are the following, listed alphabetically below, 
 along with their original license texts:

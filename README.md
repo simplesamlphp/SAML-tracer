@@ -1,16 +1,16 @@
-SAML Tracer
+SAML-tracer
 ===========
 
-SAML Tracer is a Firefox extension that aims to make debugging of
+SAML-tracer is a Firefox extension that aims to make debugging of
 SAML communication between websites easier. It is a request logger that
 in addition to showing normal requests, also highlights and decodes
 SAML messages that are transmitted.
 
 
-Using SAML Tracer
+Using SAML-tracer
 -----------------
 
-SAML Tracer is activated by clicking its icon in the browser toolbar.
+SAML-tracer is activated by clicking its icon in the browser toolbar.
 
 Once it is activated, you will get a window that shows all requests,
 and the data included in them. It also shows response headers.
@@ -25,15 +25,15 @@ Selecting a request gives you up to three tabs:
 * SAML: Decoded SAML message found in the request.
 
 
-Developing SAML Tracer
+Developing SAML-tracer
 ----------------------
 
-To make changes to SAML Tracer, you should start by cloning the Git
+To make changes to SAML-tracer, you should start by cloning the Git
 repository from:
 
   https://github.com/UNINETT/SAML-tracer/
 
-You can now modify and extend SAML Tracer. To test your changes, you 
+You can now modify and extend SAML-tracer. To test your changes, you 
 can debug the extension as described here:
 
   https://developer.mozilla.org/Add-ons/WebExtensions/Debugging
@@ -45,12 +45,12 @@ your local Git repository.
 License
 -------
 
-SAML Tracer is released under the 2-clause BSD license. See the
+SAML-tracer is released under the 2-clause BSD license. See the
 `LICENSE`-file for more information.
 
 
 Attribution
 -----------
 
-SAML Tracer makes use of open source libraries.
+SAML-tracer makes use of open source libraries.
 See [here](attribution.md) for more details.
