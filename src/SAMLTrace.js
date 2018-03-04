@@ -228,47 +228,35 @@ SAMLTrace.Request.prototype = {
       return parameter ? parameter[1] : null;
     };
 
-    if (this.saml && this.saml !== "") {
+    if ((this.saml && this.saml !== "") || (this.samlart && this.samlart !== "")) {
       // do nothing if the token of an imported request is already present
       return;
     }
 
-    var msg = findParameter('SAMLRequest', this.get);
-    if (msg == null) {
-      msg = findParameter('SAMLResponse', this.get);
-    }
-    if (msg != null) {
-      this.saml = SAMLTrace.b64inflate(msg);
-      return;
-    }
+    const returnValueAsIs = msg => msg;
+    const returnValueB64Inflated = msg => !msg ? null : SAMLTrace.b64inflate(msg);
+    const returnValueWithRemovedWhitespaceAndAtoB = msg => !msg ? null : atob(msg.replace(/\s/g, ''));
 
-    if (msg == null) {
-      msg = findParameter('SAMLart', this.get);
-    }
-    if (msg != null) {
-      this.samlart = msg;
-      return;
-    }
+    const queries = [
+      { name: 'SAMLRequest', collection: this.get, action: returnValueB64Inflated, to: result => this.saml = result},
+      { name: 'SAMLResponse', collection: this.get, action: returnValueB64Inflated, to: result => this.saml = result },
+      { name: 'SAMLart', collection: this.get, action: returnValueAsIs, to: result => this.samlart = result },
+      { name: 'SAMLRequest', collection: this.post, action: returnValueWithRemovedWhitespaceAndAtoB, to: result => this.saml = result },
+      { name: 'SAMLResponse', collection: this.post, action: returnValueWithRemovedWhitespaceAndAtoB, to: result => this.saml = result },
+      { name: 'SAMLart', collection: this.post, action: returnValueAsIs, to: result => this.samlart = result },
+    ];
 
-    msg = findParameter('SAMLRequest', this.post);
-    if (msg == null) {
-      msg = findParameter('SAMLResponse', this.post);
-    }
-    if (msg != null) {
-      msg = msg.replace(/\s/g, '');
-      this.saml = atob(msg);
-      return;
-    }
+    const findParameter = (name, collection) => {
+      let parameter = collection ? collection.find(item => item[0] === name) : null;
+      return parameter ? parameter[1] : null;
+    };
 
-    if (msg == null) {
-      msg = findParameter('SAMLart', this.post);
-    }
-    if (msg != null) {
-      this.samlart = msg;
-      return;
-    }
-
-    this.saml = null;
+    return queries.some(query => {
+      let parameter = findParameter(query.name, query.collection);
+      let value = query.action(parameter);
+      query.to(value);
+      return value !== null;
+    });
   }
 };
 
