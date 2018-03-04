@@ -144,6 +144,7 @@ SAMLTrace.Request = function(request, getResponse) {
   this.loadGET();
   this.loadPOST(request);
   this.parsePOST();
+  this.parseProtocol();
   this.parseSAML();
 };
 SAMLTrace.Request.prototype = {
@@ -218,16 +219,41 @@ SAMLTrace.Request.prototype = {
       }
     }
   },
-  'parseSAML' : function() {
-    const findParameter = function(name, collection) {
-      if (!collection) {
-        return null;
-      }
-      
-      let parameter = collection.find(item => item[0] === name);
-      return parameter ? parameter[1] : null;
+  'parseProtocol' : function() {
+    const isParameterInCollection = (parameter, collection) => {
+      return collection.findIndex(item => item[0] === parameter) !== -1;
     };
 
+    const isAnyParameterInCollection = (parameters, collection) => {
+      if (!collection) {
+        return false;
+      }
+      return parameters.some(parameter => isParameterInCollection(parameter, collection));
+    };
+
+    const isSamlProtocol = () => {
+      const parameters = ["SAMLRequest", "SAMLResponse", "SAMLart"];
+      let isInGet = isAnyParameterInCollection(parameters, this.get);
+      let isInPost = isAnyParameterInCollection(parameters, this.post);
+      return isInGet || isInPost;
+    };
+
+    const isWsFederation = () => {
+      // all probably relevant WS-Federation parameters -> ["wa", "wreply", "wres", "wctx", "wp", "wct", "wfed", "wencoding", "wtrealm", "wfresh", "wauth", "wreq", "whr", "wreqptr", "wresult", "wresultptr", "wattr", "wattrptr", "wpseudo", "wpseudoptr"];
+      // the most common ones should suffice:
+      const parameters = ["wa", "wreply", "wctx", "wtrealm", "whr", "wresult"];
+      let isInGet = isAnyParameterInCollection(parameters, this.get);
+      let isInPost = isAnyParameterInCollection(parameters, this.post);
+      return isInGet || isInPost;
+    };
+
+    if (isSamlProtocol()) {
+      this.protocol = "SAML-P";
+    } else if (isWsFederation()) {
+      this.protocol = "WS-Fed";
+    }
+  },
+  'parseSAML' : function() {
     if ((this.saml && this.saml !== "") || (this.samlart && this.samlart !== "")) {
       // do nothing if the token of an imported request is already present
       return;
@@ -237,14 +263,22 @@ SAMLTrace.Request.prototype = {
     const returnValueB64Inflated = msg => !msg ? null : SAMLTrace.b64inflate(msg);
     const returnValueWithRemovedWhitespaceAndAtoB = msg => !msg ? null : atob(msg.replace(/\s/g, ''));
 
-    const queries = [
-      { name: 'SAMLRequest', collection: this.get, action: returnValueB64Inflated, to: result => this.saml = result},
-      { name: 'SAMLResponse', collection: this.get, action: returnValueB64Inflated, to: result => this.saml = result },
-      { name: 'SAMLart', collection: this.get, action: returnValueAsIs, to: result => this.samlart = result },
-      { name: 'SAMLRequest', collection: this.post, action: returnValueWithRemovedWhitespaceAndAtoB, to: result => this.saml = result },
-      { name: 'SAMLResponse', collection: this.post, action: returnValueWithRemovedWhitespaceAndAtoB, to: result => this.saml = result },
-      { name: 'SAMLart', collection: this.post, action: returnValueAsIs, to: result => this.samlart = result },
-    ];
+    let queries = [];
+    if (this.protocol === "SAML-P") {
+      queries = [
+        { name: 'SAMLRequest', collection: this.get, action: returnValueB64Inflated, to: result => this.saml = result},
+        { name: 'SAMLResponse', collection: this.get, action: returnValueB64Inflated, to: result => this.saml = result },
+        { name: 'SAMLart', collection: this.get, action: returnValueAsIs, to: result => this.samlart = result },
+        { name: 'SAMLRequest', collection: this.post, action: returnValueWithRemovedWhitespaceAndAtoB, to: result => this.saml = result },
+        { name: 'SAMLResponse', collection: this.post, action: returnValueWithRemovedWhitespaceAndAtoB, to: result => this.saml = result },
+        { name: 'SAMLart', collection: this.post, action: returnValueAsIs, to: result => this.samlart = result }
+      ];
+    } else if (this.protocol === "WS-Fed") {
+      queries = [
+        { name: 'wresult', collection: this.get, action: returnValueAsIs, to: result => this.saml = result },
+        { name: 'wresult', collection: this.post, action: returnValueAsIs, to: result => this.saml = result }
+      ];
+    }
 
     const findParameter = (name, collection) => {
       let parameter = collection ? collection.find(item => item[0] === name) : null;
@@ -365,10 +399,21 @@ SAMLTrace.RequestItem.prototype = {
     hbox.appendChild(methodLabel);
     hbox.appendChild(urlLabel);
 
-    if (this.request.saml || this.request.samlart) {
-      var samlLogo = document.createElement("div");
-      samlLogo.classList.add("saml-logo");
-      hbox.appendChild(samlLogo);
+    if (this.request.protocol) {
+      const appendLogoDiv = (target, logoName) => {
+        let logo = document.createElement("div");
+        logo.classList.add(logoName);
+        target.appendChild(logo);
+      };
+
+      // add the protocol-logo (SAML or WS-Federation)
+      let logoName = this.request.protocol === "SAML-P" ? "saml-logo" : "ws-fed-logo";
+      appendLogoDiv(hbox, logoName);
+
+      // if the protocol is WS-Federation and a SAML-token is present, then an additional SAML-logo should be appended
+      if (this.request.protocol === "WS-Fed" && (this.request.saml || this.request.samlart)) {
+        appendLogoDiv(hbox, "saml-logo");
+      }
     }
 
     hbox.requestItem = this;

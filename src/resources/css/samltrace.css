@@ -118,7 +118,8 @@ a.tab:hover {
 }
 
 .request-url {
-  width: calc(100% - 5em - 4em);
+  /* fullwidth minus HTTP-method width minus SAML- and WS-Fed-logo */
+  width: calc(100% - 5em - 40px - 56px);
 }
 
 .request-info {
@@ -148,4 +149,11 @@ a.tab:hover {
   width: 40px;
   height: 14px;
   background: url("../images/saml.png") no-repeat center/cover;
+}
+.ws-fed-logo {
+  margin-left: auto;
+  display: block;
+  width: 56px;
+  height: 14px;
+  background: url("../images/ws-fed.png") no-repeat center/cover;
 }
