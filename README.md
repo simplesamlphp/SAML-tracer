@@ -2,9 +2,9 @@ SAML-tracer
 ===========
 
 SAML-tracer is a Firefox extension that aims to make debugging of
-SAML communication between websites easier. It is a request logger that
-in addition to showing normal requests, also highlights and decodes
-SAML messages that are transmitted.
+SAML- and WS-Federation-communication between websites easier. 
+It is a request logger that in addition to showing normal requests, 
+also highlights and decodes SAML messages that are transmitted.
 
 
 Using SAML-tracer
@@ -15,7 +15,8 @@ SAML-tracer is activated by clicking its icon in the browser toolbar.
 Once it is activated, you will get a window that shows all requests,
 and the data included in them. It also shows response headers.
 Messages including SAML data are highlighted with a SAML logo at the
-right side of the request list.
+right side of the request list. Those containing WS-Federation data
+are highlighted with a WS-Fed logo respectively.
 
 Selecting a request gives you up to three tabs:
 
@@ -46,7 +47,7 @@ License
 -------
 
 SAML-tracer is released under the 2-clause BSD license. See the
-`LICENSE`-file for more information.
+[LICENSE](LICENSE)-file for more information.
 
 
 Attribution
