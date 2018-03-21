@@ -2,6 +2,8 @@
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Anatomy_of_a_WebExtension#Specifying_background_scripts
 // The onOpenWindow event handler was slightly modified to be compatible with standard Firefox.
 
+var browser = browser || chrome
+
 browser.browserAction.onClicked.addListener((tab) => showTracerWindow());
 
 var tracerWindow = null;
