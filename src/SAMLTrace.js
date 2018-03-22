@@ -1,6 +1,4 @@
 // export SAMLTrace namespace to make ao. Request definitions available
-var browser = browser || chrome
-
 var EXPORTED_SYMBOLS = ["SAMLTrace"];
 
 if ("undefined" == typeof(SAMLTrace)) {
@@ -704,6 +702,7 @@ SAMLTrace.TraceWindow.prototype = {
 };
 
 SAMLTrace.TraceWindow.init = function() {
+  var browser = browser || chrome;
   let traceWindow = new SAMLTrace.TraceWindow();
   
   browser.webRequest.onBeforeRequest.addListener(

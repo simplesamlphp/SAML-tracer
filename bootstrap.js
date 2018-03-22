@@ -3,7 +3,6 @@
 // The onOpenWindow event handler was slightly modified to be compatible with standard Firefox.
 
 var browser = browser || chrome
-
 browser.browserAction.onClicked.addListener((tab) => showTracerWindow());
 
 var tracerWindow = null;
@@ -16,14 +15,18 @@ function showTracerWindow() {
   }
 
   // If it wasn't yet opened or it was already closed -- create a new instance.
-  var url = browser.extension.getURL("/src/TraceWindow.html");
-  var creating = browser.windows.create({
+  let url = browser.extension.getURL("/src/TraceWindow.html");
+  let creating = browser.windows.create({
     url: url,
-    type: "panel",
+    type: "popup",
     height: 600,
     width: 800
-  });
-  creating.then(onCreated, onError);
+  }, onCreated);
+
+  if (creating) {
+    // Firefox uses a promise for window creation
+    creating.then(onCreated, onError); 
+  }
 }
 
 function onCreated(windowInfo) {
