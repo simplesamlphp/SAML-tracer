@@ -191,12 +191,44 @@ SAMLTrace.Request.prototype = {
       return;
     }
 
-    const isTracedRequest = req => req.requestBody && req.requestBody.formData;
+    const isTracedParsedRequest = req => req.requestBody && req.requestBody.formData;
+    const isTracedRawRequest = req => req.requestBody && req.requestBody.raw;
     const isImportedRequest = req => req.requestBody && req.requestBody.post && request.req.requestBody.post.length;
 
-    if (isTracedRequest(request.req)) {
+    const isFormUrlEncoded = request => {
+      let contentTypeHeader = request.headers.find(header => header.name.toLowerCase() === "content-type");
+      return contentTypeHeader && contentTypeHeader.value.toLowerCase() === "application/x-www-form-urlencoded";
+    };
+
+    const rawRequestToString = rawByteArray => {
+      let postString = "";
+      rawByteArray.forEach(element => {
+        let chunk = String.fromCharCode.apply(null, new Uint8Array(element.bytes));
+        postString += chunk;
+      });
+      return postString;
+    };
+
+    const postStringToFormDataObject = parsedPostString => {
+      let parameters = parsedPostString.split('&');
+      let formData = {};
+      parameters.forEach(parameter => {
+        let splittedParameter = parameter.split('=');
+        let name = splittedParameter[0];
+        let value = decodeURIComponent(splittedParameter[1] || '').replace(/\+/g, ' ');
+        formData[name] = [ value ];
+      });
+      return formData;
+    };
+
+    if (isTracedParsedRequest(request.req)) {
       // if it's an actively traced request, we have to look up its formData and parse it later on.
       this.postData = request.req.requestBody.formData;
+    } else if (isTracedRawRequest(request.req) && isFormUrlEncoded(request)) {
+      // Chrome parses a request only up to a size of 4096 bytes as formData. If the POST exceeds 
+      // this size, its raw bytes have to be parsed manually.
+      let postString = rawRequestToString(request.req.requestBody.raw);
+      this.postData = postStringToFormDataObject(postString);
     } else if (isImportedRequest(request.req)) {
       // if the request comes from an import, the parsed post-array and probably a token are already present.
       this.post = request.req.requestBody.post;
