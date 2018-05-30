@@ -1,26 +1,22 @@
 {
-    "name": "SAML-tracer",
-    "description": "A debugger for viewing SAML messages",
-    "manifest_version": 2,
-    "version": "1.4",
-    "applications": {
-        "gecko": {
-          "id": "{d3e01ff2-9a3a-4007-8f6e-7acd9a5de263}"
-        }
-    },
-    "homepage_url": "https://github.com/UNINETT/SAML-tracer",
-    "icons": {
-        "48": "src/resources/images/saml-as-square.png"
-    },
-    "permissions": [
-        "webRequest",
-        "webRequestBlocking",
-        "<all_urls>"
-    ],
-    "background": {
-        "scripts": ["bootstrap.js"]
-    },
-    "browser_action": {
-        "default_icon": "src/resources/images/saml-as-square.png"
-    }
+  "name": "SAML-tracer",
+  "description": "A debugger for viewing SAML messages",
+  "author": "Olav Morken, Jaime Perez",
+  "manifest_version": 2,
+  "version": "1.4",
+  "homepage_url": "https://github.com/UNINETT/SAML-tracer",
+  "icons": {
+    "48": "src/resources/images/saml-as-square.png"
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["bootstrap.js"]
+  },
+  "browser_action": {
+    "default_icon": "src/resources/images/saml-as-square.png"
+  }
 }
