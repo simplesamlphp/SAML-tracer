@@ -216,7 +216,9 @@ SAMLTrace.Request.prototype = {
       parameters.forEach(parameter => {
         let splittedParameter = parameter.split('=');
         let name = splittedParameter[0];
-        let value = decodeURIComponent(splittedParameter[1] || '').replace(/\+/g, ' ');
+        // In theory the formData's values should remain urlencoded. But since the webRequest-API's 
+        // formData-object supplies these values decoded, we try to mime the same behaviour here.
+        let value = decodeURIComponent((splittedParameter[1] || '').replace(/\+/g, '%20'));
         formData[name] = [ value ];
       });
       return formData;
