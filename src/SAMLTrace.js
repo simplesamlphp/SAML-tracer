@@ -571,12 +571,18 @@ SAMLTrace.TraceWindow.prototype = {
   'reviseRedirectedRequestMethod' : function(request, id) {
     const isRedirected = requestId => {
       let parentRequest = this.httpRequests.find(r => r.req.requestId === requestId);
-      return parentRequest && parentRequest.res && parentRequest.res.statusCode === 302;
+      return parentRequest && parentRequest.res && (parentRequest.res.statusCode === 302 || parentRequest.res.statusCode === 303);
     };
 
-    // The webRequest-API seems to keep the HTTP verbs which is correct in resepct to RFC 2616 but
-    // differs from a typical browser behaviour which will usually change the POST to a GET. So do we here...
-    // see: https://github.com/UNINETT/SAML-tracer/pull/23#issuecomment-345540591
+    // There are two cases which require SAML-tracer to manually revise the captured HTTP method of a traced request:
+    //
+    // * Case 1 (HTTP StatusCode 302): The webRequest-API seems to keep the HTTP verb which was used by the parent request. This
+    //   is correct in resepct to RFC 2616 but differs from a typical browser behaviour which will usually change the POST to a GET.
+    //   So do we here... See: https://github.com/UNINETT/SAML-tracer/pull/23#issuecomment-345540591
+    //
+    // * Case 2 (HTTP StatusCode 303): RFC 2616 says a 303 should be followed by using a GET. Unfortunately Firefox's webRequest-
+    //   API-implementation acts differently in this case. It follows such redirects by using a POST. Chrome's webRequest-API-
+    //   implementation acts correct and uses a GET. Hence for Firefox clients the method will be revised here.
     if (request.method === 'POST' && isRedirected(request.requestId)) {
       request.method = 'GET';
       id = id.replace('POST', 'GET');
