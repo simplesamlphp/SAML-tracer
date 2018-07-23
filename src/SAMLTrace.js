@@ -124,13 +124,14 @@ SAMLTrace.prettifyArtifact = function(artstring) {
       'Source ID: ' + SAMLTrace.bin2hex(artifact.substr(4,20));
 };
 
-SAMLTrace.UniqueRequestId = function(webRequestId, url) {
+SAMLTrace.UniqueRequestId = function(webRequestId, method, url) {
   this.webRequestId = webRequestId;
+  this.method = method;
   this.url = url;
 };
 SAMLTrace.UniqueRequestId.prototype = {
   'create' : function(onCreated) {
-    Hash.calculate(this.url).then(digest => onCreated("request-" + this.webRequestId + "-" + digest));
+    Hash.calculate(this.url).then(digest => onCreated("request-" + this.webRequestId + "-" + this.method + "-" + digest));
   }
 };
 
@@ -215,7 +216,9 @@ SAMLTrace.Request.prototype = {
       parameters.forEach(parameter => {
         let splittedParameter = parameter.split('=');
         let name = splittedParameter[0];
-        let value = decodeURIComponent(splittedParameter[1] || '').replace(/\+/g, ' ');
+        // In theory the formData's values should remain urlencoded. But since the webRequest-API's 
+        // formData-object supplies these values decoded, we try to mime the same behaviour here.
+        let value = decodeURIComponent((splittedParameter[1] || '').replace(/\+/g, '%20'));
         formData[name] = [ value ];
       });
       return formData;
@@ -425,7 +428,7 @@ SAMLTrace.RequestItem.prototype = {
 
     var hbox = document.createElement("div");
     hbox.setAttribute('flex', '1');
-    var uniqueRequestId = new SAMLTrace.UniqueRequestId(this.request.requestId, this.request.url);
+    var uniqueRequestId = new SAMLTrace.UniqueRequestId(this.request.requestId, this.request.method, this.request.url);
     uniqueRequestId.create(id => hbox.setAttribute('id', id));
     hbox.setAttribute('class', 'list-row');
     hbox.appendChild(methodLabel);
@@ -565,6 +568,28 @@ SAMLTrace.TraceWindow.prototype = {
     statusItem.innerText = status;
   },
 
+  'reviseRedirectedRequestMethod' : function(request, id) {
+    const isRedirected = requestId => {
+      let parentRequest = this.httpRequests.find(r => r.req.requestId === requestId);
+      return parentRequest && parentRequest.res && (parentRequest.res.statusCode === 302 || parentRequest.res.statusCode === 303);
+    };
+
+    // There are two cases which require SAML-tracer to manually revise the captured HTTP method of a traced request:
+    //
+    // * Case 1 (HTTP StatusCode 302): The webRequest-API seems to keep the HTTP verb which was used by the parent request. This
+    //   is correct in resepct to RFC 2616 but differs from a typical browser behaviour which will usually change the POST to a GET.
+    //   So do we here... See: https://github.com/UNINETT/SAML-tracer/pull/23#issuecomment-345540591
+    //
+    // * Case 2 (HTTP StatusCode 303): RFC 2616 says a 303 should be followed by using a GET. Unfortunately Firefox's webRequest-
+    //   API-implementation acts differently in this case. It follows such redirects by using a POST. Chrome's webRequest-API-
+    //   implementation acts correct and uses a GET. Hence for Firefox clients the method will be revised here.
+    if (request.method === 'POST' && isRedirected(request.requestId)) {
+      request.method = 'GET';
+      id = id.replace('POST', 'GET');
+    }
+    return { id: id, request: request };
+  },
+
   'saveNewRequest' : function(request) { // onBeforeRequest
     let tracer = SAMLTrace.TraceWindow.instance();
     if (tracer.pauseTracing) {
@@ -572,36 +597,24 @@ SAMLTrace.TraceWindow.prototype = {
       return;
     }
 
-    var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
+    var uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.method, request.url);
     uniqueRequestId.create(id => {
-      var isRedirected = function(requestId) {
-        var parentRequest = tracer.httpRequests.find(r => r.req.requestId === requestId);
-        if (parentRequest != null && parentRequest.res != null && parentRequest.res.statusCode === 302) {
-          return true;
-        }
-        return false;
-      };
-
-      // The webRequest-API seems to keep the HTTP verbs which is correct in resepct to RFC 2616 but
-      // differs from a typical browser behaviour which will usually change the POST to a GET. So do we here...
-      // see: https://github.com/UNINETT/SAML-tracer/pull/23#issuecomment-345540591
-      if (request.method === 'POST' && isRedirected(request.requestId)) {
-        console.log(`Redirected 302-request '${id}' is a POST but is here changed to a GET to conform to browser behaviour...`);
-        request.method = 'GET';
-      }
-
-      var entry = {
-        id: id,
-        req: request
-      };
+      // Maybe revise the HTTP method on redirected requests
+      let alterationResult = tracer.reviseRedirectedRequestMethod(request, id);
+      let entry = { id: alterationResult.id, req: alterationResult.request };
       tracer.httpRequests.push(entry);
     });
   },
 
   'attachHeadersToRequest' : function(request) { // onBeforeSendHeaders
-    let uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.url);
+    let uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.method, request.url);
     uniqueRequestId.create(id => {
       let tracer = SAMLTrace.TraceWindow.instance();
+
+      // Maybe revise the HTTP method on redirected requests
+      let alterationResult = tracer.reviseRedirectedRequestMethod(request, id);
+      id = alterationResult.id;
+
       let entry = tracer.httpRequests.find(req => req.id === id);
       if (!entry) {
         // Skip further execution if no precedingly issued request can be found. This may occur, if tracing
@@ -616,9 +629,14 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'attachResponseToRequest' : function(response) { // onHeadersReceived
-    let uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.url);
+    let uniqueRequestId = new SAMLTrace.UniqueRequestId(response.requestId, response.method, response.url);
     uniqueRequestId.create(id => {
       let tracer = SAMLTrace.TraceWindow.instance();
+
+      // Maybe revise the HTTP method on redirected requests
+      let alterationResult = tracer.reviseRedirectedRequestMethod(response, id);
+      id = alterationResult.id;
+
       let entry = tracer.httpRequests.find(req => req.id === id);
       if (!entry) {
         // Skip further execution if no precedingly issued request can be found. This may occur, if tracing
