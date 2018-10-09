@@ -703,6 +703,8 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'showRequest' : function(requestItem) {
+    var requestInfoTabbox = document.getElementById('request-info-tabbox');
+    requestInfoTabbox.innerText = "";
     var requestInfoContent = document.getElementById('request-info-content');
     if (requestItem === null) {
       requestInfoContent.innerText = "";
@@ -710,8 +712,6 @@ SAMLTrace.TraceWindow.prototype = {
     }
     this.requestItem = requestItem;
 
-    var requestInfoTabbox = document.getElementById('request-info-tabbox');
-    requestInfoTabbox.innerText = "";
     for (var i = 0; i < requestItem.availableTabs.length; i++) {
       var name = requestItem.availableTabs[i];
       this.addRequestTab(name, requestInfoTabbox, requestInfoContent);
