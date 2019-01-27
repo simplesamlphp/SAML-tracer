@@ -60,11 +60,11 @@ SAMLTrace.prettifyXML = function(xmlstring) {
   }
 
   function xmlEntities(string) {
-    string = string.replace('&', '&amp;', 'g');
-    string = string.replace('"', '&quot;', 'g');
-    string = string.replace("'", '&apos;', 'g');
-    string = string.replace('<', '&lt;', 'g');
-    string = string.replace('>', '&gt;', 'g');
+    string = string.replace(/&/g, '&amp;');
+    string = string.replace(/"/g, '&quot;');
+    string = string.replace(/'/g, '&apos;');
+    string = string.replace(/</g, '&lt;');
+    string = string.replace(/>/g, '&gt;');
     return string;
   }
 
