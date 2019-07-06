@@ -25,6 +25,14 @@ SAMLTrace.b64inflate = function (data) {
   return String.fromCharCode.apply(String, inflated);
 };
 
+SAMLTrace.b64DecodeUnicode = function(str) {
+  // Taken from: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
+  // Going backwards: from bytestream, to percent-encoding, to original string.
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+};
+
 SAMLTrace.bin2hex = function(s) {
   var i; var l; var n; var o = '';
   for (i = 0, l = s.length; i < l; i++) {
@@ -296,7 +304,7 @@ SAMLTrace.Request.prototype = {
 
     const returnValueAsIs = msg => msg;
     const returnValueB64Inflated = msg => !msg ? null : SAMLTrace.b64inflate(msg);
-    const returnValueWithRemovedWhitespaceAndAtoB = msg => !msg ? null : atob(msg.replace(/\s/g, ''));
+    const returnValueWithRemovedWhitespaceAndAtoB = msg => !msg ? null : SAMLTrace.b64DecodeUnicode(msg.replace(/\s/g, ''));
 
     let queries = [];
     if (this.protocol === "SAML-P") {
