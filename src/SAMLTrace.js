@@ -280,6 +280,20 @@ SAMLTrace.Request.prototype = {
       let isInPost = isAnyParameterInCollection(parameters, this.post);
       return isInGet || isInPost;
     };
+    
+    const isSamlResponse = () => {
+      const parameters = ["SAMLResponse"];
+      let isInGet = isAnyParameterInCollection(parameters, this.get);
+      let isInPost = isAnyParameterInCollection(parameters, this.post);
+      return isInGet || isInPost;
+    };
+    
+    const isSamlRequest = () => {
+      const parameters = ["SAMLRequest"];
+      let isInGet = isAnyParameterInCollection(parameters, this.get);
+      let isInPost = isAnyParameterInCollection(parameters, this.post);
+      return isInGet || isInPost;
+    };    
 
     const isWsFederation = () => {
       // all probably relevant WS-Federation parameters -> ["wa", "wreply", "wres", "wctx", "wp", "wct", "wfed", "wencoding", "wtrealm", "wfresh", "wauth", "wreq", "whr", "wreqptr", "wresult", "wresultptr", "wattr", "wattrptr", "wpseudo", "wpseudoptr"];
@@ -294,6 +308,18 @@ SAMLTrace.Request.prototype = {
       this.protocol = "SAML-P";
     } else if (isWsFederation()) {
       this.protocol = "WS-Fed";
+    }
+    
+    if (isSamlResponse()) {
+        this.samlresponse = true;
+    } else {
+        this.samlresponse = false;
+    }
+    
+    if (isSamlRequest()) {
+        this.samlrequest = true;
+    } else {
+        this.samlrequest = false;
     }
   },
   'parseSAML' : function() {
@@ -346,6 +372,12 @@ SAMLTrace.RequestItem = function(request) {
   }
   if (this.request.saml != null || this.request.samlart != null) {
     this.availableTabs.push('SAML');
+  }
+  if (this.request.samlresponse == true ) {
+    this.availableTabs.push('Response');
+  } 
+  if (this.request.samlrequest == true) {
+    this.availableTabs.push('Request');
   }
 };
 SAMLTrace.RequestItem.prototype = {
@@ -405,6 +437,63 @@ SAMLTrace.RequestItem.prototype = {
     }
     target.appendChild(doc.createTextNode(samlFormatted));
   },
+  
+  'showResponse' : function(target) {
+    var doc = target.ownerDocument;
+    
+    if (this.request.saml) {
+      var attrText = "";
+      parser = new DOMParser();
+      var xmldoc = parser.parseFromString(this.request.saml,"text/xml");
+      
+      attrText += "Subject".padEnd(20," ") + " = " + xmldoc.getElementsByTagNameNS('*','Subject')[0].textContent + "\n\n";
+      if (xmldoc.getElementsByTagNameNS('*','AttributeStatement')[0]) {
+        attrText += "~ Attributes ~\n";
+        allattr = xmldoc.getElementsByTagNameNS('*','AttributeStatement')[0].childNodes;
+        for(i=0;i<allattr.length;i++) {
+          attrText += allattr[i].getAttribute('Name').padEnd(20," ") + " = " + allattr[i].textContent + "\n";
+        }
+      }
+      
+      attrText += "\n";
+      attrText += "Audience (EntityID)".padEnd(20," ")  + " = " +xmldoc.getElementsByTagNameNS('*','Audience')[0].textContent + "\n";
+      attrText += "Destination".padEnd(20," ")          + " = " +xmldoc.childNodes[0].attributes['Destination'].value+ "\n";
+      
+    } else { var attrText = "";}
+    
+    target.appendChild(doc.createTextNode(attrText));
+  },
+  
+  'showRequest' : function(target) {
+    var doc = target.ownerDocument;
+    
+    if (this.request.saml) {
+      var respText = "";
+      parser = new DOMParser();
+      var xmldoc       = parser.parseFromString(this.request.saml,"text/xml");
+      
+      var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest')[0];      
+      if (AuthnRequest) {
+        respText += "AuthnRequest\n";
+        respText += "Destination".padEnd(20," ")       + " = " + AuthnRequest.attributes['Destination'].value + "\n";
+        if (AuthnRequest.attributes['AssertionConsumerServiceURL']) {
+            respText += "ACS".padEnd(20," ")               + " = " + AuthnRequest.attributes['AssertionConsumerServiceURL'].value + "\n";
+        }
+        respText += "Issuer (EntityID)".padEnd(20," ") + " = " + xmldoc.getElementsByTagNameNS('*','Issuer')[0].textContent +"\n";
+      } 
+
+      var LogoutRequest = xmldoc.getElementsByTagNameNS('*','LogoutRequest')[0];
+      if (LogoutRequest) {
+        respText += "LogoutRequest\n";
+        respText += "Destination".padEnd(20," ")       + " = " + LogoutRequest.attributes['Destination'].value + "\n";
+        respText += "Issuer (EntityID)".padEnd(20," ") + " = " + xmldoc.getElementsByTagNameNS('*','Issuer')[0].textContent +"\n";
+        respText += "NameID".padEnd(20," ")            + " = " + xmldoc.getElementsByTagNameNS('*','NameID')[0].textContent +"\n";
+      }
+    
+    } else { var respText = "";}
+
+    target.appendChild(doc.createTextNode(respText));
+  },
 
   'showContent' : function(target, type) {
     target.innerText = "";
@@ -418,6 +507,12 @@ SAMLTrace.RequestItem.prototype = {
     case 'SAML':
       this.showSAML(target);
       break;
+    case 'Response':
+      this.showResponse(target);
+      break;
+    case 'Request':
+      this.showRequest(target);
+      break;    
     }
   },
 
