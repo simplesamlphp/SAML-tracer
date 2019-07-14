@@ -6,7 +6,7 @@
   "version": "1.5.1",
   "homepage_url": "https://github.com/UNINETT/SAML-tracer",
   "icons": {
-    "48": "src/resources/images/saml-as-square.png"
+    "48": "src/resources/images/icon.svg"
   },
   "permissions": [
     "webRequest",
@@ -17,6 +17,6 @@
     "scripts": ["bootstrap.js"]
   },
   "browser_action": {
-    "default_icon": "src/resources/images/saml-as-square.png"
+    "default_icon": "src/resources/images/icon.svg"
   }
 }
