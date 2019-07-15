@@ -6,7 +6,11 @@
   "version": "1.5.1",
   "homepage_url": "https://github.com/UNINETT/SAML-tracer",
   "icons": {
-    "48": "src/resources/images/icon.svg"
+    "16": "src/resources/images/icon16.png",
+    "32": "src/resources/images/icon32.png",
+    "48": "src/resources/images/icon48.png",
+    "96": "src/resources/images/icon96.png",
+    "128": "src/resources/images/icon128.png"
   },
   "permissions": [
     "webRequest",
@@ -17,6 +21,12 @@
     "scripts": ["bootstrap.js"]
   },
   "browser_action": {
-    "default_icon": "src/resources/images/icon.svg"
+    "default_icon": {
+      "16": "src/resources/images/icon16.png",
+      "32": "src/resources/images/icon32.png",
+      "48": "src/resources/images/icon48.png",
+      "96": "src/resources/images/icon96.png",
+      "128": "src/resources/images/icon128.png"
+    }
   }
 }
