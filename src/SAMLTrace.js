@@ -426,37 +426,99 @@ SAMLTrace.RequestItem.prototype = {
     var samlSummary = "";
     var parser  = new DOMParser();
     var xmldoc  = parser.parseFromString(this.request.saml,"text/xml");
-    var padSize = 70;
 
     /* Check for AuthnRequest */
-    var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest')[0];
-    if (AuthnRequest) {
-        var destination = AuthnRequest.attributes['Destination'];
-        if (destination) { samlSummary += "Destination".padEnd(padSize," ") + "= " + destination.value + "\n"; }
+    var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest');
+    if (AuthnRequest.length>0) {
+        samlSummary += '\nAuthnRequest: \n';
+        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'Destination');
+        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'ForceAuthn');
+        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'AssertionConsumerServiceURL');
+    }
+    
+    /* Check for Issuer*/
+    var Issuer = xmldoc.getElementsByTagNameNS('*','Issuer');
+    if (Issuer.length>0) { 
+        samlSummary += this.summaryAddAttText(Issuer[0],'Issuer');
     }
 
     /* Check for Subject */
-    if (xmldoc.getElementsByTagNameNS('*','Subject')) {
-        samlSummary += "Subject".padEnd(padSize," ") + "= " + xmldoc.getElementsByTagNameNS('*','Subject')[0].textContent + "\n";
+    var Subject = xmldoc.getElementsByTagNameNS('*','Subject');
+    if (Subject.length>0) {
+        samlSummary += this.summaryAddAttText(Subject[0],'Subject');
     }
 
     /* Check for AttributeStatement */
-    if (xmldoc.getElementsByTagNameNS('*','AttributeStatement')) {
-        var attrStatement = xmldoc.getElementsByTagNameNS('*','AttributeStatement')[0].childNodes;
-        if (attrStatement.length>0) { samlSummary += "AttributeStatement:\n";}
-        for (i = 0; i < attrStatement.length; i++) {
-            var attribute = attrStatement[i];
+    var AttributeStatement = xmldoc.getElementsByTagNameNS('*','AttributeStatement');
+    if (AttributeStatement.length>0) {
+        var AttributeStatementChilds = AttributeStatement[0].childNodes;
+        if (AttributeStatementChilds.length>0) { 
+            samlSummary += "\nAttributeStatement:\n";}
+        for (i = 0; i < AttributeStatementChilds.length; i++) {
+            var attribute = AttributeStatementChilds[i];
             var attributeName = attribute.getAttribute('Name');
             var attributeValues = [];
             for (j = 0; j<attribute.childNodes.length; j++) {
-                attributeValues.push(attribute.childNodes[j].textContent);
+                if (j==0) {
+                    samlSummary += this.summaryAddAttText(attribute.childNodes[j],attributeName);
+                } else {
+                    samlSummary += this.summaryAddAttText(attribute.childNodes[j]," ");
+                }
             }
-            samlSummary += attributeName.padEnd(padSize," ") + "= " + attributeValues.join(",") + "\n";
+            
         }
+    }
+    
+    /* Check for LogoutRequest */
+    var LogoutRequest = xmldoc.getElementsByTagNameNS('*','LogoutRequest');
+    if (LogoutRequest.length>0) {
+        samlSummary += '\nLogoutRequest: \n';
+        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'Destination');
+    }
+    
+    /* Check for NameID */
+    var NameID = xmldoc.getElementsByTagNameNS('*','NameID');
+    if (NameID.length>0) {
+        samlSummary += this.summaryAddAttText(NameID[0],'NameID');
     }
 
     target.appendChild(doc.createTextNode(samlSummary));
   },
+  
+  'summaryAddAttVal' : function(node,attrName) {
+      var s="";
+      try {
+        var attr = node.attributes[attrName];
+        if (attr) {
+            s += attrName.padEnd(70," ");
+            s += "= "+attr.value;
+            s += "\n";
+            return s;
+        }
+      } catch(error) {
+        console.log(error);
+        return "";
+      }
+      return s;
+  },
+
+  'summaryAddAttText' : function(node,description) {
+      var s="";
+      try {
+        var attr = node.textContent.trim();
+        if (attr.length>0) {
+            s += description.padEnd(70," ");
+            s += "= "+attr;
+            s += "\n";
+            return s;
+        }
+      } catch(error) {
+        console.log(error);
+        return "";
+      }
+      return s;
+  },
+
 
   'showContent' : function(target, type) {
     target.innerText = "";
