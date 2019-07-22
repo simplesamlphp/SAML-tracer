@@ -59,15 +59,6 @@ SAMLTrace.prettifyXML = function(xmlstring) {
     return true;
   }
 
-  function xmlEntities(string) {
-    string = string.replace(/&/g, '&amp;');
-    string = string.replace(/"/g, '&quot;');
-    string = string.replace(/'/g, '&apos;');
-    string = string.replace(/</g, '&lt;');
-    string = string.replace(/>/g, '&gt;');
-    return string;
-  }
-
   function prettifyElement(element, indentation) {
     var ret = indentation + '<' + element.nodeName;
 
@@ -83,7 +74,7 @@ SAMLTrace.prettifyXML = function(xmlstring) {
       if (i > 0) {
         ret += '\n' + attrIndent;
       }
-      ret += ' ' + a.nodeName + '="' + xmlEntities(a.value) + '"';
+      ret += ' ' + a.nodeName + '="' + a.value + '"';
     }
 
     if (isEmptyElement(element)) {
@@ -103,7 +94,7 @@ SAMLTrace.prettifyXML = function(xmlstring) {
     }
 
     if (isTextElement(element)) {
-      return ret + xmlEntities(element.textContent) + '</' + element.nodeName + '>\n';
+      return ret + element.textContent + '</' + element.nodeName + '>\n';
     }
 
     ret += '\n';
