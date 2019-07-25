@@ -364,6 +364,8 @@ SAMLTrace.RequestItem = function(request) {
   }
 };
 SAMLTrace.RequestItem.prototype = {
+  'shortPadding' :  25,
+  'longPadding'  :  70,
 
   'showHTTP' : function(target) {
     var doc = target.ownerDocument;
@@ -448,6 +450,11 @@ SAMLTrace.RequestItem.prototype = {
         samlSummary += this.summaryAddAttText(Subject[0],'Subject');
     }
 
+    /* Check for NameID */
+    var NameID = xmldoc.getElementsByTagNameNS('*','NameID');
+    if (NameID.length>0) {
+        samlSummary += this.summaryAddAttText(NameID[0],'NameID');
+    }
     /* Check for AttributeStatement */
     var AttributeStatement = xmldoc.getElementsByTagNameNS('*','AttributeStatement');
     if (AttributeStatement.length>0) {
@@ -459,11 +466,7 @@ SAMLTrace.RequestItem.prototype = {
             var attributeName = attribute.getAttribute('Name');
             var attributeValues = [];
             for (j = 0; j<attribute.childNodes.length; j++) {
-                if (j==0) {
-                    samlSummary += this.summaryAddAttText(attribute.childNodes[j],attributeName);
-                } else {
-                    samlSummary += this.summaryAddAttText(attribute.childNodes[j]," ");
-                }
+                    samlSummary += this.summaryAddAttText(attribute.childNodes[j],attributeName,' * ',this.longPadding);
             }
             
         }
@@ -476,21 +479,16 @@ SAMLTrace.RequestItem.prototype = {
         samlSummary += this.summaryAddAttVal(AuthnRequest[0],'Destination');
     }
     
-    /* Check for NameID */
-    var NameID = xmldoc.getElementsByTagNameNS('*','NameID');
-    if (NameID.length>0) {
-        samlSummary += this.summaryAddAttText(NameID[0],'NameID');
-    }
 
     target.appendChild(doc.createTextNode(samlSummary));
   },
   
-  'summaryAddAttVal' : function(node,attrName) {
+  'summaryAddAttVal' : function(node,attrName,decorator='',padLen=this.shortPadding) {
       var s="";
       try {
         var attr = node.attributes[attrName];
         if (attr) {
-            s += attrName.padEnd(70," ");
+            s += (decorator+attrName).padEnd(padLen," ");
             s += "= "+attr.value;
             s += "\n";
             return s;
@@ -502,12 +500,12 @@ SAMLTrace.RequestItem.prototype = {
       return s;
   },
 
-  'summaryAddAttText' : function(node,description) {
+  'summaryAddAttText' : function(node,description,decorator='',padLen=this.shortPadding) {
       var s="";
       try {
         var attr = node.textContent.trim();
         if (attr.length>0) {
-            s += description.padEnd(70," ");
+            s += (decorator+description).padEnd(padLen," ");
             s += "= "+attr;
             s += "\n";
             return s;
