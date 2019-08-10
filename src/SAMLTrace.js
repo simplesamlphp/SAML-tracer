@@ -281,20 +281,6 @@ SAMLTrace.Request.prototype = {
       return isInGet || isInPost;
     };
     
-    const isSamlResponse = () => {
-      const parameters = ["SAMLResponse"];
-      let isInGet = isAnyParameterInCollection(parameters, this.get);
-      let isInPost = isAnyParameterInCollection(parameters, this.post);
-      return isInGet || isInPost;
-    };
-    
-    const isSamlRequest = () => {
-      const parameters = ["SAMLRequest"];
-      let isInGet = isAnyParameterInCollection(parameters, this.get);
-      let isInPost = isAnyParameterInCollection(parameters, this.post);
-      return isInGet || isInPost;
-    };    
-
     const isWsFederation = () => {
       // all probably relevant WS-Federation parameters -> ["wa", "wreply", "wres", "wctx", "wp", "wct", "wfed", "wencoding", "wtrealm", "wfresh", "wauth", "wreq", "whr", "wreqptr", "wresult", "wresultptr", "wattr", "wattrptr", "wpseudo", "wpseudoptr"];
       // the most common ones should suffice:
@@ -364,7 +350,7 @@ SAMLTrace.RequestItem = function(request) {
   }
 };
 SAMLTrace.RequestItem.prototype = {
-  'shortPadding' :  25,
+  'shortPadding' :  28,
   'longPadding'  :  70,
 
   'showHTTP' : function(target) {
@@ -432,28 +418,28 @@ SAMLTrace.RequestItem.prototype = {
     /* Check for AuthnRequest */
     var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest');
     if (AuthnRequest.length>0) {
-        samlSummary += '\nAuthnRequest: \n';
-        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'Destination');
-        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'ForceAuthn');
-        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'AssertionConsumerServiceURL');
+        samlSummary += 'AuthnRequest: \n';
+        if (AuthnRequest[0].attributes['Destination'])                 { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['Destination'].value                , 'Destination'                ); }
+        if (AuthnRequest[0].attributes['ForceAuthn'])                  { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['ForceAuthn'].value                 , 'ForceAuthn'                 ); }
+        if (AuthnRequest[0].attributes['AssertionConsumerServiceURL']) { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['AssertionConsumerServiceURL'].value, 'AssertionConsumerServiceURL'); }
     }
     
     /* Check for Issuer*/
     var Issuer = xmldoc.getElementsByTagNameNS('*','Issuer');
     if (Issuer.length>0) { 
-        samlSummary += this.summaryAddAttText(Issuer[0],'Issuer');
+        samlSummary += this.summaryAdd(Issuer[0].textContent,'Issuer');
     }
 
     /* Check for Subject */
     var Subject = xmldoc.getElementsByTagNameNS('*','Subject');
     if (Subject.length>0) {
-        samlSummary += this.summaryAddAttText(Subject[0],'Subject');
+        samlSummary += this.summaryAdd(Subject[0].textContent,'Subject');
     }
 
     /* Check for NameID */
     var NameID = xmldoc.getElementsByTagNameNS('*','NameID');
     if (NameID.length>0) {
-        samlSummary += this.summaryAddAttText(NameID[0],'NameID');
+        samlSummary += this.summaryAdd(NameID[0].textContent,'NameID');
     }
     /* Check for AttributeStatement */
     var AttributeStatement = xmldoc.getElementsByTagNameNS('*','AttributeStatement');
@@ -464,57 +450,33 @@ SAMLTrace.RequestItem.prototype = {
         for (i = 0; i < AttributeStatementChilds.length; i++) {
             var attribute = AttributeStatementChilds[i];
             var attributeName = attribute.getAttribute('Name');
-            var attributeValues = [];
             for (j = 0; j<attribute.childNodes.length; j++) {
-                    samlSummary += this.summaryAddAttText(attribute.childNodes[j],attributeName,' * ',this.longPadding);
+                    samlSummary += this.summaryAdd(attribute.childNodes[j].textContent,attributeName,' * ',this.longPadding);
             }
-            
         }
     }
     
     /* Check for LogoutRequest */
     var LogoutRequest = xmldoc.getElementsByTagNameNS('*','LogoutRequest');
     if (LogoutRequest.length>0) {
-        samlSummary += '\nLogoutRequest: \n';
-        samlSummary += this.summaryAddAttVal(AuthnRequest[0],'Destination');
+        samlSummary += 'LogoutRequest: \n';
+        if (AuthnRequest[0].attributes['Destination']) { 
+          samlSummary += this.summaryAddAttVal(AuthnRequest[0].attributes['Destination'].value,'Destination');
+        }
     }
     
 
     target.appendChild(doc.createTextNode(samlSummary));
   },
   
-  'summaryAddAttVal' : function(node,attrName,decorator='',padLen=this.shortPadding) {
-      var s="";
-      try {
-        var attr = node.attributes[attrName];
-        if (attr) {
-            s += (decorator+attrName).padEnd(padLen," ");
-            s += "= "+attr.value;
-            s += "\n";
-            return s;
-        }
-      } catch(error) {
-        console.log(error);
-        return "";
-      }
-      return s;
-  },
-
-  'summaryAddAttText' : function(node,description,decorator='',padLen=this.shortPadding) {
-      var s="";
-      try {
-        var attr = node.textContent.trim();
-        if (attr.length>0) {
-            s += (decorator+description).padEnd(padLen," ");
-            s += "= "+attr;
-            s += "\n";
-            return s;
-        }
-      } catch(error) {
-        console.log(error);
-        return "";
-      }
-      return s;
+  'summaryAdd' : function(value,description,decorator='',padLen=this.shortPadding) {
+    let s="";
+    if (value) {
+      s += (decorator+description).padEnd(padLen," ");
+      s += "= "+value;
+      s += "\n";
+    }
+    return s;
   },
 
 
