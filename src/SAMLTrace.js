@@ -280,7 +280,7 @@ SAMLTrace.Request.prototype = {
       let isInPost = isAnyParameterInCollection(parameters, this.post);
       return isInGet || isInPost;
     };
-
+    
     const isWsFederation = () => {
       // all probably relevant WS-Federation parameters -> ["wa", "wreply", "wres", "wctx", "wp", "wct", "wfed", "wencoding", "wtrealm", "wfresh", "wauth", "wreq", "whr", "wreqptr", "wresult", "wresultptr", "wattr", "wattrptr", "wpseudo", "wpseudoptr"];
       // the most common ones should suffice:
@@ -346,9 +346,12 @@ SAMLTrace.RequestItem = function(request) {
   }
   if (this.request.saml != null || this.request.samlart != null) {
     this.availableTabs.push('SAML');
+    this.availableTabs.push('Summary');
   }
 };
 SAMLTrace.RequestItem.prototype = {
+  'shortPadding' :  28,
+  'longPadding'  :  70,
 
   'showHTTP' : function(target) {
     var doc = target.ownerDocument;
@@ -405,6 +408,77 @@ SAMLTrace.RequestItem.prototype = {
     }
     target.appendChild(doc.createTextNode(samlFormatted));
   },
+  
+  'showSummary' : function(target) {
+    var doc = target.ownerDocument;
+    var samlSummary = "";
+    var parser  = new DOMParser();
+    var xmldoc  = parser.parseFromString(this.request.saml,"text/xml");
+
+    /* Check for AuthnRequest */
+    var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest');
+    if (AuthnRequest.length>0) {
+        samlSummary += 'AuthnRequest: \n';
+        if (AuthnRequest[0].attributes['Destination'])                 { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['Destination'].value                , 'Destination'                ); }
+        if (AuthnRequest[0].attributes['ForceAuthn'])                  { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['ForceAuthn'].value                 , 'ForceAuthn'                 ); }
+        if (AuthnRequest[0].attributes['AssertionConsumerServiceURL']) { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['AssertionConsumerServiceURL'].value, 'AssertionConsumerServiceURL'); }
+    }
+    
+    /* Check for Issuer*/
+    var Issuer = xmldoc.getElementsByTagNameNS('*','Issuer');
+    if (Issuer.length>0) { 
+        samlSummary += this.summaryAdd(Issuer[0].textContent,'Issuer');
+    }
+
+    /* Check for Subject */
+    var Subject = xmldoc.getElementsByTagNameNS('*','Subject');
+    if (Subject.length>0) {
+        samlSummary += this.summaryAdd(Subject[0].textContent,'Subject');
+    }
+
+    /* Check for NameID */
+    var NameID = xmldoc.getElementsByTagNameNS('*','NameID');
+    if (NameID.length>0) {
+        samlSummary += this.summaryAdd(NameID[0].textContent,'NameID');
+    }
+    /* Check for AttributeStatement */
+    var AttributeStatement = xmldoc.getElementsByTagNameNS('*','AttributeStatement');
+    if (AttributeStatement.length>0) {
+        var AttributeStatementChilds = AttributeStatement[0].childNodes;
+        if (AttributeStatementChilds.length>0) { 
+            samlSummary += "\nAttributeStatement:\n";}
+        for (i = 0; i < AttributeStatementChilds.length; i++) {
+            var attribute = AttributeStatementChilds[i];
+            var attributeName = attribute.getAttribute('Name');
+            for (j = 0; j<attribute.childNodes.length; j++) {
+                    samlSummary += this.summaryAdd(attribute.childNodes[j].textContent,attributeName,' * ',this.longPadding);
+            }
+        }
+    }
+    
+    /* Check for LogoutRequest */
+    var LogoutRequest = xmldoc.getElementsByTagNameNS('*','LogoutRequest');
+    if (LogoutRequest.length>0) {
+        samlSummary += 'LogoutRequest: \n';
+        if (AuthnRequest[0].attributes['Destination']) { 
+          samlSummary += this.summaryAddAttVal(AuthnRequest[0].attributes['Destination'].value,'Destination');
+        }
+    }
+    
+
+    target.appendChild(doc.createTextNode(samlSummary));
+  },
+  
+  'summaryAdd' : function(value,description,decorator='',padLen=this.shortPadding) {
+    let s="";
+    if (value) {
+      s += (decorator+description).padEnd(padLen," ");
+      s += "= "+value;
+      s += "\n";
+    }
+    return s;
+  },
+
 
   'showContent' : function(target, type) {
     target.innerText = "";
@@ -417,6 +491,9 @@ SAMLTrace.RequestItem.prototype = {
       break;
     case 'SAML':
       this.showSAML(target);
+      break;
+    case 'Summary':
+      this.showSummary(target);
       break;
     }
   },
