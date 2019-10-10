@@ -134,11 +134,9 @@ a.tab:hover {
 }
 .request-clerror{
   color: red;
-  font-weight: bold;
 }
 .request-srerror{
   color: red;
-  font-weight: bold;
 }
 .request-other{
   color: black;
