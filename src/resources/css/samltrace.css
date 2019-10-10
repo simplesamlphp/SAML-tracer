@@ -91,6 +91,7 @@ a.tab:hover {
   display: flex;
   white-space: nowrap;
   border-bottom: 1px dotted #cccccc;
+  color: #999999;
 }
 .list-row:hover {
   background-color: #E6F0FA;
