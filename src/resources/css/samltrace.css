@@ -96,6 +96,9 @@ a.tab:hover {
 .list-row:hover {
   background-color: #E6F0FA;
 }
+.list-row.monochrome {
+  color: unset;
+}
 .list-row.selected {
   color: #96C8F5;
   background-color: #0074e8;

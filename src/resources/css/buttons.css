@@ -45,6 +45,12 @@
 #button-filter.button.active {
   background: url("../images/icons/button-filter-active.png") no-repeat 4px 50%;
 }
+#button-colorize {
+  background: url("../images/icons/button-colorize-default.png") no-repeat 4px 50%;
+}
+#button-colorize.button.active {
+  background: url("../images/icons/button-colorize-active.png") no-repeat 4px 50%;
+}
 #button-export-list {
   background: url("../images/icons/button-export-default.png") no-repeat 4px 50%;
 }
