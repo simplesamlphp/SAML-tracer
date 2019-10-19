@@ -676,6 +676,11 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'saveNewRequest' : function(request) { // onBeforeRequest
+    if (request.requestId.startsWith("fakeRequest-")) {
+      // Skip tracing fake requests that are issued by firefox for e.g. thumbnails of websites from about:blank
+      return;
+    }
+
     let tracer = SAMLTrace.TraceWindow.instance();
     if (tracer.pauseTracing) {
       // Skip tracing new requests
