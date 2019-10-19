@@ -646,7 +646,7 @@ SAMLTrace.TraceWindow.prototype = {
   'updateStatusBar' : function() {
     var hiddenElementsString = "";
     if (this.filterResources) {
-      hiddenElementsString = ` (${this.httpRequests.filter(req => !req.isVisible).length} hidden)`;
+      hiddenElementsString = ` (${this.httpRequests.filter(req => typeof req.isVisible !== "undefined" && !req.isVisible).length} hidden)`;
     }
     var status = `${this.httpRequests.length} requests received ${hiddenElementsString}`;
     var statusItem = document.getElementById('statuspanel');
