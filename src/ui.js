@@ -146,7 +146,7 @@ ui = {
     let autoScrollButton = document.getElementById("button-autoscroll");
 
     requestList.addEventListener("scroll", e => {
-      let wasScrolledUp = requestList.scrollTop < requestList.scrollTopMax;
+      let wasScrolledUp = requestList.scrollTop < requestList.scrollHeight - requestList.clientHeight;
       let activateAutoscroll = !wasScrolledUp;
 
       ui.setButtonState(autoScrollButton, activateAutoscroll);
