@@ -540,6 +540,7 @@ SAMLTrace.TraceWindow = function() {
   this.pauseTracing = false;
   this.autoScroll = true;
   this.filterResources = true;
+  this.colorizeRequests = true;
 };
 
 SAMLTrace.TraceWindow.prototype = {
@@ -632,6 +633,10 @@ SAMLTrace.TraceWindow.prototype = {
   'setFilterResources' : function(filterResources) {
     this.filterResources = filterResources;
     this.updateStatusBar();
+  },
+
+  'setColorizeRequests' : function(colorizeRequests) {
+    this.colorizeRequests = colorizeRequests;
   },
 
   'updateStatusBar' : function() {
@@ -753,6 +758,10 @@ SAMLTrace.TraceWindow.prototype = {
           if (!tracer.filterResources) {
             requestDiv.classList.add("displayAnyway");
           }
+        }
+
+        if (!tracer.colorizeRequests) {
+          requestDiv.classList.add("monochrome");
         }
         
         entry.isVisible = isVisible;

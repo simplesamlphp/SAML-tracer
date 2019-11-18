@@ -77,6 +77,16 @@ ui = {
         Array.from(hidableRows).forEach(row => row.classList.add("displayAnyway"));
       }
     }, true);
+    document.getElementById("button-colorize").addEventListener("click", e => {
+      let newState = ui.toggleButtonState(e.target);
+      window.tracer.setColorizeRequests(newState);
+      let allRequests = document.getElementsByClassName("list-row");
+      if (newState) {
+        Array.from(allRequests).forEach(row => row.classList.remove("monochrome"));
+      } else {
+        Array.from(allRequests).forEach(row => row.classList.add("monochrome"));
+      }
+    }, true);
     document.getElementById("button-export-list").addEventListener("click", () => {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";

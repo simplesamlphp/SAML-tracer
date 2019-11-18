@@ -91,9 +91,13 @@ a.tab:hover {
   display: flex;
   white-space: nowrap;
   border-bottom: 1px dotted #cccccc;
+  color: #999999;
 }
 .list-row:hover {
   background-color: #E6F0FA;
+}
+.list-row.monochrome {
+  color: unset;
 }
 .list-row.selected {
   color: #96C8F5;
@@ -133,11 +137,9 @@ a.tab:hover {
 }
 .request-clerror{
   color: red;
-  font-weight: bold;
 }
 .request-srerror{
   color: red;
-  font-weight: bold;
 }
 .request-other{
   color: black;
