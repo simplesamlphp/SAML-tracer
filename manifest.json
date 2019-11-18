@@ -3,7 +3,7 @@
   "description": "A debugger for viewing SAML messages",
   "author": "Olav Morken, Jaime Perez, Jan Köhler",
   "manifest_version": 2,
-  "version": "1.5.1",
+  "version": "1.6",
   "homepage_url": "https://github.com/UNINETT/SAML-tracer",
   "icons": {
     "16": "src/resources/images/icon16.png",
