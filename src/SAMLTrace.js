@@ -646,7 +646,7 @@ SAMLTrace.TraceWindow.prototype = {
   'updateStatusBar' : function() {
     var hiddenElementsString = "";
     if (this.filterResources) {
-      hiddenElementsString = ` (${this.httpRequests.filter(req => !req.isVisible).length} hidden)`;
+      hiddenElementsString = ` (${this.httpRequests.filter(req => typeof req.isVisible !== "undefined" && !req.isVisible).length} hidden)`;
     }
     var status = `${this.httpRequests.length} requests received ${hiddenElementsString}`;
     var statusItem = document.getElementById('statuspanel');
@@ -676,6 +676,11 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'saveNewRequest' : function(request) { // onBeforeRequest
+    if (request.requestId.startsWith("fakeRequest-")) {
+      // Skip tracing fake requests that are issued by firefox for e.g. thumbnails of websites from about:blank
+      return;
+    }
+
     let tracer = SAMLTrace.TraceWindow.instance();
     if (tracer.pauseTracing) {
       // Skip tracing new requests
