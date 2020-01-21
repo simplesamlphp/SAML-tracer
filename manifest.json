@@ -28,5 +28,13 @@
       "96": "src/resources/images/icon96.png",
       "128": "src/resources/images/icon128.png"
     }
+  },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Opens SAML-tracer if it's not yet started or brings it back to the front if it's already started."
+    }
   }
 }
