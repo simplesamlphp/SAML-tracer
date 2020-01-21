@@ -11,6 +11,8 @@ Using SAML-tracer
 -----------------
 
 SAML-tracer is activated by clicking its icon in the browser toolbar.
+It can be alternatively started by pressing <kbd>ALT</kbd> +
+<kbd>SHIFT</kbd> + <kbd>S</kbd> on the keyboard.
 
 Once it is activated, you will get a window that shows all requests,
 and the data included in them. It also shows response headers.
