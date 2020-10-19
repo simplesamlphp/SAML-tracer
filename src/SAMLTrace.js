@@ -341,8 +341,6 @@ SAMLTrace.RequestItem = function(request) {
   }
 };
 SAMLTrace.RequestItem.prototype = {
-  'shortPadding' :  28,
-  'longPadding'  :  70,
 
   'showHTTP' : function(target) {
     var doc = target.ownerDocument;
@@ -402,72 +400,70 @@ SAMLTrace.RequestItem.prototype = {
   
   'showSummary' : function(target) {
     var doc = target.ownerDocument;
-    var samlSummary = "";
+    var samlSummary = '<div id="summary"><table>';
     var parser  = new DOMParser();
     var xmldoc  = parser.parseFromString(this.request.saml,"text/xml");
 
     /* Check for AuthnRequest */
     var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest');
-    if (AuthnRequest.length>0) {
-        samlSummary += 'AuthnRequest: \n';
-        if (AuthnRequest[0].attributes['Destination'])                 { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['Destination'].value                , 'Destination'                ); }
-        if (AuthnRequest[0].attributes['ForceAuthn'])                  { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['ForceAuthn'].value                 , 'ForceAuthn'                 ); }
-        if (AuthnRequest[0].attributes['AssertionConsumerServiceURL']) { samlSummary += this.summaryAdd(AuthnRequest[0].attributes['AssertionConsumerServiceURL'].value, 'AssertionConsumerServiceURL'); }
-    }
-    
-    /* Check for Issuer*/
-    var Issuer = xmldoc.getElementsByTagNameNS('*','Issuer');
-    if (Issuer.length>0) { 
-        samlSummary += this.summaryAdd(Issuer[0].textContent,'Issuer');
+    if (AuthnRequest.length>0) { // We found AuthnRequest!
+        samlSummary += '<tr> <th colspan=2>AuthnRequest</th> </tr>';
+        for (let ArAtt of AuthnRequest[0].attributes) {
+            if (!ArAtt.name.startsWith('xmlns')) samlSummary += `<tr><td class="hljs-attribute">${ArAtt.name}</td><td> ${ArAtt.value}</td></tr>`;
+        }
+        /* Check for Issuer within AuthnRequest */
+        var Issuer = xmldoc.getElementsByTagNameNS('*','Issuer');
+        if (Issuer.length>0) samlSummary += `<tr><td class="hljs-attribute">Issuer</td><td> ${Issuer[0].textContent}</td></tr>`;
     }
 
-    /* Check for Subject */
-    var Subject = xmldoc.getElementsByTagNameNS('*','Subject');
-    if (Subject.length>0) {
-        samlSummary += this.summaryAdd(Subject[0].textContent,'Subject');
-    }
 
-    /* Check for NameID */
-    var NameID = xmldoc.getElementsByTagNameNS('*','NameID');
-    if (NameID.length>0) {
-        samlSummary += this.summaryAdd(NameID[0].textContent,'NameID');
-    }
-    /* Check for AttributeStatement */
-    var AttributeStatement = xmldoc.getElementsByTagNameNS('*','AttributeStatement');
-    if (AttributeStatement.length>0) {
-        var AttributeStatementChilds = AttributeStatement[0].childNodes;
-        if (AttributeStatementChilds.length>0) { 
-            samlSummary += "\nAttributeStatement:\n";}
-        for (i = 0; i < AttributeStatementChilds.length; i++) {
-            var attribute = AttributeStatementChilds[i];
-            var attributeName = attribute.getAttribute('Name');
-            for (j = 0; j<attribute.childNodes.length; j++) {
-                    samlSummary += this.summaryAdd(attribute.childNodes[j].textContent,attributeName,' * ',this.longPadding);
-            }
+    /*
+    Check for SAML2.0 Response
+    */
+    var SamlResponse = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:protocol','Response');
+    if (SamlResponse.length>0) { // We found SamlResponse!
+
+        samlSummary += '<tr><th colspan=2>SAML Response</th></tr>';
+        for (let SrAtt of SamlResponse[0].attributes) {
+            if (!SrAtt.name.startsWith('xmlns:')) samlSummary += `<tr><td class="hljs-attribute">${SrAtt.name}</td><td> ${SrAtt.value}</td></tr>`;
+        }
+
+        /* Check for Issuer within Response */
+        for (SrChild of SamlResponse[0].children) {
+          if (SrChild.tagName.endsWith(':Issuer')) {
+            samlSummary += `<tr><td class="hljs-attribute">Issuer</td><td> ${SrChild.textContent}</td></tr>`;
+          }
+        }
+
+        /* Check for Subject */
+        var SamlSubject = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion','Subject');
+        if (SamlSubject.length>0) {
+          samlSummary += '<tr><th colspan=2>Subject</th></tr>';
+          samlSummary += `<tr><td class="hljs-attribute">Subject</td><td> ${SamlSubject[0].textContent.trim()}</td></tr>`;
+        }
+
+        
+        /* Check for AttributeStatement */
+        var AttributeStatement = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion','AttributeStatement');
+        if (AttributeStatement.length>0) {
+          samlSummary += '<tr><th colspan=2>AttributeStatement</th></tr>';
+          for (let Attr of AttributeStatement[0].children) {
+            samlSummary += `<tr><td class="hljs-attribute">${Attr.getAttribute('Name')}</td><td> ${Attr.textContent.trim()}</td></tr>`;
+          }
+        }
+
+        /* Check for X509 Certificates */
+        var AttachedCertificates = xmldoc.getElementsByTagNameNS('http://www.w3.org/2000/09/xmldsig#','X509Certificate');
+        if (AttachedCertificates.length>0) {
+          samlSummary += '<tr><th colspan=2>Embedded certificates</th></tr>';
+          for (let i=0;i<AttachedCertificates.length;i++) {
+            samlSummary += `<tr><td class="hljs-attribute">Certificate ${i}</td><td>  <a href="data:application/x-x509-ca-cert;base64;charset=utf8,${AttachedCertificates[i].textContent.trim()}" download="saml${i}.cer">Download</a> </td></tr>`;
+          }
         }
     }
     
-    /* Check for LogoutRequest */
-    var LogoutRequest = xmldoc.getElementsByTagNameNS('*','LogoutRequest');
-    if (LogoutRequest.length>0) {
-        samlSummary += 'LogoutRequest: \n';
-        if (AuthnRequest[0].attributes['Destination']) { 
-          samlSummary += this.summaryAddAttVal(AuthnRequest[0].attributes['Destination'].value,'Destination');
-        }
-    }
-    
-
-    target.appendChild(doc.createTextNode(samlSummary));
-  },
-  
-  'summaryAdd' : function(value,description,decorator='',padLen=this.shortPadding) {
-    let s="";
-    if (value) {
-      s += (decorator+description).padEnd(padLen," ");
-      s += "= "+value;
-      s += "\n";
-    }
-    return s;
+    samlSummary+='</table></div>';
+    target.innerHTML=samlSummary;
   },
 
 
