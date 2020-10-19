@@ -159,3 +159,16 @@ a.tab:hover {
   height: 14px;
   background: url("../images/ws-fed.png") no-repeat center/cover;
 }
+
+#summary {
+  white-space: normal;
+  word-wrap: normal;
+}
+
+#summary table th {
+  background-color:#eee;
+}
+
+#summary table td {
+  padding: 0 10px;
+}
