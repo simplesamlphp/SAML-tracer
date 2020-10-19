@@ -423,43 +423,74 @@ SAMLTrace.RequestItem.prototype = {
     var SamlResponse = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:protocol','Response');
     if (SamlResponse.length>0) { // We found SamlResponse!
 
-        samlSummary += '<tr><th colspan=2>SAML Response</th></tr>';
-        for (let SrAtt of SamlResponse[0].attributes) {
-            if (!SrAtt.name.startsWith('xmlns:')) samlSummary += `<tr><td class="hljs-attribute">${SrAtt.name}</td><td> ${SrAtt.value}</td></tr>`;
-        }
+      samlSummary += '<tr><th colspan=2>SAML Response</th></tr>';
+      for (let SrAtt of SamlResponse[0].attributes) {
+        if (!SrAtt.name.startsWith('xmlns:')) samlSummary += `<tr><td class="hljs-attribute">${SrAtt.name}</td><td> ${SrAtt.value}</td></tr>`;
+      }
 
-        /* Check for Issuer within Response */
-        for (SrChild of SamlResponse[0].children) {
-          if (SrChild.tagName.endsWith(':Issuer')) {
-            samlSummary += `<tr><td class="hljs-attribute">Issuer</td><td> ${SrChild.textContent}</td></tr>`;
+      /* Check for Issuer within Response */
+      for (SrChild of SamlResponse[0].children) {
+        if (SrChild.tagName.endsWith(':Issuer')) {
+          samlSummary += `<tr><td class="hljs-attribute">Issuer</td><td> ${SrChild.textContent}</td></tr>`;
+        }
+      }
+
+      /* Check for Subject */
+      var SamlSubject = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion','Subject');
+      if (SamlSubject.length>0) {
+        samlSummary += '<tr><th colspan=2>Subject</th></tr>';
+        samlSummary += `<tr><td class="hljs-attribute">Subject</td><td> ${SamlSubject[0].textContent.trim()}</td></tr>`;
+      }
+
+      
+      /* Check for AttributeStatement */
+      var AttributeStatement = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion','AttributeStatement');
+      if (AttributeStatement.length>0) {
+        samlSummary += '<tr><th colspan=2>AttributeStatement</th></tr>';
+        for (let Attr of AttributeStatement[0].children) {
+          samlSummary += `<tr><td class="hljs-attribute">${Attr.getAttribute('Name')}</td><td> ${Attr.textContent.trim()}</td></tr>`;
+        }
+      }
+    }
+    
+    /*
+    Check for SAML1 / WS-Federation Response
+    */
+    var Saml1Assertion = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:1.0:assertion','Assertion');
+    if (Saml1Assertion.length>0) { //We found WS-Fed response!
+      
+      //Assertion info
+      samlSummary += '<tr><th colspan=2>Assertion</th></tr>';
+      for (let SrAtt of Saml1Assertion[0].attributes) {
+        if (!SrAtt.name.startsWith('xmlns:')) samlSummary += `<tr><td class="hljs-attribute">${SrAtt.name}</td><td> ${SrAtt.value}</td></tr>`;
+      }
+      
+      //Attributes
+      var AttributeStatement = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:1.0:assertion','AttributeStatement');
+      if (AttributeStatement.length>0) {
+        samlSummary += '<tr><th colspan=2>AttributeStatement</th></tr>';
+        for (let AttrSt of AttributeStatement[0].children) {
+          //Subject
+          if (AttrSt.localName=="Subject") {
+            for (let AttChld of AttrSt.children) {
+              if (AttChld.localName=="NameIdentifier") samlSummary += `<tr><td class="hljs-attribute">Subject</td><td> ${AttChld.textContent.trim()}</td></tr>`;
+            }
+          //List of claims
+          } else if (AttrSt.localName=="Attribute") {
+            samlSummary += `<tr><td class="hljs-attribute">${AttrSt.getAttribute('AttributeName')}</td><td> ${AttrSt.textContent.trim()}</td></tr>`;
           }
         }
-
-        /* Check for Subject */
-        var SamlSubject = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion','Subject');
-        if (SamlSubject.length>0) {
-          samlSummary += '<tr><th colspan=2>Subject</th></tr>';
-          samlSummary += `<tr><td class="hljs-attribute">Subject</td><td> ${SamlSubject[0].textContent.trim()}</td></tr>`;
-        }
-
-        
-        /* Check for AttributeStatement */
-        var AttributeStatement = xmldoc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion','AttributeStatement');
-        if (AttributeStatement.length>0) {
-          samlSummary += '<tr><th colspan=2>AttributeStatement</th></tr>';
-          for (let Attr of AttributeStatement[0].children) {
-            samlSummary += `<tr><td class="hljs-attribute">${Attr.getAttribute('Name')}</td><td> ${Attr.textContent.trim()}</td></tr>`;
-          }
-        }
-
-        /* Check for X509 Certificates */
-        var AttachedCertificates = xmldoc.getElementsByTagNameNS('http://www.w3.org/2000/09/xmldsig#','X509Certificate');
-        if (AttachedCertificates.length>0) {
-          samlSummary += '<tr><th colspan=2>Embedded certificates</th></tr>';
-          for (let i=0;i<AttachedCertificates.length;i++) {
-            samlSummary += `<tr><td class="hljs-attribute">Certificate ${i}</td><td>  <a href="data:application/x-x509-ca-cert;base64;charset=utf8,${AttachedCertificates[i].textContent.trim()}" download="saml${i}.cer">Download</a> </td></tr>`;
-          }
-        }
+      }
+    }
+    
+    
+    /* Check for X509 Certificates (SAML1+2) */
+    var AttachedCertificates = xmldoc.getElementsByTagNameNS('http://www.w3.org/2000/09/xmldsig#','X509Certificate');
+    if (AttachedCertificates.length>0) {
+    samlSummary += '<tr><th colspan=2>Embedded certificates</th></tr>';
+    for (let i=0;i<AttachedCertificates.length;i++) {
+      samlSummary += `<tr><td class="hljs-attribute">Certificate ${i}</td><td>  <a href="data:application/x-x509-ca-cert;base64;charset=utf8,${AttachedCertificates[i].textContent.trim()}" download="saml${i}.cer">Download</a> </td></tr>`;
+    }
     }
     
     samlSummary+='</table></div>';
