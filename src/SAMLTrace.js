@@ -448,7 +448,9 @@ SAMLTrace.RequestItem.prototype = {
       if (AttributeStatement.length>0) {
         samlSummary += '<tr><th colspan=2>AttributeStatement</th></tr>';
         for (let Attr of AttributeStatement[0].children) {
-          samlSummary += `<tr><td class="hljs-attribute">${Attr.getAttribute('Name')}</td><td> ${Attr.textContent.trim()}</td></tr>`;
+          for (let AttrVal of Attr.children) {
+            samlSummary += `<tr><td class="hljs-attribute">${Attr.getAttribute('Name')}</td><td> ${AttrVal.textContent.trim()}</td></tr>`;
+          }
         }
       }
     }
