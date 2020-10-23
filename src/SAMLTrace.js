@@ -479,7 +479,9 @@ SAMLTrace.RequestItem.prototype = {
             }
           //List of claims
           } else if (AttrSt.localName=="Attribute") {
-            samlSummary += `<tr><td class="hljs-attribute">${AttrSt.getAttribute('AttributeName')}</td><td> ${AttrSt.textContent.trim()}</td></tr>`;
+            for (let AttrStCh of AttrSt.children) {
+              samlSummary += `<tr><td class="hljs-attribute">${AttrSt.getAttribute('AttributeName')}</td><td> ${AttrStCh.textContent.trim()}</td></tr>`;
+            }
           }
         }
       }
