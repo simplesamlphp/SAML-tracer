@@ -32,7 +32,7 @@ Developing SAML-tracer
 To make changes to SAML-tracer, you should start by cloning the Git
 repository from:
 
-  https://github.com/UNINETT/SAML-tracer/
+  https://github.com/SimpleSAMLphp/SAML-tracer/
 
 You can now modify and extend SAML-tracer. To test your changes, you 
 can debug the extension as described here:

@@ -4,7 +4,7 @@
   "author": "Olav Morken, Jaime Perez, Jan Köhler",
   "manifest_version": 2,
   "version": "1.6",
-  "homepage_url": "https://github.com/UNINETT/SAML-tracer",
+  "homepage_url": "https://github.com/SimpleSAMLphp/SAML-tracer",
   "icons": {
     "16": "src/resources/images/icon16.png",
     "32": "src/resources/images/icon32.png",

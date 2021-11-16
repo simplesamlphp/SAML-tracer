@@ -659,7 +659,7 @@ SAMLTrace.TraceWindow.prototype = {
     //
     // * Case 1 (HTTP StatusCode 302): The webRequest-API seems to keep the HTTP verb which was used by the parent request. This
     //   is correct in resepct to RFC 2616 but differs from a typical browser behaviour which will usually change the POST to a GET.
-    //   So do we here... See: https://github.com/UNINETT/SAML-tracer/pull/23#issuecomment-345540591
+    //   So do we here... See: https://github.com/SimpleSAMLphp/SAML-tracer/pull/23#issuecomment-345540591
     //
     // * Case 2 (HTTP StatusCode 303): RFC 2616 says a 303 should be followed by using a GET. Unfortunately Firefox's webRequest-
     //   API-implementation acts differently in this case. It follows such redirects by using a POST. Chrome's webRequest-API-
