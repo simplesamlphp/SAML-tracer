@@ -194,17 +194,21 @@ ui = {
     };
 
     const removeSyntaxHighlightingClasses = block => {
-      const syntaxHighlightingClasses = [ "HTTP", "XML" ];
+      const syntaxHighlightingClasses = [ "highlightable", "HTTP", "XML" ];
       syntaxHighlightingClasses.forEach(c => block.classList.remove(c));
     };
 
-    let content = document.querySelector("#request-info-content");
-    removeSyntaxHighlightingClasses(content);
-
-    let selectedTab = document.querySelector(".tab.selected");
-    let syntaxHighlightingClass = getSyntaxHighlightingClass(selectedTab);
-    content.classList.add(syntaxHighlightingClass);
-    hljs.highlightBlock(content);
+    let highlightables = document.querySelectorAll("#request-info-content .highlightable");
+    if (highlightables && highlightables.length > 0) {
+      let selectedTab = document.querySelector(".tab.selected");
+      let syntaxHighlightingClass = getSyntaxHighlightingClass(selectedTab);
+      
+      highlightables.forEach(highlightable => {
+        removeSyntaxHighlightingClasses(highlightable);
+        highlightable.classList.add(syntaxHighlightingClass);
+        hljs.highlightElement(highlightable);
+      });
+    }
   },
   
   enableSyntaxHighlighting: function() {

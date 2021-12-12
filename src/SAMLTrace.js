@@ -343,45 +343,43 @@ SAMLTrace.RequestItem = function(request) {
 SAMLTrace.RequestItem.prototype = {
 
   'showHTTP' : function(target) {
-    var doc = target.ownerDocument;
-
-    function addHeaderLine(h) {
-      var name = doc.createElement('b');
-      name.textContent = h.name;
-      target.appendChild(name);
-      target.appendChild(doc.createTextNode(': ' + h.value + '\n'));
+    function formatHeaderLine(h) {
+      return h.name + ': ' + h.value + '\n';
     }
 
-    var reqLine = doc.createElement('b');
-    reqLine.textContent = this.request.method + ' ' + this.request.url + ' HTTP/1.1\n';
-    target.appendChild(reqLine);
-    this.request.requestHeaders.forEach(addHeaderLine);
-    target.appendChild(doc.createTextNode('\n'));
+    let reqText = this.request.method + ' ' + this.request.url + ' HTTP/1.1\n';
+    this.request.requestHeaders.forEach(h => reqText += formatHeaderLine(h));
+    reqText += '\n';
+
+    const reqDiv = target.ownerDocument.createElement('div');
+    reqDiv.classList.add('highlightable')
+    reqDiv.textContent = reqText;
+    target.appendChild(reqDiv);
 
     this.request.loadResponse();
-    var respLine = doc.createElement('b');
-    respLine.textContent = this.request.responseStatusText + "\n";
-    target.appendChild(respLine);
-    this.request.responseHeaders.forEach(addHeaderLine);
+    let resText = this.request.responseStatusText + '\n';
+    this.request.responseHeaders.forEach(h => resText += formatHeaderLine(h));
+
+    const resDiv = target.ownerDocument.createElement('div');
+    resDiv.classList.add('highlightable')
+    resDiv.textContent = resText;
+    target.appendChild(resDiv);
   },
 
   'showParameters' : function(target) {
-    var doc = target.ownerDocument;
-
     function addParameters(name, parameters) {
       if (!parameters || parameters.length === 0) {
         return;
       }
-      var h = doc.createElement('b');
-      h.textContent = name + '\n';
-      target.appendChild(h);
-      for (var i = 0; i < parameters.length; i++) {
-        var p = parameters[i];
-        var nameElement = doc.createElement('b');
-        nameElement.textContent = p[0];
-        target.appendChild(nameElement);
-        target.appendChild(doc.createTextNode(': ' + p[1] + '\n'));
-      }
+
+      const method = target.ownerDocument.createElement('b');
+      method.textContent = name + '\n';
+      target.appendChild(method);
+
+      const paramsDiv = target.ownerDocument.createElement('div');
+      paramsDiv.classList.add('highlightable')
+      parameters.forEach(p => paramsDiv.textContent += p[0] + ': ' + p[1] + '\n');
+      target.appendChild(paramsDiv);
     }
 
     addParameters('GET', this.request.get);
@@ -389,13 +387,16 @@ SAMLTrace.RequestItem.prototype = {
   },
 
   'showSAML' : function(target) {
-    var doc = target.ownerDocument;
     if (this.request.saml) {
       var samlFormatted = SAMLTrace.prettifyXML(this.request.saml);
     } else {
       var samlFormatted = SAMLTrace.prettifyArtifact(this.request.samlart);
     }
-    target.appendChild(doc.createTextNode(samlFormatted));
+    
+    const samlDiv = target.ownerDocument.createElement('div');
+    samlDiv.classList.add('highlightable');
+    samlDiv.textContent = samlFormatted;
+    target.appendChild(samlDiv);
   },
 
   'showSummary' : function(target) {
