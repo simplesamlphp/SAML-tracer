@@ -16,7 +16,7 @@ fi
 
 D=$(mktemp -d)
 
-git archive --format zip "$RELEASE" | (cd "$D"; tar xv)
+git archive --format tar "$RELEASE" | (cd "$D"; tar xv)
 
 cd "$D"
 
