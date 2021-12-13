@@ -352,7 +352,7 @@ SAMLTrace.RequestItem.prototype = {
     reqText += '\n';
 
     const reqDiv = target.ownerDocument.createElement('div');
-    reqDiv.classList.add('highlightable')
+    reqDiv.classList.add('highlightable');
     reqDiv.textContent = reqText;
     target.appendChild(reqDiv);
 
@@ -361,7 +361,7 @@ SAMLTrace.RequestItem.prototype = {
     this.request.responseHeaders.forEach(h => resText += formatHeaderLine(h));
 
     const resDiv = target.ownerDocument.createElement('div');
-    resDiv.classList.add('highlightable')
+    resDiv.classList.add('highlightable');
     resDiv.textContent = resText;
     target.appendChild(resDiv);
   },
@@ -377,7 +377,7 @@ SAMLTrace.RequestItem.prototype = {
       target.appendChild(method);
 
       const paramsDiv = target.ownerDocument.createElement('div');
-      paramsDiv.classList.add('highlightable')
+      paramsDiv.classList.add('highlightable');
       parameters.forEach(p => paramsDiv.textContent += p[0] + ': ' + p[1] + '\n');
       target.appendChild(paramsDiv);
     }
