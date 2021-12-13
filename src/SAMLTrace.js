@@ -343,45 +343,43 @@ SAMLTrace.RequestItem = function(request) {
 SAMLTrace.RequestItem.prototype = {
 
   'showHTTP' : function(target) {
-    var doc = target.ownerDocument;
-
-    function addHeaderLine(h) {
-      var name = doc.createElement('b');
-      name.textContent = h.name;
-      target.appendChild(name);
-      target.appendChild(doc.createTextNode(': ' + h.value + '\n'));
+    function formatHeaderLine(h) {
+      return h.name + ': ' + h.value + '\n';
     }
 
-    var reqLine = doc.createElement('b');
-    reqLine.textContent = this.request.method + ' ' + this.request.url + ' HTTP/1.1\n';
-    target.appendChild(reqLine);
-    this.request.requestHeaders.forEach(addHeaderLine);
-    target.appendChild(doc.createTextNode('\n'));
+    let reqText = this.request.method + ' ' + this.request.url + ' HTTP/1.1\n';
+    this.request.requestHeaders.forEach(h => reqText += formatHeaderLine(h));
+    reqText += '\n';
+
+    const reqDiv = target.ownerDocument.createElement('div');
+    reqDiv.classList.add('highlightable');
+    reqDiv.textContent = reqText;
+    target.appendChild(reqDiv);
 
     this.request.loadResponse();
-    var respLine = doc.createElement('b');
-    respLine.textContent = this.request.responseStatusText + "\n";
-    target.appendChild(respLine);
-    this.request.responseHeaders.forEach(addHeaderLine);
+    let resText = this.request.responseStatusText + '\n';
+    this.request.responseHeaders.forEach(h => resText += formatHeaderLine(h));
+
+    const resDiv = target.ownerDocument.createElement('div');
+    resDiv.classList.add('highlightable');
+    resDiv.textContent = resText;
+    target.appendChild(resDiv);
   },
 
   'showParameters' : function(target) {
-    var doc = target.ownerDocument;
-
     function addParameters(name, parameters) {
       if (!parameters || parameters.length === 0) {
         return;
       }
-      var h = doc.createElement('b');
-      h.textContent = name + '\n';
-      target.appendChild(h);
-      for (var i = 0; i < parameters.length; i++) {
-        var p = parameters[i];
-        var nameElement = doc.createElement('b');
-        nameElement.textContent = p[0];
-        target.appendChild(nameElement);
-        target.appendChild(doc.createTextNode(': ' + p[1] + '\n'));
-      }
+
+      const method = target.ownerDocument.createElement('b');
+      method.textContent = name + '\n';
+      target.appendChild(method);
+
+      const paramsDiv = target.ownerDocument.createElement('div');
+      paramsDiv.classList.add('highlightable');
+      parameters.forEach(p => paramsDiv.textContent += p[0] + ': ' + p[1] + '\n');
+      target.appendChild(paramsDiv);
     }
 
     addParameters('GET', this.request.get);
@@ -389,29 +387,51 @@ SAMLTrace.RequestItem.prototype = {
   },
 
   'showSAML' : function(target) {
-    var doc = target.ownerDocument;
     if (this.request.saml) {
       var samlFormatted = SAMLTrace.prettifyXML(this.request.saml);
     } else {
       var samlFormatted = SAMLTrace.prettifyArtifact(this.request.samlart);
     }
-    target.appendChild(doc.createTextNode(samlFormatted));
-  },
-  
-  'showSummary' : function(target) {
-    var samlSummary = '<div id="summary"><table>';
-    var parser  = new DOMParser();
-    var xmldoc  = parser.parseFromString(this.request.saml, "text/xml");
-  
     
+    const samlDiv = target.ownerDocument.createElement('div');
+    samlDiv.classList.add('highlightable');
+    samlDiv.textContent = samlFormatted;
+    target.appendChild(samlDiv);
+  },
+
+  'showSummary' : function(target) {
+    const table = document.createElement("table");
+
     /* Helper functions for summary table */
     function appendHeader(text) {
-      samlSummary += `<tr><th colspan=2>${text}</th></tr>`;
+      const th = document.createElement("th");
+      th.innerText = text;
+      th.colSpan = 2;
+
+      const tr = document.createElement("tr");
+      tr.appendChild(th);
+
+      table.appendChild(tr);
     }
   
-    function appendRow(key, value) {
+    function appendRow(key, value, isElement) {
       if (value) {
-        samlSummary += `<tr><td class="hljs-attribute">${key}</td><td> ${value}</td></tr>`;
+        const tdKey = document.createElement("td");
+        tdKey.innerText = key;
+        tdKey.classList.add("hljs-attribute");
+
+        const tdValue = document.createElement("td");
+        if (isElement) {
+          tdValue.appendChild(value);
+        } else {
+          tdValue.innerText = value;
+        }
+
+        const tr = document.createElement("tr");
+        tr.appendChild(tdKey);
+        tr.appendChild(tdValue);
+
+        table.appendChild(tr);
       }
     }
   
@@ -426,7 +446,10 @@ SAMLTrace.RequestItem.prototype = {
     function tryGetByQuerySelector(element, selector) {
       return element.querySelector(selector)?.textContent ?? '';
     }
-  
+
+    var parser  = new DOMParser();
+    var xmldoc  = parser.parseFromString(this.request.saml, "text/xml");
+
     /* Check for AuthnRequest */
     var AuthnRequest = xmldoc.getElementsByTagNameNS('*','AuthnRequest');
     if (AuthnRequest.length>0) { // We found AuthnRequest!
@@ -506,15 +529,20 @@ SAMLTrace.RequestItem.prototype = {
     if (AttachedCertificates.length>0) {
       appendHeader('Embedded certificates');
       for (let i=0;i<AttachedCertificates.length;i++) {
-        let href = `<a href="data:application/x-x509-ca-cert;base64;charset=utf8,${AttachedCertificates[i].textContent.trim()}" download="saml${i}.cer">Download</a>`
-        appendRow(`Certificate ${i}`, href);
+        const cert = document.createElement("a");
+        cert.innerText = "Download";
+        cert.href = `data:application/x-x509-ca-cert;base64;charset=utf8,${AttachedCertificates[i].textContent.trim()}`;
+        cert.download = `saml${i}.cer`;
+        appendRow(`Certificate ${i}`, cert, true);
       }
     }
-  
-    samlSummary+='</table></div>';
-    target.innerHTML=samlSummary;
-  },
 
+    const samlSummary = document.createElement("div");
+    samlSummary.id = "summary";
+    samlSummary.appendChild(table);
+
+    target.appendChild(samlSummary);
+  },
 
   'showContent' : function(target, type) {
     target.innerText = "";
@@ -865,7 +893,7 @@ SAMLTrace.TraceWindow.prototype = {
     var tab = document.createElement('a');
     tab.setAttribute('class', 'tab');
     tab.setAttribute('href', '#' + name);
-    tab.innerHTML = name;
+    tab.innerText = name;
     tab.addEventListener('click', e => {
       var tabName = e.target.hash.substr(1);
       this.selectTab(tabName, e.target.parentElement);

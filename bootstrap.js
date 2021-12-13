@@ -15,7 +15,7 @@ function showTracerWindow() {
   }
 
   // If it wasn't yet opened or it was already closed -- create a new instance.
-  let url = browser.extension.getURL("/src/TraceWindow.html");
+  let url = browser.runtime.getURL("/src/TraceWindow.html");
   let creating = browser.windows.create({
     url: url,
     type: "popup",
