@@ -6,8 +6,7 @@ if ("undefined" == typeof(SAMLTrace)) {
 };
 
 SAMLTrace.b64inflate = function (data) {
-  // Remove any whitespace in the base64-encoded data -- Shibboleth may insert
-  // line feeds in the data.
+  // Remove any whitespace in the base64-encoded data -- Shibboleth may insert line feeds in the data.
   data = data.replace(/\s/g, '');
 
   if (data.length % 4 != 0) {
@@ -20,8 +19,9 @@ SAMLTrace.b64inflate = function (data) {
     return null;
   }
 
-  var decoded = atob(data);
-  var inflated = pako.inflateRaw(decoded);
+  const decoded = atob(data);
+  const bytes = Uint8Array.from(decoded, c => c.charCodeAt(0));
+  const inflated = pako.inflateRaw(bytes);
   return String.fromCharCode.apply(String, inflated);
 };
 
