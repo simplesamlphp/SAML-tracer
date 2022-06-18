@@ -162,27 +162,9 @@ SAMLTrace.Request.prototype = {
       return;
     }
 
-    var r = new RegExp('[&;\?]');
-    var elements = this.url.split(r);
-
     this.get = [];
-
-    for (var i = 1; i < elements.length; i++) {
-      var e = elements[i];
-      var p = e.indexOf('=');
-      var name, value;
-      if (p == -1) {
-        name = e;
-        value = '';
-      } else {
-        name = e.substr(0, p);
-        value = e.substr(p + 1);
-      }
-
-      name = name.replace('+', ' ');
-      name = decodeURIComponent(name);
-      value = value.replace('+', ' ');
-      value = decodeURIComponent(value);
+    // URLSearchParams handles splitting and decoding: https://url.spec.whatwg.org/#concept-urlencoded-parser
+    for (const [name, value] of new URL(this.url).searchParams.entries()) {
       this.get.push([name, value]);
     }
   },
