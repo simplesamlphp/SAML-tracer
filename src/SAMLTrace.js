@@ -904,18 +904,6 @@ SAMLTrace.TraceWindow.init = function() {
   var browser = browser || chrome;
   let traceWindow = new SAMLTrace.TraceWindow();
 
-  let isFirefox = () => {
-    return typeof InstallTrigger !== 'undefined';
-  }
-
-  let getOnBeforeSendHeadersExtraInfoSpec = () => {
-    return isFirefox() ? ["blocking", "requestHeaders"] : ["blocking", "requestHeaders", "extraHeaders"];
-  };
-
-  let getOnHeadersReceivedExtraInfoSpec = () => {
-    return isFirefox() ? ["blocking", "responseHeaders"] : ["blocking", "responseHeaders", "extraHeaders"];
-  };
-
   browser.webRequest.onBeforeRequest.addListener(
     traceWindow.saveNewRequest,
     {urls: ["<all_urls>"]},
@@ -925,13 +913,13 @@ SAMLTrace.TraceWindow.init = function() {
   browser.webRequest.onBeforeSendHeaders.addListener(
     traceWindow.attachHeadersToRequest,
     {urls: ["<all_urls>"]},
-    getOnBeforeSendHeadersExtraInfoSpec()
+    ['blocking', 'requestHeaders', browser.webRequest.OnBeforeSendHeadersOptions.EXTRA_HEADERS].filter(Boolean)
   );
-
+  
   browser.webRequest.onHeadersReceived.addListener(
     traceWindow.attachResponseToRequest,
     {urls: ["<all_urls>"]},
-    getOnHeadersReceivedExtraInfoSpec()
+    ['blocking', 'responseHeaders', browser.webRequest.OnHeadersReceivedOptions.EXTRA_HEADERS].filter(Boolean)
   );
 };
 
