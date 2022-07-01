@@ -915,7 +915,7 @@ SAMLTrace.TraceWindow.init = function() {
     {urls: ["<all_urls>"]},
     ['blocking', 'requestHeaders', browser.webRequest.OnBeforeSendHeadersOptions.EXTRA_HEADERS].filter(Boolean)
   );
-  
+
   browser.webRequest.onHeadersReceived.addListener(
     traceWindow.attachResponseToRequest,
     {urls: ["<all_urls>"]},
