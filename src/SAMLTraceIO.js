@@ -55,7 +55,7 @@ SAMLTraceIO.prototype = {
           onSuccess();
         }
       } catch (error) {
-        console.log("An error occured while trying to parse and import requests: " + error);
+        console.log("An error occurred while trying to parse and import requests: " + error);
         if (error instanceof SyntaxError) {
           onError("The selected file doesn't seem to contain importable traces!");
         } else if (error instanceof TypeError) {
@@ -79,7 +79,7 @@ SAMLTraceIO.prototype = {
       return false;
     }
 
-    // Since the relase of v1.0.0 every request's got a "requestId". If it ain't present, it's a legacy import.
+    // Since the release of v1.0.0 every request's got a "requestId". If it ain't present, it's a legacy import.
     let isLegacyImport = !importedRequests[0].hasOwnProperty("requestId");
     console.log(`The imported requests are in ${isLegacyImport ? "legacy" : "current"}-style.`);
 
