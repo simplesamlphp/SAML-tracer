@@ -6,7 +6,7 @@ if ("undefined" === typeof(ScrollableList)) {
   var ScrollableList = new function() {
 
     const isElementToBeSkipped = elem => {
-      return elem && elem.classList.contains("isRessource") && !elem.classList.contains("displayAnyway");
+      return elem && elem.classList.contains("isResource") && !elem.classList.contains("displayAnyway");
     };
 
     const getSibling = (cur, siblingFunc) => {
@@ -66,7 +66,7 @@ if ("undefined" === typeof(ScrollableList)) {
       }
     };
 
-    this.selectRowOnKeybeardEvent = (e, list, onNewElementSelected) => {
+    this.selectRowOnKeyboardEvent = (e, list, onNewElementSelected) => {
       this.list = list;
       let newElement = null;
       let selectedElement = this.list.querySelector(".selected");

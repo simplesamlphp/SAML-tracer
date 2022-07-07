@@ -7,7 +7,7 @@ ui = {
   exportResult: null,
 
   bindButtons: () => {
-    // bind radio huttons
+    // bind radio buttons
     let radioButtons = document.querySelectorAll('input[type="radio"]');
     Array.from(radioButtons).map(rb => rb.onchange = e => ui.createExportResult());
 
@@ -23,12 +23,12 @@ ui = {
     }, true);
   },
 
-  setupContent: (requests, httpRequests, isFlteringActive) => {
+  setupContent: (requests, httpRequests, isFilteringActive) => {
     // remember the currently captured (and filtered) requests
     if (requests) {
       let filteredRequests = requests.filter(req => {
         let match = httpRequests.find(hr => hr.req.requestId === req.requestId);
-        if (match && (match.isVisible || !isFlteringActive)) {
+        if (match && (match.isVisible || !isFilteringActive)) {
           return req;
         }
       });

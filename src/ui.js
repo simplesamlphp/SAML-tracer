@@ -70,7 +70,7 @@ ui = {
     document.getElementById("button-filter").addEventListener("click", e => {
       let newState = ui.toggleButtonState(e.target);
       window.tracer.setFilterResources(newState);
-      let hidableRows = document.getElementsByClassName("list-row isRessource");
+      let hidableRows = document.getElementsByClassName("list-row isResource");
       if (newState) {
         Array.from(hidableRows).forEach(row => row.classList.remove("displayAnyway"));
       } else {
@@ -90,9 +90,9 @@ ui = {
     document.getElementById("button-export-list").addEventListener("click", () => {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";
-      let isFlteringActive = document.getElementById("button-filter").classList.contains("active");
+      let isFilteringActive = document.getElementById("button-filter").classList.contains("active");
       let exportDialogContent = document.getElementById("exportDialogContent");
-      exportDialogContent.contentWindow.ui.setupContent(window.tracer.requests, window.tracer.httpRequests, isFlteringActive);
+      exportDialogContent.contentWindow.ui.setupContent(window.tracer.requests, window.tracer.httpRequests, isFilteringActive);
     }, true);
     document.getElementById("button-import-list").addEventListener("click", () => {
       let importDialog = document.getElementById("importDialog");
@@ -124,10 +124,10 @@ ui = {
       }
     };
 
-    const selectRowOnKeybeardEvent = e => {
+    const selectRowOnKeyboardEvent = e => {
       // select another request, when ArrowUp, ArrowDown, PageUp, PageDown, Home or End are pressed
       let requestList = document.getElementById("request-list");
-      ScrollableList.selectRowOnKeybeardEvent(e, requestList, newElement => {
+      ScrollableList.selectRowOnKeyboardEvent(e, requestList, newElement => {
         window.tracer.selectItemInList(newElement, requestList);
         window.tracer.showRequest(newElement.requestItem);
         ui.highlightContent();
@@ -147,7 +147,7 @@ ui = {
     iframes.forEach(iframe => iframe.contentWindow.document.addEventListener("keydown", closeDialogs));
     document.addEventListener("keydown", closeDialogs);
     document.addEventListener("keydown", selectRequestInfoContent);
-    document.addEventListener("keydown", selectRowOnKeybeardEvent);
+    document.addEventListener("keydown", selectRowOnKeyboardEvent);
     document.addEventListener("keydown", togglePauseTracing);
   },
 
