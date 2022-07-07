@@ -808,7 +808,7 @@ SAMLTrace.TraceWindow.prototype = {
 
         var isVisible = tracer.isRequestVisible(response);
         if (!isVisible) {
-          requestDiv.classList.add("isRessource");
+          requestDiv.classList.add("isResource");
           
           if (!tracer.filterResources) {
             requestDiv.classList.add("displayAnyway");

@@ -107,11 +107,11 @@ a.tab:hover {
   color: #96C8F5;
   background-color: #0074e8;
 }
-.list-row.isRessource {
+.list-row.isResource {
   height: 0;
   border-bottom: none;
 }
-.list-row.isRessource.displayAnyway {
+.list-row.isResource.displayAnyway {
   height: unset;
   border-bottom: 1px dotted #cccccc;
 }
@@ -122,7 +122,7 @@ a.tab:hover {
 }
 
 .request-url {
-  /* fullwidth minus HTTP-method width minus SAML- and WS-Fed-logo */
+  /* full width minus HTTP-method width minus SAML- and WS-Fed-logo */
   width: calc(100% - 5em - 40px - 56px);
 }
 
