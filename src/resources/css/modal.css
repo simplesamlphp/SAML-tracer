@@ -6,7 +6,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(150, 150, 150, 0.9);
+  background-color: var(--color-modal);
   display: flex;
   justify-content: center;
 }
@@ -25,14 +25,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff url("../images/icons/button-clear-default.png") no-repeat 50%;
+  background: var(--color-background) var(--button-clear-default) no-repeat 50%;
   cursor: pointer;
 }
 .modal-close:hover {
-  background: #dedede url("../images/icons/button-clear-default.png") no-repeat 50%;
+  background: var(--color-button-background) var(--button-clear-default) no-repeat 50%;
 }
 
 .modal-content {
   padding: 10px;
-  background-color: #ffffff;
+  background-color: var(--color-background);
 }
