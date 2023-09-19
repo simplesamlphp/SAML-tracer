@@ -1,0 +1,19 @@
+{
+  "name": "SAML-tracer",
+  "main": "index.js",
+  "repository": "https://github.com/simplesamlphp/SAML-tracer",
+  "license": "LGPL-2.1-or-later",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "scripts": {
+    "postinstall": "minimum-node-version || true",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "highlight.js": "^11.8.0",
+    "minimum-node-version": "^3.0.0",
+    "pako": "^2.1.0"
+  }
+}

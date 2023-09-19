@@ -1,0 +1,72 @@
+---
+
+name: Build release
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build release
+    runs-on: [ubuntu-latest]
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.SAMLTRACER_BUILD_TOKEN }}
+          ref: ${{ github.head_ref || github.ref_name }}
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+
+      - name: Fetch changes
+        # Without fetching, we might miss new tags due to caching in Github Actions
+        run: git fetch --all
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install & build assets
+        run: |
+          npx npm-check-updates -u
+          # Make sure the lock-file is up to date before we run clean-install
+          npm install --package-lock-only
+          npm clean-install
+          npm audit fix
+
+      # Store the version, stripping any v-prefix
+      - name: Write release version
+        run: |
+          TAG="${{ github.ref_name }}"
+          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
+
+      - name: Copy assets to lib-directory
+        run: |
+          cp node_modules/highlight.js/lib/core.js lib/highlight.js
+          cp node_modules/pako/dist/pako_inflate.js lib/pako_inflate.js
+
+      - name: Clean release
+        run: |
+          grep export-ignore .gitattributes | cut -d ' ' -f 1 | while IFS= read -r line
+          do
+            rm -rf "$line"
+          done
+          rm -rf .git
+
+      - name: Build release
+        run: |
+          zip -r /tmp/samltracer.zip *
+
+      - name: Save release
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: "/tmp/samltracer.zip"
+          retention-days: 1
+
+      - name: Calculate SHA checksum
+        run: sha256sum "/tmp/samltracer.zip"
