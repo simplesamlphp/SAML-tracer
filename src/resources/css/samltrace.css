@@ -1,61 +1,61 @@
 :root {
-	--color-background: white;
-	--color-header-background: #f5f5f5;
-	--color-button-background: #ebebeb;
-	--color-button-hover: #e0e0e0;
-	--color-border: #d6d6d6;
-	--color-text: #292929;
-	--color-highlight: #0074e8;
-	--color-highlight-color: white;
-	--color-highlight-lighter: #96C8F5;
-	--color-green: green;
-	--color-orange: orange;
-	--color-red: red;
-	--color-modal: rgba(200, 200, 200, 0.6);
-	--color-syntax-comment: #737373;
-	--color-syntax-string: #003eaa;
-	--color-syntax-keyword: #dd00a9;
-	--color-syntax-section: #0074e8;
-	--color-syntax-tag: #dc2d25;
+  --color-background: white;
+  --color-header-background: #f5f5f5;
+  --color-button-background: #ebebeb;
+  --color-button-hover: #e0e0e0;
+  --color-border: #d6d6d6;
+  --color-text: #292929;
+  --color-highlight: #0074e8;
+  --color-highlight-color: white;
+  --color-highlight-lighter: #96C8F5;
+  --color-green: green;
+  --color-orange: orange;
+  --color-red: red;
+  --color-modal: rgba(200, 200, 200, 0.6);
+  --color-syntax-comment: #737373;
+  --color-syntax-string: #003eaa;
+  --color-syntax-keyword: #dd00a9;
+  --color-syntax-section: #0074e8;
+  --color-syntax-tag: #dc2d25;
 
-	--button-clear-default: url("../images/icons/button-clear-default.png");
-	--button-pause-default: url("../images/icons/button-pause-default.png");
-	--button-pause-active: url("../images/icons/button-pause-active.png");
-	--button-autoscroll-default: url("../images/icons/button-autoscroll-default.png");
-	--button-autoscroll-active: url("../images/icons/button-autoscroll-active.png");
-	--button-filter-default: url("../images/icons/button-filter-default.png");
-	--button-filter-active: url("../images/icons/button-filter-active.png");
-	--button-colorize-default: url("../images/icons/button-colorize-default.png");
-	--button-colorize-active: url("../images/icons/button-colorize-active.png");
-	--button-export-default: url("../images/icons/button-export-default.png");
-	--button-import-default: url("../images/icons/button-import-default.png");
+  --button-clear-default: url("../images/icons/button-clear-default.png");
+  --button-pause-default: url("../images/icons/button-pause-default.png");
+  --button-pause-active: url("../images/icons/button-pause-active.png");
+  --button-autoscroll-default: url("../images/icons/button-autoscroll-default.png");
+  --button-autoscroll-active: url("../images/icons/button-autoscroll-active.png");
+  --button-filter-default: url("../images/icons/button-filter-default.png");
+  --button-filter-active: url("../images/icons/button-filter-active.png");
+  --button-colorize-default: url("../images/icons/button-colorize-default.png");
+  --button-colorize-active: url("../images/icons/button-colorize-active.png");
+  --button-export-default: url("../images/icons/button-export-default.png");
+  --button-import-default: url("../images/icons/button-import-default.png");
 }
 @media (prefers-color-scheme: dark) {
-	:root {
-		--color-background: black;
-		--color-header-background: #141414;
-		--color-button-background: #292929;
-		--color-button-hover: #333333;
-		--color-border: #3d3d3d;
-		--color-text: #d6d6d6;
-		--color-green: #007B00;
-		--color-orange: #AA8517;;
-		--color-red: #a63434;
-		--color-modal: rgba(50, 50, 50, 0.6);
-		--color-syntax-comment: #737373;
-		--color-syntax-string: #165cd7;
-		--color-syntax-keyword: #bf289c;
-		--color-syntax-section: #2d7dcc;
-		--color-syntax-tag: #dc2d25;
+  :root {
+  --color-background: black;
+  --color-header-background: #141414;
+  --color-button-background: #292929;
+  --color-button-hover: #333333;
+  --color-border: #3d3d3d;
+  --color-text: #d6d6d6;
+  --color-green: #007B00;
+  --color-orange: #AA8517;;
+  --color-red: #a63434;
+  --color-modal: rgba(50, 50, 50, 0.6);
+  --color-syntax-comment: #737373;
+  --color-syntax-string: #165cd7;
+  --color-syntax-keyword: #bf289c;
+  --color-syntax-section: #2d7dcc;
+  --color-syntax-tag: #dc2d25;
 
-		--button-clear-default: url("../images/icons/button-clear-active.png");
-		--button-pause-default: url("../images/icons/button-pause-active.png");
-		--button-autoscroll-default: url("../images/icons/button-autoscroll-active.png");
-		--button-filter-default: url("../images/icons/button-filter-active.png");
-		--button-colorize-default: url("../images/icons/button-colorize-active.png");
-		--button-export-default: url("../images/icons/button-export-active.png");
-		--button-import-default: url("../images/icons/button-import-active.png");
-	}
+  --button-clear-default: url("../images/icons/button-clear-active.png");
+  --button-pause-default: url("../images/icons/button-pause-active.png");
+  --button-autoscroll-default: url("../images/icons/button-autoscroll-active.png");
+  --button-filter-default: url("../images/icons/button-filter-active.png");
+  --button-colorize-default: url("../images/icons/button-colorize-active.png");
+  --button-export-default: url("../images/icons/button-export-active.png");
+  --button-import-default: url("../images/icons/button-import-active.png");
+  }
 }
 
 body {
@@ -71,6 +71,10 @@ body {
 
 iframe {
   border: none;
+}
+
+a {
+  color: var(--color-highlight);
 }
 
 .not-selectable {
@@ -223,7 +227,7 @@ a.tab:hover {
 }
 
 #summary table th {
-	color: var(--color-text);
+  color: var(--color-text);
   background-color: var(--color-button-background);
 }
 
