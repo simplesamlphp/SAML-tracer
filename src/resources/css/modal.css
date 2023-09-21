@@ -29,7 +29,7 @@
   cursor: pointer;
 }
 .modal-close:hover {
-  background: var(--color-button-background) var(--button-clear-default) no-repeat 50%;
+  background: var(--color-button-active) var(--button-clear-default) no-repeat 50%;
 }
 
 .modal-content {

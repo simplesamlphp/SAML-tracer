@@ -1,6 +1,6 @@
 .title {
   font-weight: bold;
-  border-bottom: 1px dotted var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   line-height: 20px;
 }
 
@@ -16,8 +16,8 @@
 
 .errorBox {
   display: none;
-  color: white;
-  background-color: red;
+  color: var(--color-error-text);
+  background-color: var(--color-error-background);
   margin-top: 15px;
   padding: 5px;
 }

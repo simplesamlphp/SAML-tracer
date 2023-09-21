@@ -1,17 +1,25 @@
 :root {
+  --color-text: #737373;
+  --color-text-active: white;
   --color-background: white;
-  --color-header-background: #f5f5f5;
-  --color-button-background: #ebebeb;
-  --color-button-hover: #e0e0e0;
-  --color-border: #d6d6d6;
-  --color-text: #292929;
-  --color-highlight: #0074e8;
-  --color-highlight-color: white;
-  --color-highlight-lighter: #96C8F5;
+  --color-border: #e0e0e2;
+  --color-header: #f9f9fa;
+  --color-button-disabled: #cecece;
+  --color-button-background: #e6e6e6;
+  --color-button-active: #0865e0;
+  --color-button-hover: #dbdbdb;
+  --color-line-hover: #f0f9fe;
+  --color-line-selected: #0074e8;
+  --color-tab-text: #3c3c3c;
+  --color-tab-hover: #ededf0;
+  --color-tab-active: #0865e0;
+
   --color-green: green;
   --color-orange: orange;
   --color-red: red;
   --color-modal: rgba(200, 200, 200, 0.6);
+  --color-error-text: #a4000f;
+  --color-error-background: #fdf2f5;
   --color-syntax-comment: #737373;
   --color-syntax-string: #003eaa;
   --color-syntax-keyword: #dd00a9;
@@ -32,29 +40,38 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-  --color-background: black;
-  --color-header-background: #141414;
-  --color-button-background: #292929;
-  --color-button-hover: #333333;
-  --color-border: #3d3d3d;
-  --color-text: #d6d6d6;
-  --color-green: #007B00;
-  --color-orange: #AA8517;;
-  --color-red: #a63434;
-  --color-modal: rgba(50, 50, 50, 0.6);
-  --color-syntax-comment: #737373;
-  --color-syntax-string: #165cd7;
-  --color-syntax-keyword: #bf289c;
-  --color-syntax-section: #2d7dcc;
-  --color-syntax-tag: #dc2d25;
+    --color-text: #d7d7db;
+    --color-background: #232327;
+    --color-border: #38383d;
+    --color-header: #0c0c0d;
+    --color-button-disabled: #353535;
+    --color-button-background: #4e4e51;
+    --color-button-hover: #58585c;
+    --color-line-hover: #353b48;
+    --color-line-selected: #204e8a;
+    --color-tab-text: #b3b3b3;
+    --color-tab-hover: #232327;
+    --color-tab-active: white;
 
-  --button-clear-default: url("../images/icons/button-clear-active.png");
-  --button-pause-default: url("../images/icons/button-pause-active.png");
-  --button-autoscroll-default: url("../images/icons/button-autoscroll-active.png");
-  --button-filter-default: url("../images/icons/button-filter-active.png");
-  --button-colorize-default: url("../images/icons/button-colorize-active.png");
-  --button-export-default: url("../images/icons/button-export-active.png");
-  --button-import-default: url("../images/icons/button-import-active.png");
+    --color-green: #007B00;
+    --color-orange: #AA8517;;
+    --color-red: #a63434;
+    --color-modal: rgba(50, 50, 50, 0.6);
+    --color-error-text: #fbb0cf;
+    --color-error-background: #4b2f36;
+    --color-syntax-comment: #737373;
+    --color-syntax-string: #165cd7;
+    --color-syntax-keyword: #bf289c;
+    --color-syntax-section: #2d7dcc;
+    --color-syntax-tag: #dc2d25;
+
+    --button-clear-default: url("../images/icons/button-clear-active.png");
+    --button-pause-default: url("../images/icons/button-pause-active.png");
+    --button-autoscroll-default: url("../images/icons/button-autoscroll-active.png");
+    --button-filter-default: url("../images/icons/button-filter-active.png");
+    --button-colorize-default: url("../images/icons/button-colorize-active.png");
+    --button-export-default: url("../images/icons/button-export-active.png");
+    --button-import-default: url("../images/icons/button-import-active.png");
   }
 }
 
@@ -74,7 +91,7 @@ iframe {
 }
 
 a {
-  color: var(--color-highlight);
+  color: var(--color-button-active);
 }
 
 .not-selectable {
@@ -90,7 +107,7 @@ a {
 
 #header {
   height: 24px;
-  background-color: var(--color-header-background);
+  background-color: var(--color-background);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   flex-direction: row;
@@ -110,7 +127,7 @@ a {
 #request-info-tabbox {
   overflow: hidden;
   height: 25px;
-  background-color: var(--color-header-background);
+  background-color: var(--color-header);
   border-bottom: 1px solid var(--color-border);
   display: flex;
 }
@@ -119,20 +136,19 @@ a.tab {
   float: left;
   padding: 4px 10px;
   align-self: flex-end;
-  color: var(--color-text);
+  color: var(--color-tab-text);
   text-decoration: none;
 }
 
 a.tab.selected {
-  color: var(--color-highlight);
-  border-top: 2px solid var(--color-highlight);
-  background-color: var(--color-background);
+  color: var(--color-tab-active);
+  border-top: 2px solid var(--color-button-active);
   box-shadow: unset;
 }
 
 a.tab:hover {
   border-top: 2px solid var(--color-border);
-  background-color: var(--color-button-background);
+  background-color: var(--color-tab-hover);
 }
 
 #request-info-content {
@@ -140,7 +156,7 @@ a.tab:hover {
   overflow-y: scroll;
   word-wrap: break-word;
   white-space: pre-wrap;
-  font-family: Consolas, "Lucida Console", Courier, monospace;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Lucida Console", "Liberation Mono", "Courier New", Courier, monospace;
 }
 
 #statuspanel {
@@ -154,19 +170,19 @@ a.tab:hover {
   overflow: hidden;
   display: flex;
   white-space: nowrap;
-  border-bottom: 1px dotted var(--color-button-background);
+  border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
 }
 .list-row:hover {
-  background-color: var(--color-button-background);
+  background-color: var(--color-line-hover);
 }
 .list-row.monochrome {
   color: unset;
 }
 .list-row.selected,
 .list-row.selected:hover {
-  color: var(--color-highlight-lighter);
-  background-color: var(--color-highlight);
+  color: var(--color-text-active);
+  background-color: var(--color-line-selected);
 }
 .list-row.isResource {
   height: 0;
@@ -174,7 +190,7 @@ a.tab:hover {
 }
 .list-row.isResource.displayAnyway {
   height: unset;
-  border-bottom: 1px dotted var(--color-button-background);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .request-method {
@@ -228,7 +244,7 @@ a.tab:hover {
 
 #summary table th {
   color: var(--color-text);
-  background-color: var(--color-button-background);
+  background-color: var(--color-border);
 }
 
 #summary table td {

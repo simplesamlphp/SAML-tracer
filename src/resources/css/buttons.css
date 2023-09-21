@@ -6,18 +6,21 @@
   align-items: center;
   display: flex;
   cursor: pointer;
-  background-color: var(--color-button-background) !important;
+  background-color: var(--color-button-background);
+	background-repeat: no-repeat;
+	background-position: 4px 50%;
   border-radius: 2px;
 }
 .button:hover {
-  background-color: var(--color-button-hover) !important;
+  background-color: var(--color-button-hover);
 }
 .button.active {
-  color: var(--color-highlight-color);
-  background-color: var(--color-highlight) !important;
+  color: var(--color-text-active);
+  background-color: var(--color-button-active);
 }
 .button.inactive {
-  color: var(--color-border);
+	color: var(--color-button-background);
+  background-color: var(--color-button-disabled);
   pointer-events: none;
 }
 .button.with-icon {
@@ -25,35 +28,35 @@
 }
 
 #button-clear {
-  background: var(--button-clear-default) no-repeat 4px 50%;
+  background-image: var(--button-clear-default);
 }
 #button-pause {
-  background: var(--button-pause-default) no-repeat 4px 50%;
+  background-image: var(--button-pause-default);
 }
 #button-pause.button.active {
-  background: var(--button-pause-active) no-repeat 4px 50%;
+  background-image: var(--button-pause-active);
 }
 #button-autoscroll {
-  background: var(--button-autoscroll-default) no-repeat 4px 50%;
+  background-image: var(--button-autoscroll-default);
 }
 #button-autoscroll.button.active {
-  background: var(--button-autoscroll-active) no-repeat 4px 50%;
+  background-image: var(--button-autoscroll-active);
 }
 #button-filter {
-  background: var(--button-filter-default) no-repeat 4px 50%;
+  background-image: var(--button-filter-default);
 }
 #button-filter.button.active {
-  background: var(--button-filter-active) no-repeat 4px 50%;
+  background-image: var(--button-filter-active);
 }
 #button-colorize {
-  background: var(--button-colorize-default) no-repeat 4px 50%;
+  background-image: var(--button-colorize-default);
 }
 #button-colorize.button.active {
-  background: var(--button-colorize-active) no-repeat 4px 50%;
+  background-image: var(--button-colorize-active);
 }
 #button-export-list {
-  background: var(--button-export-default) no-repeat 4px 50%;
+  background-image: var(--button-export-default);
 }
 #button-import-list {
-  background: var(--button-import-default) no-repeat 4px 50%;
+  background-image: var(--button-import-default);
 }
