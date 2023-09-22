@@ -1,5 +1,6 @@
 .hljs {
   display: block;
+	color: var(--color-syntax);
 }
 
 .hljs-comment,

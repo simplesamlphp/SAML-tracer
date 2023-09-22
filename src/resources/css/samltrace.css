@@ -20,11 +20,12 @@
   --color-modal: rgba(200, 200, 200, 0.6);
   --color-error-text: #a4000f;
   --color-error-background: #fdf2f5;
+  --color-syntax: #38383d;
   --color-syntax-comment: #737373;
-  --color-syntax-string: #003eaa;
-  --color-syntax-keyword: #dd00a9;
-  --color-syntax-section: #0074e8;
-  --color-syntax-tag: #dc2d25;
+  --color-syntax-string: #1951b2;
+  --color-syntax-keyword: #de04aa;
+  --color-syntax-section: #107de9;
+  --color-syntax-tag: #3b3b40;
 
   --button-clear-default: url("../images/icons/button-clear-default.png");
   --button-pause-default: url("../images/icons/button-pause-default.png");
@@ -59,11 +60,12 @@
     --color-modal: rgba(50, 50, 50, 0.6);
     --color-error-text: #fbb0cf;
     --color-error-background: #4b2f36;
+    --color-syntax: #c8c8cc;
     --color-syntax-comment: #737373;
-    --color-syntax-string: #165cd7;
-    --color-syntax-keyword: #bf289c;
-    --color-syntax-section: #2d7dcc;
-    --color-syntax-tag: #dc2d25;
+    --color-syntax-string: #a580e2;
+    --color-syntax-keyword: #ff7de9;
+    --color-syntax-section: #75bfff;
+    --color-syntax-tag: #b1b1b3;
 
     --button-clear-default: url("../images/icons/button-clear-active.png");
     --button-pause-default: url("../images/icons/button-pause-active.png");
@@ -103,6 +105,9 @@ a {
   user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+}
+.is-selectable::selection {
+  background-color: var(--color-border);
 }
 
 #header {
@@ -145,10 +150,12 @@ a.tab.selected {
   border-top: 2px solid var(--color-button-active);
   box-shadow: unset;
 }
-
 a.tab:hover {
   border-top: 2px solid var(--color-border);
   background-color: var(--color-tab-hover);
+}
+a.tab.selected:hover {
+  border-top: 2px solid var(--color-button-active);
 }
 
 #request-info-content {
