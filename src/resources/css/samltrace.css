@@ -8,6 +8,7 @@
   --color-button-background: #e6e6e6;
   --color-button-active: #0865e0;
   --color-button-hover: #dbdbdb;
+  --color-line-text: #737373;
   --color-line-hover: #f0f9fe;
   --color-line-selected: #0074e8;
   --color-tab-text: #3c3c3c;
@@ -106,9 +107,6 @@ a {
   -moz-user-select: text;
   -ms-user-select: text;
 }
-.is-selectable::selection {
-  background-color: var(--color-border);
-}
 
 #header {
   height: 24px;
@@ -178,7 +176,7 @@ a.tab.selected:hover {
   display: flex;
   white-space: nowrap;
   border-bottom: 1px solid var(--color-border);
-  color: var(--color-syntax-comment);
+  color: var(--color-line-text);
 }
 .list-row:hover {
   background-color: var(--color-line-hover);
