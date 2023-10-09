@@ -1,2 +1,2 @@
-build.sh export-ignore
+lib/.gitkeep export-ignore
 node_modules export-ignore
