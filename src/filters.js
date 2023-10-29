@@ -109,7 +109,7 @@ SAMLTraceIO_filters.genMultiValueFilter = function(collection, key, separator, n
       return;
     }
 
-    let elem = req[collection].find(item => item.name === key);
+    let elem = req[collection].find(item => item.name.toUpperCase() === key.toUpperCase());
     if (elem == null) {
       return;
     }
