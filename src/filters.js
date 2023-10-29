@@ -89,7 +89,7 @@ SAMLTraceIO_filters.obfuscateValueFilter = function(collection, key) {
 * i.e.
 *   myfilter = SAMLTraceIO_filters.overwriteCookieValueFilter(
 *     'requestHeaders', 'Cookie', '{overwritten}');
-* will return a function that can called with a SAMLTrace.Request instance
+* will return a function that can be called with a SAMLTrace.Request instance
 * as argument, and will filter based on provided parameters,
 * i.e.
 *   filtered_request = myfilter(unfiltered_request);
@@ -109,33 +109,40 @@ SAMLTraceIO_filters.genMultiValueFilter = function(collection, key, separator, n
       return;
     }
 
-    let elem = req[collection].find(item => item.name === key);
-    if (elem == null) {
+    const elems = req[collection].filter(item => item.name.toUpperCase() === key.toUpperCase());
+    if (elems == null || elems.length === 0) {
       return;
     }
-    
-    var ac = elem.value.split(separator);
-    var fc = [];
 
-    for (let i = 0; i < ac.length; i++) {
-      var kk,kv;
-      if (ac[i].indexOf('=')>=0) {
-        kk=ac[i].split('=')[0];
-        kv=ac[i].split('=')[1];
-      } else {
-        kk='';// no key
-        kv=ac[i];
-      }
-
-      new_val_func(kk, kv, (kkk, newval) => {
-        // create syntactically correct entry:
-        fc.push([kkk, newval].join('='));
-
-        // update element's value on the last iteration
-        if (i === ac.length - 1) {
-          elem.value = fc.join(separator);
+    for (let index = 0; index < elems.length; index++) {
+      let elem = elems[index];
+      let originalKeyValuePairs = elem.value.split(separator);
+      let processedKeyValuePairs = [];
+  
+      for (let i = 0; i < originalKeyValuePairs.length; i++) {
+        let subkey, subvalue;
+        if (originalKeyValuePairs[i].indexOf('=') >= 0) {
+          subkey = originalKeyValuePairs[i].split('=')[0];
+          subvalue = originalKeyValuePairs[i].split('=')[1];
+        } else {
+          subkey = originalKeyValuePairs[i];
+          subvalue = null; // no value for boolean/flag-attributes
         }
-      });
+  
+        new_val_func(subkey, subvalue, (processedSubkey, newval) => {
+          // create syntactically correct entry:
+          if (subvalue !== null) {
+            processedKeyValuePairs.push([processedSubkey, newval].join('='));
+          } else {
+            processedKeyValuePairs.push(processedSubkey);
+          }
+  
+          // update element's value on the last iteration
+          if (i === originalKeyValuePairs.length - 1) {
+            elem.value = processedKeyValuePairs.join(separator);
+          }
+        });
+      } 
     }
   };
 }
