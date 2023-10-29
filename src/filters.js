@@ -109,33 +109,36 @@ SAMLTraceIO_filters.genMultiValueFilter = function(collection, key, separator, n
       return;
     }
 
-    let elem = req[collection].find(item => item.name.toUpperCase() === key.toUpperCase());
-    if (elem == null) {
+    const elems = req[collection].filter(item => item.name.toUpperCase() === key.toUpperCase());
+    if (elems == null || elems.length === 0) {
       return;
     }
-    
-    var ac = elem.value.split(separator);
-    var fc = [];
 
-    for (let i = 0; i < ac.length; i++) {
-      var kk,kv;
-      if (ac[i].indexOf('=')>=0) {
-        kk=ac[i].split('=')[0];
-        kv=ac[i].split('=')[1];
-      } else {
-        kk='';// no key
-        kv=ac[i];
-      }
-
-      new_val_func(kk, kv, (kkk, newval) => {
-        // create syntactically correct entry:
-        fc.push([kkk, newval].join('='));
-
-        // update element's value on the last iteration
-        if (i === ac.length - 1) {
-          elem.value = fc.join(separator);
+    for (let index = 0; index < elems.length; index++) {
+      let elem = elems[index];
+      let ac = elem.value.split(separator);
+      let fc = [];
+  
+      for (let i = 0; i < ac.length; i++) {
+        let kk,kv;
+        if (ac[i].indexOf('=')>=0) {
+          kk=ac[i].split('=')[0];
+          kv=ac[i].split('=')[1];
+        } else {
+          kk='';// no key
+          kv=ac[i];
         }
-      });
+  
+        new_val_func(kk, kv, (kkk, newval) => {
+          // create syntactically correct entry:
+          fc.push([kkk, newval].join('='));
+  
+          // update element's value on the last iteration
+          if (i === ac.length - 1) {
+            elem.value = fc.join(separator);
+          }
+        });
+      } 
     }
   };
 }
