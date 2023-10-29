@@ -125,13 +125,17 @@ SAMLTraceIO_filters.genMultiValueFilter = function(collection, key, separator, n
           subkey = originalKeyValuePairs[i].split('=')[0];
           subvalue = originalKeyValuePairs[i].split('=')[1];
         } else {
-          subkey = '';// no key
-          subvalue = originalKeyValuePairs[i];
+          subkey = originalKeyValuePairs[i];
+          subvalue = null; // no value for boolean/flag-attributes
         }
   
         new_val_func(subkey, subvalue, (processedSubkey, newval) => {
           // create syntactically correct entry:
-          processedKeyValuePairs.push([processedSubkey, newval].join('='));
+          if (subvalue !== null) {
+            processedKeyValuePairs.push([processedSubkey, newval].join('='));
+          } else {
+            processedKeyValuePairs.push(processedSubkey);
+          }
   
           // update element's value on the last iteration
           if (i === originalKeyValuePairs.length - 1) {
