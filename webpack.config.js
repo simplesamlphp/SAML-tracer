@@ -6,7 +6,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const buildDir = __dirname + '/lib';
 
 const localConfig = {
-    js_filename: '[name].js'
+    js_filename: '[name].min.js'
 };
 
 module.exports = environment => {
@@ -42,7 +42,7 @@ module.exports = environment => {
                 patterns: [
                     {
                         from: path.resolve(__dirname + '/node_modules/pako/dist/pako_inflate.js'),
-                        to: '[name][ext]'
+                        to: '[name].min[ext]'
                     }
                 ]
             })
