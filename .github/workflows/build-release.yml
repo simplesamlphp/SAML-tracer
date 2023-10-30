@@ -37,17 +37,13 @@ jobs:
           npm install --package-lock-only
           npm clean-install
           npm audit fix
+          npm run build
 
       # Store the version, stripping any v-prefix
       - name: Write release version
         run: |
           TAG="${{ github.ref_name }}"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
-
-      - name: Copy assets to lib-directory
-        run: |
-          cp node_modules/highlight.js/lib/core.js lib/highlight.js
-          cp node_modules/pako/dist/pako_inflate.js lib/pako_inflate.js
 
       - name: Clean release
         run: |
