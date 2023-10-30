@@ -185,12 +185,12 @@ ui = {
   
   highlightContent: () => {
     const getSyntaxHighlightingClass = tab => {
-      let tabName = tab ? tab.href.split('#')[1] : "n/a";
-      if (tabName === "HTTP" || tabName === "Parameters") {
-        return "HTTP";
-      } else {
-        return "XML";
-      }
+      const tabName = tab ? tab.href.split('#')[1] : 'n/a';
+      return {
+        'HTTP': 'HTTP',
+        'Parameters': 'Properties',
+        'SAML': 'XML'
+      }[tabName];
     };
 
     const removeSyntaxHighlightingClasses = block => {
