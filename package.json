@@ -2,7 +2,7 @@
   "name": "SAML-tracer",
   "main": "index.js",
   "repository": "https://github.com/simplesamlphp/SAML-tracer",
-  "license": "LGPL-2.1-or-later",
+  "license": "BSD-2-Clause",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
