@@ -33,6 +33,7 @@ module.exports = environment => {
             ]
         },
         optimization: {
+            minimize: false,
             minimizer: [new TerserPlugin({
                 extractComments: false,
             })],
