@@ -1,6 +1,8 @@
 'use strict';
 
-import hljs from  "highlight.js/lib/core";
+var hljs;
+
+import {highlight as hljs} from  "highlight.js/lib/core";
 import http from "highlight.js/lib/languages/http";
 import properties from "highlight.js/lib/languages/properties";
 import xml from "highlight.js/lib/languages/xml";
