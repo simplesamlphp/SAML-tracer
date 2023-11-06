@@ -620,11 +620,11 @@ SAMLTrace.TraceWindow.prototype = {
     case 'application/vnd.google.safebrowsing-update':
     case 'application/x-javascript':
     case 'application/x-shockwave-flash':
-    case 'application/font-sfnt':
-    case 'application/font-woff':
-    case 'application/font-woff2':
-    case 'application/x-font-ttf':
-    case 'application/x-font-woff':
+    case 'font/eot':
+    case 'font/otf':
+    case 'font/ttf':
+    case 'font/woff':
+    case 'font/woff2':
     case 'image/gif':
     case 'image/jpg':
     case 'image/jpeg':
