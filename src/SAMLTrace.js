@@ -625,6 +625,12 @@ SAMLTrace.TraceWindow.prototype = {
     case 'application/font-woff2':
     case 'application/x-font-ttf':
     case 'application/x-font-woff':
+    case 'font/collection':
+    case 'font/otf':
+    case 'font/sfnt':
+    case 'font/ttf':
+    case 'font/woff':
+    case 'font/woff2':
     case 'image/gif':
     case 'image/jpg':
     case 'image/jpeg':
