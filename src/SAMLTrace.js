@@ -600,18 +600,23 @@ SAMLTrace.TraceWindow = function() {
 
 SAMLTrace.TraceWindow.prototype = {
   'isRequestVisible' : function(request) {
-    var contentTypeHeader = request.responseHeaders.filter(header => header.name.toLowerCase() === 'content-type');
-    if (contentTypeHeader === null || contentTypeHeader.length === 0) {
+    const contentTypeHeader = request.responseHeaders.find(header => header.name.toLowerCase() === 'content-type');
+    if (contentTypeHeader === null) {
       return true;
     }
-    var type = contentTypeHeader[0].value;
+    const type = contentTypeHeader.value.split(';')[0].toLowerCase().trim();
+    const basetype = type.split('/')[0];
 
-    var i = type.indexOf(';');
-    if (i != -1) {
-      type = type.substr(0, i);
+    switch (basetype) {
+    case 'audio':
+    case 'font':
+    case 'image':
+    case 'video':
+      return false;
     }
-    type = type.toLowerCase().trim();
 
+    // Some of the below are deprecated variants, but we keep them as
+    // we still want to filter them when sent by older web servers.
     switch (type) {
     case 'application/ecmascript':
     case 'application/javascript':
@@ -625,27 +630,14 @@ SAMLTrace.TraceWindow.prototype = {
     case 'application/font-woff2':
     case 'application/x-font-ttf':
     case 'application/x-font-woff':
-    case 'font/collection':
-    case 'font/otf':
-    case 'font/sfnt':
-    case 'font/ttf':
-    case 'font/woff':
-    case 'font/woff2':
-    case 'image/gif':
-    case 'image/jpg':
-    case 'image/jpeg':
-    case 'image/png':
-    case 'image/vnd.microsoft.icon':
-    case 'image/x-icon':
-    case 'image/svg+xml':
     case 'text/css':
     case 'text/ecmascript':
     case 'text/javascript':
     case 'text/x-content-security-policy':
       return false;
-    default:
-      return true;
     }
+
+    return true;
   },
 
   'addRequestItem' : function(request, getResponse) {
