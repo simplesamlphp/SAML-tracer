@@ -28,7 +28,7 @@ jobs:
         run: git fetch --all
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install & build assets
         run: |
@@ -37,7 +37,9 @@ jobs:
           npm install --package-lock-only
           npm clean-install
           npm audit fix
-          npm run build
+
+          cp node_modules/@highlightjs/cdn-assets/highlight.min.js lib/
+          cp node_modules/pako/dist/pako_inflate.js lib/pako_inflate.min.js
 
       # Store the version, stripping any v-prefix
       - name: Write release version
