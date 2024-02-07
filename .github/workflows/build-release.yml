@@ -8,78 +8,16 @@ on:  # yamllint disable-line rule:truthy
       - '*'
   workflow_dispatch:
 
-env:
-  HLJS_VERSION: 11.9.0
-  PAKO_VERSION: 2.1.0
-
 jobs:
-  build-hljs:
-    name: Build dependencies
-    runs-on: [ubuntu-latest]
-    strategy:
-      fail-fast: false
-
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/checkout@v4
-        with:
-          repository: 'highlightjs/highlight.js'
-          ref: ${{ env.HLJS_VERSION }}
-
-      - name: Custom build Highlight.js
-        run: |
-          npm install --package-lock-only
-          npm clean-install
-          npm run build
-          node tools/build.js xml properties http
-
-      - name: 'Upload Hightlight.js build'
-        uses: actions/upload-artifact@v4
-        with:
-          name: hljs
-          path: build/highlight.min.js
-          retention-days: 1
-
-  build-pako:
-    name: Build dependencies
-    runs-on: [ubuntu-latest]
-    strategy:
-      fail-fast: false
-
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/checkout@v4
-        with:
-          repository: 'nodeca/pako'
-          ref: "${{ env.PAKO_VERSION }}"
-
-      - name: Custom build Pako
-        run: |
-          npm install --package-lock-only
-          npm clean-install
-          npm run build
-
-      - name: 'Upload Pako build'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pako
-          path: dist/pako_inflate.min.js
-          retention-days: 1
-
   build:
     name: Build release
     runs-on: [ubuntu-latest]
-    needs: [build-hljs, build-pako]
-    strategy:
-      fail-fast: false
 
     steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.SAMLTRACER_BUILD_TOKEN }}
@@ -91,39 +29,14 @@ jobs:
         # Without fetching, we might miss new tags due to caching in Github Actions
         run: git fetch --all
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: hljs
-          path: lib/
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: pako
-          path: lib/
-
-      - uses: geekyeggo/delete-artifact@v4
-        with:
-          name: |
-            hljs
-            pako
+      - name: Run build-script
+        run: bin/build.sh
 
       # Store the version, stripping any v-prefix
       - name: Write release version
         run: |
           TAG="${{ github.ref_name }}"
           echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
-
-      - name: Clean release
-        run: |
-          grep export-ignore .gitattributes | cut -d ' ' -f 1 | while IFS= read -r line
-          do
-            rm -rf "$line"
-          done
-          rm -rf .git
-
-      - name: Build release
-        run: |
-          zip -r /tmp/samltracer.zip *
 
       - name: Save release
         uses: actions/upload-artifact@v4
