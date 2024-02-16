@@ -1,0 +1,49 @@
+---
+
+name: Build release
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build release
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.SAMLTRACER_BUILD_TOKEN }}
+          ref: ${{ github.head_ref || github.ref_name }}
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+
+      - name: Fetch changes
+        # Without fetching, we might miss new tags due to caching in Github Actions
+        run: git fetch --all
+
+      - name: Run build-script
+        run: bin/build.sh
+
+      # Store the version, stripping any v-prefix
+      - name: Write release version
+        run: |
+          TAG="${{ github.ref_name }}"
+          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
+
+      - name: Save release
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: "/tmp/samltracer.zip"
+          retention-days: 1
+
+      - name: Calculate SHA checksum
+        run: sha256sum "/tmp/samltracer.zip"
