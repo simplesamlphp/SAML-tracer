@@ -905,19 +905,19 @@ SAMLTrace.TraceWindow.init = function() {
   browser.webRequest.onBeforeRequest.addListener(
     traceWindow.saveNewRequest,
     {urls: ["<all_urls>"]},
-    ["blocking", "requestBody"]
+    ["requestBody"]
   );
 
   browser.webRequest.onBeforeSendHeaders.addListener(
     traceWindow.attachHeadersToRequest,
     {urls: ["<all_urls>"]},
-    ['blocking', 'requestHeaders', browser.webRequest.OnBeforeSendHeadersOptions.EXTRA_HEADERS].filter(Boolean)
+    ['requestHeaders', browser.webRequest.OnBeforeSendHeadersOptions.EXTRA_HEADERS].filter(Boolean)
   );
 
   browser.webRequest.onHeadersReceived.addListener(
     traceWindow.attachResponseToRequest,
     {urls: ["<all_urls>"]},
-    ['blocking', 'responseHeaders', browser.webRequest.OnHeadersReceivedOptions.EXTRA_HEADERS].filter(Boolean)
+    ['responseHeaders', browser.webRequest.OnHeadersReceivedOptions.EXTRA_HEADERS].filter(Boolean)
   );
 };
 

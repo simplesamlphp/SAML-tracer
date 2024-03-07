@@ -2,7 +2,7 @@
   "name": "SAML-tracer",
   "description": "A debugger for viewing SAML messages",
   "author": "Olav Morken, Jaime Perez, Thijs Kinkhorst, Jan Köhler",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "version": "1.7.1",
   "homepage_url": "https://github.com/SimpleSAMLphp/SAML-tracer",
   "icons": {
@@ -13,14 +13,15 @@
     "128": "src/resources/images/icon128.png"
   },
   "permissions": [
-    "webRequest",
-    "webRequestBlocking",
+    "webRequest"
+  ],
+  "host_permissions": [
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["bootstrap.js"]
+    "service_worker": "bootstrap.js"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "src/resources/images/icon16.png",
       "32": "src/resources/images/icon32.png",
@@ -30,7 +31,7 @@
     }
   },
   "commands": {
-    "_execute_browser_action": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Alt+Shift+S"
       },
