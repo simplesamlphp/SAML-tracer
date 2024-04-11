@@ -3,7 +3,7 @@
 // The onOpenWindow event handler was slightly modified to be compatible with standard Firefox.
 
 var browser = browser || chrome
-browser.browserAction.onClicked.addListener((tab) => showTracerWindow());
+browser.action.onClicked.addListener((tab) => showTracerWindow());
 
 var tracerWindow = null;
 
