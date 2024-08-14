@@ -23,7 +23,7 @@ fi
 # Build Highlight.js
 HLJS=$(mktemp -d)
 cd "$HLJS"
-git clone -b "$HLJS_VERSION" https://github.com/highlightjs/highlight.js.git
+git clone --depth 1 -b "$HLJS_VERSION" https://github.com/highlightjs/highlight.js.git
 cd highlight.js
 
 npm install --package-lock-only
@@ -34,7 +34,7 @@ node tools/build.js xml properties http
 # Build Pako
 PAKO=$(mktemp -d)
 cd "$PAKO"
-git clone -b "$PAKO_VERSION" https://github.com/nodeca/pako.git
+git clone --depth 1 -b "$PAKO_VERSION" https://github.com/nodeca/pako.git
 cd pako
 
 npm install --package-lock-only
