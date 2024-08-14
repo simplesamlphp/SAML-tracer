@@ -30,6 +30,12 @@
       "128": "src/resources/images/icon128.png"
     }
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{d3e01ff2-9a3a-4007-8f6e-7acd9a5de263}",
+      "strict_min_version": "109.0"
+    }
+  },
   "commands": {
     "_execute_action": {
       "suggested_key": {
