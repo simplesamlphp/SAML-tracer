@@ -60,7 +60,7 @@ git archive --format tar "$RELEASE" | (cd "$DEST"; tar xv)
 
 cd "$DEST"
 
-zip -r "$TARGET" *
+zip -1 -r "$TARGET" *
 
 cd /
 rm -rf "$DEST"
