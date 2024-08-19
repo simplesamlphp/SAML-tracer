@@ -18,6 +18,9 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; img-src 'self'; script-src 'self'; style-src 'self';"
+  },
   "background": {
     "service_worker": "bootstrap.js",
     "scripts": ["bootstrap.js"]
