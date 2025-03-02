@@ -4,7 +4,7 @@ set -e
 
 CWD="$(pwd)"
 
-HLJS_VERSION=11.10.0
+HLJS_VERSION=11.11.1
 PAKO_VERSION=2.1.0
 
 if [ -n "$1" ]; then
