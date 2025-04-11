@@ -601,7 +601,7 @@ SAMLTrace.TraceWindow = function() {
 SAMLTrace.TraceWindow.prototype = {
   'isRequestVisible' : function(request) {
     const contentTypeHeader = request.responseHeaders.find(header => header.name.toLowerCase() === 'content-type');
-    if (contentTypeHeader === null) {
+    if (!contentTypeHeader) {
       return true;
     }
     const type = contentTypeHeader.value.split(';')[0].toLowerCase().trim();
