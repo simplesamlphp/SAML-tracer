@@ -23,17 +23,10 @@ ui = {
     }, true);
   },
 
-  setupContent: (requests, httpRequests, isFilteringActive) => {
+  setupContent: (httpRequests, hideResources, showProtocolRequestsOnly) => {
     // remember the currently captured (and filtered) requests
-    if (requests) {
-      let filteredRequests = requests.filter(req => {
-        let match = httpRequests.find(hr => hr.req.requestId === req.requestId);
-        if (match && (match.isVisible || !isFilteringActive)) {
-          return req;
-        }
-      });
-      ui.requests = filteredRequests;
-    }
+    filteredRequests = httpRequests?.filter(req => req.isVisible && req.isVisible(hideResources, showProtocolRequestsOnly)).map(req => req.parsed);
+    ui.requests = filteredRequests;
 
     const displayExportableRequestCount = () => {
       let requestCount = document.getElementById("request-count");

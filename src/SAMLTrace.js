@@ -562,6 +562,9 @@ SAMLTrace.RequestItem.prototype = {
     var uniqueRequestId = new SAMLTrace.UniqueRequestId(this.request.requestId, this.request.method, this.request.url);
     uniqueRequestId.create(id => hbox.setAttribute('id', id));
     hbox.setAttribute('class', 'list-row');
+    if (this.request.protocol) {
+      hbox.classList.add('is-protocol');
+    }
     hbox.appendChild(methodLabel);
     hbox.appendChild(urlLabel);
 
@@ -594,15 +597,16 @@ SAMLTrace.TraceWindow = function() {
   this.requests = [];
   this.pauseTracing = false;
   this.autoScroll = true;
-  this.filterResources = true;
+  this.hideResources = true;
+  this.showProtocolOnly = false;
   this.colorizeRequests = true;
 };
 
 SAMLTrace.TraceWindow.prototype = {
-  'isRequestVisible' : function(request) {
+  'isRequestResource' : function(request) {
     const contentTypeHeader = request.responseHeaders.find(header => header.name.toLowerCase() === 'content-type');
     if (!contentTypeHeader) {
-      return true;
+      return false;
     }
     const type = contentTypeHeader.value.split(';')[0].toLowerCase().trim();
     const basetype = type.split('/')[0];
@@ -612,7 +616,7 @@ SAMLTrace.TraceWindow.prototype = {
     case 'font':
     case 'image':
     case 'video':
-      return false;
+      return true;
     }
 
     // Some of the below are deprecated variants, but we keep them as
@@ -630,21 +634,23 @@ SAMLTrace.TraceWindow.prototype = {
     case 'application/font-woff2':
     case 'application/x-font-ttf':
     case 'application/x-font-woff':
+    case 'font/woff2':
     case 'text/css':
     case 'text/ecmascript':
     case 'text/javascript':
     case 'text/x-content-security-policy':
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   },
 
   'addRequestItem' : function(request, getResponse) {
     var samlTracerRequest = new SAMLTrace.Request(request, getResponse);
-    var item = new SAMLTrace.RequestItem(samlTracerRequest, showContentElement);
     this.requests.push(samlTracerRequest);
+    request.parsed = samlTracerRequest;
 
+    var item = new SAMLTrace.RequestItem(samlTracerRequest, showContentElement);
     var requestList = document.getElementById('request-list');
     var showContentElement = document.getElementById('request-info-content');
     var requestItemListElement = item.addListItem(requestList, showContentElement);
@@ -683,8 +689,13 @@ SAMLTrace.TraceWindow.prototype = {
     this.autoScroll = autoScroll;
   },
 
-  'setFilterResources' : function(filterResources) {
-    this.filterResources = filterResources;
+  'setHideResources' : function(hideResources) {
+    this.hideResources = hideResources;
+    this.updateStatusBar();
+  },
+
+  'setShowProtocolOnly' : function(showProtocolOnly) {
+    this.showProtocolOnly = showProtocolOnly;
     this.updateStatusBar();
   },
 
@@ -693,12 +704,14 @@ SAMLTrace.TraceWindow.prototype = {
   },
 
   'updateStatusBar' : function() {
-    var hiddenElementsString = "";
-    if (this.filterResources) {
-      hiddenElementsString = ` (${this.httpRequests.filter(req => typeof req.isVisible !== "undefined" && !req.isVisible).length} hidden)`;
+    let hiddenElementsString = "";
+    if (this.hideResources || this.showProtocolOnly) {
+      const invisibleItems = this.httpRequests.filter(req => (req.isVisible && !req.isVisible(this.hideResources, this.showProtocolOnly)));
+      hiddenElementsString = ` (${invisibleItems.length} hidden)`;
     }
-    var status = `${this.httpRequests.length} requests received ${hiddenElementsString}`;
-    var statusItem = document.getElementById('statuspanel');
+    
+    const status = `${this.httpRequests.length} requests received ${hiddenElementsString}`;
+    const statusItem = document.getElementById('statuspanel');
     statusItem.innerText = status;
   },
 
@@ -784,6 +797,11 @@ SAMLTrace.TraceWindow.prototype = {
       }
 
       entry.res = response;
+      entry.isVisible = function(hideResources, showProtocolRequestsOnly) {
+        const isHiddenByResource = hideResources && entry.isResource;
+        const isHiddenByProtocol = showProtocolRequestsOnly && !entry.parsed?.protocol;      
+        return !(isHiddenByResource || isHiddenByProtocol);
+      };
 
       // layout update: apply style to item based on responseStatus
       let status = 'other';
@@ -800,24 +818,28 @@ SAMLTrace.TraceWindow.prototype = {
       };
 
       var requestDiv = document.getElementById(id);
-      if (requestDiv !== null) {
+      if (requestDiv) {
         removeClassByPrefix(requestDiv, "request-");
         requestDiv.classList.add("request-" + status);
 
-        var isVisible = tracer.isRequestVisible(response);
-        if (!isVisible) {
-          requestDiv.classList.add("isResource");
-          
-          if (!tracer.filterResources) {
-            requestDiv.classList.add("displayAnyway");
+        var isResource = tracer.isRequestResource(response);
+        entry.isResource = isResource;
+        if (isResource) {
+          requestDiv.classList.add("is-resource");
+        
+          if (!tracer.hideResources) {
+            requestDiv.classList.add("show-resource");
           }
+        }
+
+        if (!entry.parsed.protocol && tracer.showProtocolOnly) {
+          requestDiv.classList.add("non-protocol");
         }
 
         if (!tracer.colorizeRequests) {
           requestDiv.classList.add("monochrome");
         }
-        
-        entry.isVisible = isVisible;
+
         tracer.updateStatusBar();
       }
       

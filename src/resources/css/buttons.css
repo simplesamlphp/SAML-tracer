@@ -42,10 +42,16 @@
 #button-autoscroll.button.active {
   background-image: var(--button-autoscroll-active);
 }
-#button-filter {
+#button-hide-resources {
   background-image: var(--button-filter-default);
 }
-#button-filter.button.active {
+#button-hide-resources.button.active {
+  background-image: var(--button-filter-active);
+}
+#button-show-protocol-only {
+  background-image: var(--button-filter-default);
+}
+#button-show-protocol-only.button.active {
   background-image: var(--button-filter-active);
 }
 #button-colorize {

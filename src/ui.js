@@ -51,6 +51,25 @@ ui = {
     newState ? button.classList.add("active") : button.classList.remove("active");
   },
 
+  toggleListRowVisibility() {
+    const hideResources = document.getElementById("button-hide-resources").classList.contains("active");
+    const showProtocolRequestsOnly = document.getElementById("button-show-protocol-only").classList.contains("active");
+
+    Array.from(document.getElementsByClassName("list-row")).forEach(row => {
+      if (hideResources) {
+        row.classList.remove("show-resource");
+      } else {
+        row.classList.add("show-resource");
+      }
+      
+      if (showProtocolRequestsOnly && !row.classList.contains("is-protocol")) {
+        row.classList.add("non-protocol");
+      } else {
+        row.classList.remove("non-protocol");
+      }
+    });
+  },
+
   bindButtons: function() {
     document.getElementById("button-clear").addEventListener("click", () => {
       window.tracer.clearRequests();
@@ -67,15 +86,15 @@ ui = {
         requestList.scrollTop = requestList.scrollTopMax;
       }
     }, true);
-    document.getElementById("button-filter").addEventListener("click", e => {
-      let newState = ui.toggleButtonState(e.target);
-      window.tracer.setFilterResources(newState);
-      let hidableRows = document.getElementsByClassName("list-row isResource");
-      if (newState) {
-        Array.from(hidableRows).forEach(row => row.classList.remove("displayAnyway"));
-      } else {
-        Array.from(hidableRows).forEach(row => row.classList.add("displayAnyway"));
-      }
+    document.getElementById("button-hide-resources").addEventListener("click", e => {
+      const newState = ui.toggleButtonState(e.target);
+      window.tracer.setHideResources(newState);
+      ui.toggleListRowVisibility();
+    }, true);
+    document.getElementById("button-show-protocol-only").addEventListener("click", e => {
+      const newState = ui.toggleButtonState(e.target);
+      window.tracer.setShowProtocolOnly(newState);
+      ui.toggleListRowVisibility();
     }, true);
     document.getElementById("button-colorize").addEventListener("click", e => {
       let newState = ui.toggleButtonState(e.target);
@@ -90,9 +109,8 @@ ui = {
     document.getElementById("button-export-list").addEventListener("click", () => {
       let exportDialog = document.getElementById("exportDialog");
       exportDialog.style.visibility = "visible";
-      let isFilteringActive = document.getElementById("button-filter").classList.contains("active");
       let exportDialogContent = document.getElementById("exportDialogContent");
-      exportDialogContent.contentWindow.ui.setupContent(window.tracer.requests, window.tracer.httpRequests, isFilteringActive);
+      exportDialogContent.contentWindow.ui.setupContent(window.tracer.httpRequests, window.tracer.hideResources, window.tracer.showProtocolRequestsOnly);
     }, true);
     document.getElementById("button-import-list").addEventListener("click", () => {
       let importDialog = document.getElementById("importDialog");
