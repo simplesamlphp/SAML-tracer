@@ -6,7 +6,8 @@ if ("undefined" === typeof(ScrollableList)) {
   var ScrollableList = new function() {
 
     const isElementToBeSkipped = elem => {
-      return elem && elem.classList.contains("isResource") && !elem.classList.contains("displayAnyway");
+      const visibleInDom = elem.checkVisibility();
+      return !visibleInDom;
     };
 
     const getSibling = (cur, siblingFunc) => {
