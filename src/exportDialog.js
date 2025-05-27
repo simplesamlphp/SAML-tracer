@@ -13,10 +13,32 @@ ui = {
 
     // bind export button
     document.getElementById("button-export").addEventListener("click", e => {
-      let io = new SAMLTraceIO();
-      let encodedExportResult = encodeURIComponent(io.serialize(ui.exportResult));
-      e.target.href = "data:application/json;charset=utf-8," + encodedExportResult;
-      e.target.download = io.getOutputFile(ui.exportResult);
+      const io = new SAMLTraceIO();const filename = io.getOutputFile(ui.exportResult);
+      const jsonString = io.serialize(ui.exportResult);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      // Use the downloads API
+      var browser = browser || chrome;
+      const downloading = browser.downloads.download({url, filename});
+
+      downloading.then(
+        downloadId => console.log(`Download ${downloadId} has started.`),
+        error => {
+          console.log(`Revoking Object URL because download failed: ${error}`);
+          URL.revokeObjectURL(url);
+        }
+      );
+
+      // Clean up the object URL
+      const downloadChanged = delta => {
+        if (delta.state && delta.state.current === "complete") {
+          console.log(`Download ${delta.id} (${filename}) has completed. Object URL will be revoked.`);
+          URL.revokeObjectURL(url);
+          browser.downloads.onChanged.removeListener(downloadChanged);
+        }
+      };
+      browser.downloads.onChanged.addListener(downloadChanged);
 
       // hide dialog after export
       window.parent.ui.hideDialogs();
