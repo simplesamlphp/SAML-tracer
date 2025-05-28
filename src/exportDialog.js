@@ -13,7 +13,8 @@ ui = {
 
     // bind export button
     document.getElementById("button-export").addEventListener("click", e => {
-      const io = new SAMLTraceIO();const filename = io.getOutputFile(ui.exportResult);
+      const io = new SAMLTraceIO();
+      const filename = io.getOutputFile(ui.exportResult);
       const jsonString = io.serialize(ui.exportResult);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
