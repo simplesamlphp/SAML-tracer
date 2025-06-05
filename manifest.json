@@ -13,14 +13,13 @@
     "128": "src/resources/images/icon128.png"
   },
   "permissions": [
-    "webRequest",
-    "downloads"
+    "webRequest"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "content_security_policy": {
-    "extension_pages": "default-src 'none'; img-src 'self'; script-src 'self'; style-src 'self';"
+    "extension_pages": "default-src 'none'; img-src 'self'; script-src 'self'; style-src 'self'; frame-src data:;"
   },
   "background": {
     "service_worker": "bootstrap.js",
