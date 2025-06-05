@@ -13,8 +13,7 @@
     "128": "src/resources/images/icon128.png"
   },
   "permissions": [
-    "webRequest",
-    "downloads"
+    "webRequest"
   ],
   "host_permissions": [
     "<all_urls>"

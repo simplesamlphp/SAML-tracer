@@ -39,7 +39,7 @@ SAMLTraceIO.prototype = {
   },
 
   'getOutputFile': function(exportResult) {
-    const timeStamp = exportResult && exportResult.timestamp ? exportResult.timestamp.replaceAll(":", "_") : "no-timestamp";
+    let timeStamp = exportResult && exportResult.timestamp ? exportResult.timestamp : "no-timestamp";
     return `SAML-tracer-export-${timeStamp}.json`;
   },
 
