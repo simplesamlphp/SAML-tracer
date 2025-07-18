@@ -1,8 +1,9 @@
 SAML-tracer
 ===========
 
-SAML-tracer is a Firefox extension that aims to make debugging of
-SAML- and WS-Federation-communication between websites easier. 
+SAML-tracer is a browser extension, available from the Firefox and Chrome
+extension stores, that aims to make debugging of SAML- and 
+WS-Federation-communication between websites easier. 
 It is a request logger that in addition to showing normal requests, 
 also highlights and decodes SAML messages that are transmitted.
 
@@ -37,7 +38,7 @@ repository from:
   https://github.com/SimpleSAMLphp/SAML-tracer/
 
 You can now modify and extend SAML-tracer. To test your changes, you 
-can debug the extension as described here:
+can debug the extension as described here for Firefox:
 
   https://developer.mozilla.org/Add-ons/WebExtensions/Debugging
 
