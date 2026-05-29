@@ -45,6 +45,10 @@ can debug the extension as described here for Firefox:
 After modifying the source code, you need to commit your changes to
 your local Git repository.
 
+Browser support
+---------------
+
+This extension is available for Firefox (see Mozilla extension) and for Chrome & Edge (see Chrome extension).
 
 License
 -------
