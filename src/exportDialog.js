@@ -25,7 +25,7 @@ ui = {
 
   setupContent: (httpRequests, hideResources, showProtocolRequestsOnly) => {
     // remember the currently captured (and filtered) requests
-    filteredRequests = httpRequests?.filter(req => req.isVisible && req.isVisible(hideResources, showProtocolRequestsOnly)).map(req => req.parsed);
+    filteredRequests = httpRequests?.filter(req => req.isVisible && req.isVisible(hideResources, showProtocolRequestsOnly)).map(req => req.parsed).filter(Boolean);
     ui.requests = filteredRequests;
 
     const displayExportableRequestCount = () => {

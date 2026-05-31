@@ -1,0 +1,14 @@
+{
+  "name": "saml-tracer",
+  "version": "1.9.2",
+  "description": "A debugger for viewing SAML messages",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}

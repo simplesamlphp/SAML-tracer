@@ -181,6 +181,7 @@ SAMLTraceIO.ExportFilter.prototype = {
     };
 
     const enrichWithResponse = (req, res) => {
+      if (res == null) return;
       let responseCopy = createFromJSON(res);
       req.responseStatus = responseCopy.statusCode;
       req.responseStatusText = responseCopy.statusLine;
