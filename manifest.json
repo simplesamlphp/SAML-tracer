@@ -40,9 +40,6 @@
       "strict_min_version": "140.0"
     }
   },
-  "chrome_settings_overrides": {
-    "homepage": "https://github.com/SimpleSAMLphp/SAML-tracer"
-  },
   "commands": {
     "_execute_action": {
       "suggested_key": {
