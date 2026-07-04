@@ -1,3 +1,4 @@
-lib/.gitkeep export-ignore
 bin/ export-ignore
-composer.lock
+lib/.gitkeep export-ignore
+node_modules/ export-ignore
+composer.lock export-ignore
