@@ -61,7 +61,7 @@ jobs:
       - name: Copy third-party dependencies to lib/ directory
         run: |
           cp vendor/fredericpetit/highlightjs-composer/assets/js/highlight.min.js lib/highlight.min.js
-          cp node_modules/pako/dist/browser/pako_inflate.esm.min.mjs lib/pako_inflate.min.js
+          cp node_modules/pako/dist/pako_inflate.min.js lib/pako_inflate.min.js
 
       - name: Clean release
         run: |
