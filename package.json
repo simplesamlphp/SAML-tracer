@@ -5,6 +5,9 @@
   "scripts": {
     "test": "jest"
   },
+  "dependencies": {
+    "pako": "~2.2"
+  },
   "devDependencies": {
     "jest": "^29.0.0"
   },

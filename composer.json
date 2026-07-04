@@ -1,0 +1,5 @@
+{
+    "require": {
+        "fredericpetit/highlightjs-composer": "^11.11"
+    }
+}
