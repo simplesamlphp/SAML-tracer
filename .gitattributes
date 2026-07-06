@@ -1,4 +1,3 @@
-bin/ export-ignore
 lib/.gitkeep export-ignore
 node_modules/ export-ignore
 composer.lock export-ignore
