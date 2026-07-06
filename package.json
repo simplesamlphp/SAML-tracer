@@ -10,7 +10,7 @@
     "pako": "~2.2"
   },
   "devDependencies": {
-    "jest": "^29.0.0"
+    "jest": "^30.4"
   },
   "jest": {
     "testEnvironment": "node"
