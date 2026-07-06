@@ -36,31 +36,17 @@ jobs:
           npm clean-install
           npm audit fix
 
-      # Store the version, stripping any v-prefix
-      - name: Write release version
+      - name: Build custom (minimum) release of highlight.js
         run: |
-          TAG="${{ github.ref_name }}"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
-
-      - name: Setup PHP, with composer and extensions
-        id: setup-php
-        # https://github.com/shivammathur/setup-php
-        uses: shivammathur/setup-php@v2
-        with:
-          # Should match the minimum required version for SimpleSAMLphp
-          php-version: '8.5'
-          tools: composer:v2
-          coverage: none
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Install Composer dependencies
-        run: composer install --no-progress --no-dev --prefer-dist --optimize-autoloader
+          cd node_modules/highlight.js
+          npm install --package-lock-only
+          npm clean-install
+          npm run build
+          node tools/build.js xml properties http
 
       - name: Copy third-party dependencies to lib/ directory
         run: |
-          cp vendor/fredericpetit/highlightjs-composer/assets/js/highlight.min.js lib/highlight.min.js
+          cp node_modules/highlight.js/build/highlight.min.js lib/highlight.min.js
           cp node_modules/pako/dist/pako_inflate.min.js lib/pako_inflate.min.js
 
       - name: Clean release

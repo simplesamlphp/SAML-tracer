@@ -1,8 +1,0 @@
-{
-    "name": "simplesamlphp/saml-tracer",
-    "description": "A debugger for viewing SAML messages",
-    "license": "BSD-2-Clause",
-    "require": {
-        "fredericpetit/highlightjs-composer": "^11.11"
-    }
-}
