@@ -14,11 +14,7 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.SAMLTRACER_BUILD_TOKEN }}
           ref: ${{ github.head_ref || github.ref_name }}
@@ -29,17 +25,44 @@ jobs:
         # Without fetching, we might miss new tags due to caching in Github Actions
         run: git fetch --all
 
-      - name: Run build-script
-        run: bin/build.sh
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
-      # Store the version, stripping any v-prefix
-      - name: Write release version
+      - name: Install & build assets
         run: |
-          TAG="${{ github.ref_name }}"
-          echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
+          # Make sure the lock-file is up to date before we run clean-install
+          npm install --package-lock-only
+          npm clean-install
+          npm audit fix
+
+      - name: Build custom (minimum) release of highlight.js
+        run: |
+          cd node_modules/highlight.js
+          npm install --package-lock-only
+          npm clean-install
+          npm run build
+          node tools/build.js xml properties http
+
+      - name: Copy third-party dependencies to lib/ directory
+        run: |
+          cp node_modules/highlight.js/build/highlight.min.js lib/highlight.min.js
+          cp node_modules/pako/dist/pako_inflate.min.js lib/pako_inflate.min.js
+
+      - name: Clean release
+        run: |
+          grep export-ignore .gitattributes | cut -d ' ' -f 1 | while IFS= read -r line
+          do
+            rm -rf "$line"
+          done
+          rm -rf .git
+
+      - name: Build zip-file
+        run: |
+          zip -1 -r /tmp/samltracer.zip *
 
       - name: Save release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release
           path: "/tmp/samltracer.zip"

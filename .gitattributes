@@ -1,2 +1,5 @@
 lib/.gitkeep export-ignore
-bin/ export-ignore
+node_modules/ export-ignore
+test/ export-ignore
+vendor/ export-ignore
+package-lock.json export-ignore

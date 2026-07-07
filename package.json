@@ -5,6 +5,10 @@
   "scripts": {
     "test": "jest"
   },
+  "dependencies": {
+    "highlight.js": "github:highlightjs/highlight.js",
+    "pako": "~2.2"
+  },
   "devDependencies": {
     "jest": "^29.0.0"
   },
