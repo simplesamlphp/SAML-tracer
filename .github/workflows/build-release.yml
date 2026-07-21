@@ -29,24 +29,23 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install & build assets
-        run: |
-          # Make sure the lock-file is up to date before we run clean-install
-          npm install --package-lock-only
-          npm clean-install
-          npm audit fix
-
-      - name: Build custom (minimum) release of highlight.js
-        run: |
-          cd node_modules/highlight.js
-          npm install --package-lock-only
-          npm clean-install
-          npm run build
-          node tools/build.js xml properties http
+      - name: Install assets
+        # Deliberately a plain clean-install: package-lock.json is authoritative, so the
+        # published build is reproducible from the committed lock-file alone. Do not add
+        # `npm install --package-lock-only` or `npm audit fix` here -- both mutate the
+        # dependency tree at build time, which makes the shipped third-party files
+        # impossible for AMO reviewers to verify.
+        run: npm clean-install
 
       - name: Copy third-party dependencies to lib/ directory
+        # Copied verbatim from the @highlightjs/cdn-assets package, which is highlight.js'
+        # own published distribution. The files are byte-identical to that release, so a
+        # reviewer can verify them with `npm ci` and `diff` rather than reproducing a build.
         run: |
-          cp node_modules/highlight.js/build/highlight.min.js lib/highlight.min.js
+          cp node_modules/@highlightjs/cdn-assets/es/core.min.js lib/core.min.js
+          cp node_modules/@highlightjs/cdn-assets/es/languages/xml.min.js lib/xml.min.js
+          cp node_modules/@highlightjs/cdn-assets/es/languages/http.min.js lib/http.min.js
+          cp node_modules/@highlightjs/cdn-assets/es/languages/properties.min.js lib/properties.min.js
           cp node_modules/pako/dist/pako_inflate.min.js lib/pako_inflate.min.js
 
       - name: Clean release

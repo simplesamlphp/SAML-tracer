@@ -15,6 +15,11 @@ License type: BSD 3-clause "New" or "Revised" License
 
 Project URL: https://github.com/highlightjs/highlight.js
 
+Distribution: the files in `lib/` are copied verbatim, without modification, from the
+project's own published distribution package `@highlightjs/cdn-assets`, pinned to version
+11.11.1 in `package.json`. The exact tarball and its SHA-512 integrity hash are recorded in
+`package-lock.json`, so the shipped files can be verified with `npm ci` followed by `diff`.
+
 Original license text:
 
 ```

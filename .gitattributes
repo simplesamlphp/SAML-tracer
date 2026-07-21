@@ -2,4 +2,5 @@ lib/.gitkeep export-ignore
 node_modules/ export-ignore
 test/ export-ignore
 vendor/ export-ignore
-package-lock.json export-ignore
+# package-lock.json is deliberately kept in the release archive: it is the provenance record
+# for the third-party files in lib/, and AMO reviewers need it to verify them.

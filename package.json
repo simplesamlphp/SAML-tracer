@@ -6,7 +6,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "highlight.js": "github:highlightjs/highlight.js",
+    "@highlightjs/cdn-assets": "11.11.1",
     "pako": "~2.2"
   },
   "devDependencies": {
