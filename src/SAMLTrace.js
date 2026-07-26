@@ -5,7 +5,7 @@ if ("undefined" == typeof(SAMLTrace)) {
   var SAMLTrace = {};
 };
 
-SAMLTrace.b64inflate = function (data) {
+SAMLTrace.b64inflate = async function (data) {
   // Remove any whitespace in the base64-encoded data -- Shibboleth may insert line feeds in the data.
   data = data.replace(/\s/g, '');
 
@@ -21,7 +21,8 @@ SAMLTrace.b64inflate = function (data) {
 
   const decoded = atob(data);
   const bytes = Uint8Array.from(decoded, c => c.charCodeAt(0));
-  const inflated = pako.inflateRaw(bytes);
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  const inflated = new Uint8Array(await new Response(stream).arrayBuffer());
   return String.fromCharCode.apply(String, inflated);
 };
 
@@ -145,7 +146,9 @@ SAMLTrace.Request = function(request, getResponse) {
   this.loadPOST(request);
   this.parsePOST();
   this.parseProtocol();
-  this.parseSAML();
+  // parseSAML() inflates the HTTP-Redirect binding via DecompressionStream and is therefore
+  // asynchronous. Callers must await it before rendering: RequestItem inspects `saml` and
+  // `samlart` to decide which tabs exist.
 };
 SAMLTrace.Request.prototype = {
   'loadRequestHeaders' : function(request) {
@@ -269,7 +272,7 @@ SAMLTrace.Request.prototype = {
       this.protocol = "WS-Fed";
     }
   },
-  'parseSAML' : function() {
+  'parseSAML' : async function() {
     if ((this.saml && this.saml !== "") || (this.samlart && this.samlart !== "")) {
       // do nothing if the token of an imported request is already present
       return;
@@ -301,12 +304,17 @@ SAMLTrace.Request.prototype = {
       return parameter ? parameter[1] : null;
     };
 
-    return queries.some(query => {
+    // Sequential rather than Array.some(), because the inflating actions are asynchronous.
+    // Semantics are unchanged: every query up to and including the first match is applied.
+    for (const query of queries) {
       let parameter = findParameter(query.name, query.collection);
-      let value = query.action(parameter);
+      let value = await query.action(parameter);
       query.to(value);
-      return value !== null;
-    });
+      if (value !== null) {
+        return true;
+      }
+    }
+    return false;
   }
 };
 
@@ -645,8 +653,10 @@ SAMLTrace.TraceWindow.prototype = {
     return false;
   },
 
-  'addRequestItem' : function(request, getResponse) {
+  'addRequestItem' : async function(request, getResponse) {
     var samlTracerRequest = new SAMLTrace.Request(request, getResponse);
+    // Parse before publishing the request, so nothing can observe a half-initialised entry.
+    await samlTracerRequest.parseSAML();
     this.requests.push(samlTracerRequest);
     request.parsed = samlTracerRequest;
 
@@ -760,7 +770,7 @@ SAMLTrace.TraceWindow.prototype = {
 
   'attachHeadersToRequest' : function(request) { // onBeforeSendHeaders
     let uniqueRequestId = new SAMLTrace.UniqueRequestId(request.requestId, request.method, request.url);
-    uniqueRequestId.create(id => {
+    uniqueRequestId.create(async id => {
       let tracer = SAMLTrace.TraceWindow.instance();
 
       // Maybe revise the HTTP method on redirected requests
@@ -775,7 +785,7 @@ SAMLTrace.TraceWindow.prototype = {
       }
 
       entry.headers = request.requestHeaders;
-      tracer.addRequestItem(entry, () => entry.res);
+      await tracer.addRequestItem(entry, () => entry.res);
       tracer.updateStatusBar();
     });
   },
