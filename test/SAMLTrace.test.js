@@ -1,19 +1,20 @@
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 const { deflateRawSync } = require('zlib');
 
-// b64inflate() warns via dump(), which only exists in the extension's browser context.
-global.dump = () => {};
-
-function loadScript(relativePath) {
-  const code = fs.readFileSync(path.resolve(__dirname, '..', relativePath), 'utf8');
-  vm.runInNewContext(code, global);
+// Load the extension source in this test's own global scope rather than a fresh
+// vm context. b64inflate() relies on web globals (atob, Blob, Response,
+// DecompressionStream) that Jest's node environment provides directly — but under
+// Jest on Node >= 26, a context created via vm.runInNewContext(code, global) no
+// longer sees them, so the vm-based loader used elsewhere fails here. dump() only
+// exists in the extension's browser context, so we inject a no-op.
+function loadSAMLTrace() {
+  const code = fs.readFileSync(path.resolve(__dirname, '..', 'src/SAMLTrace.js'), 'utf8');
+  const factory = new Function('dump', `${code}\nreturn SAMLTrace;`);
+  return factory(() => {});
 }
 
-loadScript('src/SAMLTrace.js');
-
-const SAMLTrace = global.SAMLTrace;
+const SAMLTrace = loadSAMLTrace();
 
 /** Encodes a string the way an IdP encodes an HTTP-Redirect binding payload. */
 function redirectBindingEncode(xml) {
