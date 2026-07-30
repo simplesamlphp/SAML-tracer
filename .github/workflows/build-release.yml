@@ -46,7 +46,6 @@ jobs:
           cp node_modules/@highlightjs/cdn-assets/es/languages/xml.min.js lib/xml.min.js
           cp node_modules/@highlightjs/cdn-assets/es/languages/http.min.js lib/http.min.js
           cp node_modules/@highlightjs/cdn-assets/es/languages/properties.min.js lib/properties.min.js
-          cp node_modules/pako/dist/pako_inflate.min.js lib/pako_inflate.min.js
 
       - name: Clean release
         run: |

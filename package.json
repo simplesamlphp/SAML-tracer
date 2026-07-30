@@ -3,16 +3,18 @@
   "version": "1.9.2",
   "description": "A debugger for viewing SAML messages",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@highlightjs/cdn-assets": "11.11.1",
-    "pako": "~2.2"
+    "@highlightjs/cdn-assets": "11.11.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "jest": "^29.0.0"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testMatch": ["**/*.test.js"]
   }
 }

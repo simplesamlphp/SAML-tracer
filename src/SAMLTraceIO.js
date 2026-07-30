@@ -47,10 +47,10 @@ SAMLTraceIO.prototype = {
    * Imports requests and restores them in the TraceWindow.
    **/
   'importRequests': function(selectedFile, tracer, onSuccess, onError) {
-    const parseRequests = rawResult => {
+    const parseRequests = async rawResult => {
       try {
         let exportedSession = JSON.parse(rawResult);
-        let successfullyRestored = this.restoreFromImport(exportedSession.requests, tracer, onError);
+        let successfullyRestored = await this.restoreFromImport(exportedSession.requests, tracer, onError);
         if (successfullyRestored) {
           onSuccess();
         }
@@ -73,7 +73,7 @@ SAMLTraceIO.prototype = {
     reader.readAsText(selectedFile);
   },
 
-  'restoreFromImport' : function(importedRequests, tracer, onError) {
+  'restoreFromImport' : async function(importedRequests, tracer, onError) {
     if (!importedRequests || importedRequests.length === 0) {
       onError("There aren't any requests to import...");
       return false;
@@ -124,11 +124,13 @@ SAMLTraceIO.prototype = {
     };
 
     let restoreableRequests = importedRequests.map(ir => createRestoreableModel(ir));
-    restoreableRequests.forEach(rr => {
+    // Sequential rather than forEach(), because addRequestItem() is asynchronous and
+    // attachResponseToRequest() must not run until the request has been added.
+    for (const rr of restoreableRequests) {
       tracer.saveNewRequest(rr);
-      tracer.addRequestItem(rr, rr.getResponse);
+      await tracer.addRequestItem(rr, rr.getResponse);
       tracer.attachResponseToRequest(rr.getResponse());
-    });
+    }
 
     return true;
   }
