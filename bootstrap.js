@@ -30,18 +30,16 @@ function showTracerWindow() {
 }
 
 function onCreated(windowInfo) {
-  console.log(`Created window: ${windowInfo.id}`);
-
   // memorize the extension window, so that we can give it focus, if it's already opened.
   tracerWindow = windowInfo;
   browser.windows.onRemoved.addListener(onCloseExtensionWindow);
 }
 
 function onError(error) {
-  console.log(`Error: ${error}`);
+  // Avoid logging error details to the console, since they may inadvertently
+  // include sensitive information processed by the extension.
 }
 
 function onCloseExtensionWindow(windowId) {
-  console.log(`Window ${windowId} is closed. Setting "traceWindow" to null.`)
   tracerWindow = null
 }
