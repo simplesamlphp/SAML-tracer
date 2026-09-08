@@ -36,8 +36,9 @@ function onCreated(windowInfo) {
 }
 
 function onError(error) {
-  // Avoid logging error details to the console, since they may inadvertently
-  // include sensitive information processed by the extension.
+  // Intentionally not logged: this is the browser.windows.create() rejection
+  // handler, so `error` is a WebExtensions API error value, not extension
+  // data. Left silent as diagnostic hygiene rather than a data-leak fix.
 }
 
 function onCloseExtensionWindow(windowId) {
